@@ -16,12 +16,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
+import com.example.remindme_mobile.utils.ComputedFields
+
 enum class PeopleSort {
     DAYS_ASC, NAME_ASC, AGE_DESC, RECENT
 }
 
 data class PeopleUiState(
-    val people: List<ReminderItem> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null,
     val sort: PeopleSort = PeopleSort.DAYS_ASC,
@@ -32,6 +38,43 @@ class PeopleViewModel : ViewModel() {
     private val repository = ReminderRepository(SupabaseManager.client)
     private val _uiState = MutableStateFlow(PeopleUiState())
     val uiState: StateFlow<PeopleUiState> = _uiState.asStateFlow()
+
+    private val _allPeople = MutableStateFlow<List<ReminderItem>>(emptyList())
+    
+    val filteredPeople: StateFlow<List<ReminderItem>> = combine(_allPeople, _uiState) { people, state ->
+        var list = people
+        if (state.searchQuery.isNotBlank()) {
+            list = list.filter { it.name.contains(state.searchQuery, ignoreCase = true) }
+        }
+
+        fun getBirthdate(item: ReminderItem): LocalDate? {
+            val bd = item.personDetails?.get("birthdate")?.takeIf { it.isNotBlank() } ?: return null
+            return try { LocalDate.parse(bd) } catch (e: DateTimeParseException) { null }
+        }
+
+        list.sortedWith(Comparator { a, b ->
+            when (state.sort) {
+                PeopleSort.DAYS_ASC -> {
+                    val bdA = getBirthdate(a)
+                    val bdB = getBirthdate(b)
+                    val daysA = if (bdA != null) ComputedFields.calculateDaysToBirthday(bdA) else 9999
+                    val daysB = if (bdB != null) ComputedFields.calculateDaysToBirthday(bdB) else 9999
+                    daysA.compareTo(daysB)
+                }
+                PeopleSort.NAME_ASC -> a.name.compareTo(b.name, ignoreCase = true)
+                PeopleSort.AGE_DESC -> {
+                    val bdA = getBirthdate(a)
+                    val bdB = getBirthdate(b)
+                    if (bdA == null || bdB == null) 0 else {
+                        val ageA = ComputedFields.calculateAge(bdA)
+                        val ageB = ComputedFields.calculateAge(bdB)
+                        ageB.compareTo(ageA)
+                    }
+                }
+                PeopleSort.RECENT -> b.createdAt.compareTo(a.createdAt)
+            }
+        })
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private var realtimeChannel: RealtimeChannel? = null
 
@@ -71,7 +114,8 @@ class PeopleViewModel : ViewModel() {
             try {
                 val all = repository.getReminders()
                 val people = all.filter { it.category == CategoryType.PERSON }
-                _uiState.update { it.copy(people = people, isLoading = false) }
+                _allPeople.value = people
+                _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
@@ -89,10 +133,13 @@ class PeopleViewModel : ViewModel() {
     fun deletePerson(id: String) {
         viewModelScope.launch {
             try {
+                // Optimistically remove from list
+                _allPeople.update { list -> list.filter { it.id != id } }
                 repository.deleteReminder(id)
-                fetchPeople(showLoading = false)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message) }
+                // Refetch on error
+                fetchPeople(showLoading = false)
             }
         }
     }

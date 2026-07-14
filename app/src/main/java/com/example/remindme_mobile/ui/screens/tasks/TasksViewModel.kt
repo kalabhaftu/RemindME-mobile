@@ -16,17 +16,39 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
+import java.time.temporal.ChronoUnit
+
 data class TasksUiState(
-    val tasks: List<ReminderItem> = emptyList(),
     val isLoading: Boolean = true,
-    val error: String? = null,
-    val searchQuery: String = ""
+    val error: String? = null
 )
 
 class TasksViewModel : ViewModel() {
     private val repository = ReminderRepository(SupabaseManager.client)
     private val _uiState = MutableStateFlow(TasksUiState())
     val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()
+
+    private val _allTasks = MutableStateFlow<List<ReminderItem>>(emptyList())
+
+    val sortedTasks: StateFlow<List<ReminderItem>> = combine(_allTasks, _uiState) { tasks, _ ->
+        tasks.sortedWith(Comparator { a, b ->
+            val da = a.taskDetails?.get("due_at") as? String
+            val db = b.taskDetails?.get("due_at") as? String
+            if (da == null || db == null) return@Comparator 0
+            try {
+                // due_at could be full ISO datetime, let's parse as LocalDate or ZonedDateTime depending
+                // Flutter uses DateTime.parse().compareTo()
+                da.compareTo(db)
+            } catch (e: Exception) {
+                0
+            }
+        })
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private var realtimeChannel: RealtimeChannel? = null
 
@@ -66,24 +88,40 @@ class TasksViewModel : ViewModel() {
             try {
                 val all = repository.getReminders()
                 val tasks = all.filter { it.category == CategoryType.TASK }
-                _uiState.update { it.copy(tasks = tasks, isLoading = false) }
+                _allTasks.value = tasks
+                _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
 
-    fun updateSearchQuery(query: String) {
-        _uiState.update { it.copy(searchQuery = query) }
+    fun markTaskDone(task: ReminderItem) {
+        val dueStr = task.taskDetails?.get("due_at") as? String ?: return
+        try {
+            val due = java.time.LocalDateTime.parse(dueStr.replace("Z", ""))
+            val dateStr = String.format("%04d-%02d-%02d", due.year, due.monthValue, due.dayOfMonth)
+            viewModelScope.launch {
+                try {
+                    repository.markTaskDone(task.id, dateStr)
+                    fetchTasks(showLoading = false)
+                } catch (e: Exception) {
+                    _uiState.update { it.copy(error = e.message) }
+                }
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = e.message) }
+        }
     }
 
     fun deleteTask(id: String) {
         viewModelScope.launch {
             try {
+                _allTasks.update { list -> list.filter { it.id != id } }
                 repository.deleteReminder(id)
-                fetchTasks(showLoading = false)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message) }
+                fetchTasks(showLoading = false)
             }
         }
     }

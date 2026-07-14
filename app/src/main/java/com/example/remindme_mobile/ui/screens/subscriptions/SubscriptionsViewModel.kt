@@ -16,17 +16,39 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
+import java.time.temporal.ChronoUnit
+
 data class SubscriptionsUiState(
-    val subscriptions: List<ReminderItem> = emptyList(),
     val isLoading: Boolean = true,
-    val error: String? = null,
-    val searchQuery: String = ""
+    val error: String? = null
 )
 
 class SubscriptionsViewModel : ViewModel() {
     private val repository = ReminderRepository(SupabaseManager.client)
     private val _uiState = MutableStateFlow(SubscriptionsUiState())
     val uiState: StateFlow<SubscriptionsUiState> = _uiState.asStateFlow()
+
+    private val _allSubscriptions = MutableStateFlow<List<ReminderItem>>(emptyList())
+
+    val sortedSubscriptions: StateFlow<List<ReminderItem>> = combine(_allSubscriptions, _uiState) { subs, _ ->
+        subs.sortedWith(Comparator { a, b ->
+            val ra = a.subscriptionDetails?.get("renewal_date")
+            val rb = b.subscriptionDetails?.get("renewal_date")
+            if (ra.isNullOrBlank() || rb.isNullOrBlank()) return@Comparator 0
+            try {
+                val da = LocalDate.parse(ra)
+                val db = LocalDate.parse(rb)
+                da.compareTo(db)
+            } catch (e: DateTimeParseException) {
+                0
+            }
+        })
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private var realtimeChannel: RealtimeChannel? = null
 
@@ -66,24 +88,22 @@ class SubscriptionsViewModel : ViewModel() {
             try {
                 val all = repository.getReminders()
                 val subscriptions = all.filter { it.category == CategoryType.SUBSCRIPTION }
-                _uiState.update { it.copy(subscriptions = subscriptions, isLoading = false) }
+                _allSubscriptions.value = subscriptions
+                _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
 
-    fun updateSearchQuery(query: String) {
-        _uiState.update { it.copy(searchQuery = query) }
-    }
-
     fun deleteSubscription(id: String) {
         viewModelScope.launch {
             try {
+                _allSubscriptions.update { list -> list.filter { it.id != id } }
                 repository.deleteReminder(id)
-                fetchSubscriptions(showLoading = false)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message) }
+                fetchSubscriptions(showLoading = false)
             }
         }
     }
