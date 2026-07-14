@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "811223410064",
+    "project_id": "myfirebasemessagingservi-eadc7",
+    "storage_bucket": "myfirebasemessagingservi-eadc7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:811223410064:android:6daf580f3126b81d167f15",
+        "android_client_info": {
+          "package_name": "com.remindme.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "811223410064-rq3l5t0mmbj7s60c7f16asrh2818of2r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.remindme.app",
+            "certificate_hash": "b74957bc8b2a323a496d687873669f167be9c9ba"
+          }
+        },
+        {
+          "client_id": "811223410064-bsnd923nhcfk8gn2onf78h44ri32mq0u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD22eydRTRcogoA5yHHxF2qVlG6Xzjmcn4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "811223410064-bsnd923nhcfk8gn2onf78h44ri32mq0u.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "811223410064-r9mfn17cs6g5shi5mqfa1m4dpid7ildt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.constellation.constellation"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

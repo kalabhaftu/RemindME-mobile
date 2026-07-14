@@ -1,0 +1,69 @@
+package com.example.remindme_mobile.ui.components.liquid
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.kyant.backdrop.backdrops.LayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+
+@Composable
+fun LiquidScaffold(
+    modifier: Modifier = Modifier,
+    backdrop: LayerBackdrop = rememberLayerBackdrop(),
+    appBar: @Composable (() -> Unit)? = null,
+    bottomBar: @Composable (() -> Unit)? = null,
+    content: @Composable (PaddingValues) -> Unit
+) {
+    val isDark = isSystemInDarkTheme()
+    val gradientColors = if (isDark) {
+        listOf(Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460))
+    } else {
+        listOf(Color(0xFFE0EAFC), Color(0xFFCFDEF3))
+    }
+
+    CompositionLocalProvider(LocalBackdrop provides backdrop) {
+        Box(modifier = modifier.fillMaxSize()) {
+            // Fluid Background Layer
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .layerBackdrop(backdrop)
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = gradientColors,
+                            start = Offset.Zero,
+                            end = Offset.Infinite
+                        )
+                    )
+            )
+
+            // Main Content
+            val topPadding = if (appBar != null) 90.dp else 0.dp
+            val bottomPadding = if (bottomBar != null) 90.dp else 0.dp
+            content(PaddingValues(top = topPadding, bottom = bottomPadding))
+
+            // App Bar
+            if (appBar != null) {
+                Box(modifier = Modifier.align(Alignment.TopCenter)) {
+                    appBar()
+                }
+            }
+
+            // Bottom Bar
+            if (bottomBar != null) {
+                Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp)) {
+                    bottomBar()
+                }
+            }
+        }
+    }
+}
