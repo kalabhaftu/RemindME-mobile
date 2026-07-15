@@ -17,6 +17,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
 import com.remindme.app.ui.components.liquid.*
 import com.remindme.app.ui.theme.*
 import com.remindme.app.utils.AppConstants
@@ -32,6 +36,22 @@ fun AddPersonScreen(
     
     // Snackbar state for errors
     val snackbarHostState = remember { SnackbarHostState() }
+    
+    var showDatePicker by remember { mutableStateOf(false) }
+    
+    val context = LocalContext.current
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            val bytes = context.contentResolver.openInputStream(it)?.readBytes()
+            if (bytes != null) {
+                val type = context.contentResolver.getType(it) ?: "image/jpeg"
+                val extension = type.substringAfterLast("/")
+                viewModel.uploadAvatar(bytes, extension)
+            }
+        }
+    }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
@@ -77,15 +97,28 @@ fun AddPersonScreen(
                         .size(72.dp)
                         .clip(CircleShape)
                         .clickable {
-                            // TODO Image Picker
+                            if (!uiState.isUploadingAvatar) {
+                                imagePickerLauncher.launch("image/*")
+                            }
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    LiquidIcon(
-                        imageVector = Icons.Default.CameraAlt,
-                        color = TextTertiary,
-                        size = 28.dp
-                    )
+                    if (uiState.isUploadingAvatar) {
+                        LiquidSpinner(size = 28.dp)
+                    } else if (uiState.avatarUrl != null) {
+                        AsyncImage(
+                            model = uiState.avatarUrl,
+                            contentDescription = "Avatar",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        LiquidIcon(
+                            imageVector = Icons.Default.CameraAlt,
+                            color = TextTertiary,
+                            size = 28.dp
+                        )
+                    }
                 }
             }
             
@@ -104,8 +137,7 @@ fun AddPersonScreen(
                 value = uiState.birthdate,
                 placeholder = "Select date and time",
                 onTap = {
-                    // TODO Date/Time Picker dialogs
-                    viewModel.updateBirthdate(LocalDateTime.now())
+                    showDatePicker = true
                 }
             )
             
@@ -177,6 +209,17 @@ fun AddPersonScreen(
                     Text("Add Person", color = TextPrimary)
                 }
             }
+        }
+        
+        if (showDatePicker) {
+            LiquidDateTimePickerDialog(
+                initialDate = uiState.birthdate,
+                onDismissRequest = { showDatePicker = false },
+                onDateTimeSelected = {
+                    viewModel.updateBirthdate(it)
+                    showDatePicker = false
+                }
+            )
         }
     }
 }

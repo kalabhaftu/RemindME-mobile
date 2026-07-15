@@ -97,8 +97,18 @@ fun DashboardScreen(
         com.remindme.app.ui.components.UpcomingPanel(
             occurrences = uiState.occurrences,
             onMarkDone = { id, date -> viewModel.markDone(id, date) },
-            onSnooze = { id, date -> viewModel.snooze(id, date) }
+            onSnooze = { id, date -> viewModel.snooze(id, date) },
+            onEdit = { /* TODO */ }
         )
+
+        uiState.selectedDate?.let { date ->
+            SelectedDaySheet(
+                date = date,
+                occurrences = uiState.occurrences.filter { it.date == date },
+                onMarkDone = { id, occDate -> viewModel.markDone(id, occDate) },
+                onDismiss = { viewModel.clearSelectedDate() }
+            )
+        }
     }
 }
 

@@ -28,7 +28,7 @@ fun LoginScreen(
     viewModel: LoginViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val backdrop = com.kyant.backdrop.LocalBackdrop.current
+    val backdrop = com.remindme.app.ui.components.liquid.LocalBackdrop.current
 
     if (uiState.toastMessage != null) {
         // Show toast or snackbar
@@ -130,6 +130,17 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(text = "Continue with Google", color = Color.White, fontSize = 16.sp)
                 }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LiquidButton(
+                onClick = viewModel::sendMagicLink,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isLoading
+            ) {
+                Text(text = "Send Magic Link", color = Color.White, fontSize = 16.sp)
             }
         }
     }

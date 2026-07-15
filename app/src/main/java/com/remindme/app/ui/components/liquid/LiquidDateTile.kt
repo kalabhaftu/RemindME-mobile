@@ -39,6 +39,7 @@ fun LiquidDateTile(
         ) {
             FloatingGlassContainer(
                 tintColor = Color.Transparent
+            ) {
                 Box(modifier = Modifier.padding(8.dp)) {
                     LiquidIcon(
                         imageVector = Icons.Default.CalendarToday,

@@ -25,6 +25,7 @@ fun AddSubscriptionScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    var showDatePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
@@ -97,10 +98,7 @@ fun AddSubscriptionScreen(
                 label = "Renewal Date & Time *",
                 value = uiState.renewalDate,
                 placeholder = "Select date and time",
-                onTap = {
-                    // TODO Date/Time Picker dialogs
-                    viewModel.updateRenewalDate(LocalDateTime.now())
-                }
+                onTap = { showDatePicker = true }
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -176,6 +174,17 @@ fun AddSubscriptionScreen(
                     Text("Save", color = TextPrimary)
                 }
             }
+        }
+        
+        if (showDatePicker) {
+            LiquidDateTimePickerDialog(
+                initialDate = uiState.renewalDate,
+                onDismissRequest = { showDatePicker = false },
+                onDateTimeSelected = {
+                    viewModel.updateRenewalDate(it)
+                    showDatePicker = false
+                }
+            )
         }
     }
 }

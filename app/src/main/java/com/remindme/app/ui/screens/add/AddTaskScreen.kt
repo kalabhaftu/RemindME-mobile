@@ -34,6 +34,7 @@ fun AddTaskScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showDatePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
@@ -110,10 +111,7 @@ fun AddTaskScreen(
                 label = "Due Date & Time *",
                 value = uiState.dueAt,
                 placeholder = "Select date and time",
-                onTap = {
-                    // TODO Date/Time Picker dialogs
-                    viewModel.updateDueAt(LocalDateTime.now())
-                }
+                onTap = { showDatePicker = true }
             )
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -150,6 +148,17 @@ fun AddTaskScreen(
                     Text("Add Task", color = TextPrimary)
                 }
             }
+        }
+        
+        if (showDatePicker) {
+            LiquidDateTimePickerDialog(
+                initialDate = uiState.dueAt,
+                onDismissRequest = { showDatePicker = false },
+                onDateTimeSelected = {
+                    viewModel.updateDueAt(it)
+                    showDatePicker = false
+                }
+            )
         }
     }
 }

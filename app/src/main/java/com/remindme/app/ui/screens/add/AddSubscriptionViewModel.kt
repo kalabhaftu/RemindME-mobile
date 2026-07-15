@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import io.github.jan.supabase.auth.auth
 
 data class AddSubscriptionUiState(
     val name: String = "",
@@ -81,11 +82,13 @@ class AddSubscriptionViewModel : ViewModel() {
     }
 
     fun saveSubscription() {
-        if (_uiState.value.name.isBlank()) {
+        val currentName = _uiState.value.name
+        val currentRenewalDate = _uiState.value.renewalDate
+        if (currentName.isBlank()) {
             _uiState.update { it.copy(error = "Service name is required") }
             return
         }
-        if (_uiState.value.renewalDate == null) {
+        if (currentRenewalDate == null) {
             _uiState.update { it.copy(error = "Please select a renewal date") }
             return
         }
@@ -93,8 +96,44 @@ class AddSubscriptionViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                // TODO: repository.createReminder()
-                delay(1000)
+                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
+                val id = java.util.UUID.randomUUID().toString()
+                val now = LocalDateTime.now()
+                val renewalDateStr = currentRenewalDate.toString()
+                
+                val nextOccurrence = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
+                    category = "subscription",
+                    renewalDate = renewalDateStr,
+                    cycle = _uiState.value.cycle
+                )
+
+                val subscriptionDetails = mapOf(
+                    "cost" to _uiState.value.amount,
+                    "currency" to _uiState.value.currency,
+                    "cycle" to _uiState.value.cycle,
+                    "renewal_date" to renewalDateStr,
+                    "logo_url" to (_uiState.value.logoUrl ?: "")
+                )
+                
+                val recurrenceRules = mapOf(
+                    "frequency" to _uiState.value.cycle,
+                    "next_occurrence" to (nextOccurrence ?: "")
+                )
+
+                val item = com.remindme.app.domain.models.ReminderItem(
+                    id = id,
+                    userId = userId,
+                    category = com.remindme.app.domain.models.CategoryType.SUBSCRIPTION,
+                    name = currentName,
+                    notes = _uiState.value.notes,
+                    iconKey = null,
+                    createdAt = now,
+                    updatedAt = now,
+                    subscriptionDetails = subscriptionDetails,
+                    recurrenceRules = recurrenceRules
+                )
+
+                repository.addReminder(item)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }

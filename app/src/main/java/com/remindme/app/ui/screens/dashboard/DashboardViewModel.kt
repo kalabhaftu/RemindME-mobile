@@ -97,8 +97,12 @@ class DashboardViewModel : ViewModel() {
         fetchReminders(showLoading = false)
     }
 
-    fun onDateSelected(date: LocalDate?) {
+    fun onDateSelected(date: LocalDate) {
         _uiState.update { it.copy(selectedDate = date) }
+    }
+
+    fun clearSelectedDate() {
+        _uiState.update { it.copy(selectedDate = null) }
     }
 
     fun markDone(id: String, dueAt: LocalDate) {

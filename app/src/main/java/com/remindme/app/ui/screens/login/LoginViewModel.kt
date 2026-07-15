@@ -6,6 +6,7 @@ import com.remindme.app.data.remote.SupabaseManager
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.auth.providers.builtin.OTP
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -82,6 +83,29 @@ class LoginViewModel : ViewModel() {
                 SupabaseManager.client.auth.signInWith(Google)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = "Google sign-in failed: ${e.message}") }
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun sendMagicLink() {
+        val email = _uiState.value.email.trim()
+        if (email.isEmpty()) {
+            _uiState.update { it.copy(error = "Please enter email for magic link") }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            try {
+                SupabaseManager.client.auth.signInWith(OTP) {
+                    this.email = email
+                    createUser = true
+                }
+                _uiState.update { it.copy(toastMessage = "Magic link sent! Check your email to sign in.") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = "Failed to send magic link: ${e.message}") }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }

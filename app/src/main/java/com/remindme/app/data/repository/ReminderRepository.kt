@@ -93,4 +93,46 @@ class ReminderRepository(private val supabase: SupabaseClient) {
         }
         supabase.postgrest["snooze_state"].upsert(payload)
     }
+
+    suspend fun addReminder(item: ReminderItem) = withContext(Dispatchers.IO) {
+        // Insert main item
+        supabase.postgrest["reminder_items"].insert(item)
+
+        // Insert details depending on category
+        item.personDetails?.let {
+            val payload = buildJsonObject {
+                put("reminder_item_id", item.id)
+                it.forEach { (k, v) -> put(k, v.toString()) }
+            }
+            supabase.postgrest["person_details"].insert(payload)
+        }
+        item.subscriptionDetails?.let {
+            val payload = buildJsonObject {
+                put("reminder_item_id", item.id)
+                it.forEach { (k, v) -> put(k, v.toString()) }
+            }
+            supabase.postgrest["subscription_details"].insert(payload)
+        }
+        item.taskDetails?.let {
+            val payload = buildJsonObject {
+                put("reminder_item_id", item.id)
+                it.forEach { (k, v) -> put(k, v.toString()) }
+            }
+            supabase.postgrest["task_details"].insert(payload)
+        }
+        item.holidayDetails?.let {
+            val payload = buildJsonObject {
+                put("reminder_item_id", item.id)
+                it.forEach { (k, v) -> put(k, v.toString()) }
+            }
+            supabase.postgrest["holiday_details"].insert(payload)
+        }
+        item.recurrenceRules?.let {
+            val payload = buildJsonObject {
+                put("reminder_item_id", item.id)
+                it.forEach { (k, v) -> put(k, v.toString()) }
+            }
+            supabase.postgrest["recurrence_rules"].insert(payload)
+        }
+    }
 }

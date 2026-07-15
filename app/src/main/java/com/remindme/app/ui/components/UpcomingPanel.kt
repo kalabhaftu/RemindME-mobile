@@ -121,7 +121,7 @@ fun UpcomingItem(
 
     FloatingGlassContainer(
         borderRadius = 16.dp,
-        padding = PaddingValues(0.dp)
+        padding = 0.dp
     ) {
         Row(
             modifier = Modifier
@@ -133,12 +133,12 @@ fun UpcomingItem(
         ) {
             FloatingGlassContainer(
                 borderRadius = 10.dp,
-                padding = PaddingValues(9.dp)
+                padding = 9.dp
             ) {
                 LiquidIcon(
-                    icon = iconRes,
+                    imageVector = iconRes,
                     size = 18.dp,
-                    color = if (isDone) AppColors.textTertiary else AppColors.accent500
+                    tint = if (isDone) AppColors.textTertiary else AppColors.accent500
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -148,7 +148,7 @@ fun UpcomingItem(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = if (isDone) AppColors.textTertiary else AppColors.textPrimary,
-                    decoration = if (isDone) TextDecoration.LineThrough else null
+                    textDecoration = if (isDone) TextDecoration.LineThrough else null
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(

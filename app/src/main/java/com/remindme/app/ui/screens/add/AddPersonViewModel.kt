@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.storage.storage
+import java.util.UUID
 
 data class AddPersonUiState(
     val name: String = "",
@@ -57,11 +60,13 @@ class AddPersonViewModel : ViewModel() {
     fun setError(error: String) = _uiState.update { it.copy(error = error) }
 
     fun savePerson() {
-        if (_uiState.value.name.isBlank()) {
+        val currentName = _uiState.value.name
+        val currentBirthdate = _uiState.value.birthdate
+        if (currentName.isBlank()) {
             _uiState.update { it.copy(error = "Name is required") }
             return
         }
-        if (_uiState.value.birthdate == null) {
+        if (currentBirthdate == null) {
             _uiState.update { it.copy(error = "Please select a birthdate") }
             return
         }
@@ -69,12 +74,70 @@ class AddPersonViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                // TODO: Actually save the Person using ReminderRepository
-                // For now, simulate success.
-                kotlinx.coroutines.delay(1000)
+                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
+                val id = java.util.UUID.randomUUID().toString()
+                val now = LocalDateTime.now()
+                val birthdateStr = currentBirthdate.toString()
+                
+                val nextOccurrence = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
+                    category = "person",
+                    birthdate = birthdateStr
+                )
+
+                val personDetails = mapOf(
+                    "birthdate" to birthdateStr,
+                    "gender" to _uiState.value.gender,
+                    "relationship" to _uiState.value.relationship,
+                    "custom_relationship" to _uiState.value.customRelationship
+                )
+                
+                val recurrenceRules = mapOf(
+                    "frequency" to "yearly",
+                    "next_occurrence" to (nextOccurrence ?: "")
+                )
+
+                val item = com.remindme.app.domain.models.ReminderItem(
+                    id = id,
+                    userId = userId,
+                    category = com.remindme.app.domain.models.CategoryType.PERSON,
+                    name = currentName,
+                    notes = _uiState.value.notes,
+                    iconKey = _uiState.value.avatarUrl,
+                    createdAt = now,
+                    updatedAt = now,
+                    personDetails = personDetails,
+                    recurrenceRules = recurrenceRules
+                )
+
+                repository.addReminder(item)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun uploadAvatar(bytes: ByteArray, extension: String) {
+        viewModelScope.launch {
+            setAvatarUploading(true)
+            setError("")
+            try {
+                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
+                val filename = "${UUID.randomUUID()}.$extension"
+                val path = "$userId/$filename"
+                
+                // Upload to the "avatars" bucket
+                val bucket = SupabaseManager.client.storage.from("avatars")
+                bucket.upload(path, bytes) {
+                    upsert = false
+                }
+                
+                val publicUrl = bucket.publicUrl(path)
+                updateAvatarUrl(publicUrl)
+            } catch (e: Exception) {
+                setError("Failed to upload avatar: ${e.message}")
+            } finally {
+                setAvatarUploading(false)
             }
         }
     }

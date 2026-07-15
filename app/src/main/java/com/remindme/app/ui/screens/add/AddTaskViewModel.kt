@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import io.github.jan.supabase.auth.auth
 
 data class AddTaskUiState(
     val name: String = "",
@@ -50,11 +51,13 @@ class AddTaskViewModel : ViewModel() {
     fun setError(error: String) = _uiState.update { it.copy(error = error) }
 
     fun saveTask() {
-        if (_uiState.value.name.isBlank()) {
+        val currentName = _uiState.value.name
+        val currentDueAt = _uiState.value.dueAt
+        if (currentName.isBlank()) {
             _uiState.update { it.copy(error = "Task name is required") }
             return
         }
-        if (_uiState.value.dueAt == null) {
+        if (currentDueAt == null) {
             _uiState.update { it.copy(error = "Please select a due date") }
             return
         }
@@ -62,8 +65,40 @@ class AddTaskViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                // TODO: repository.createReminder()
-                delay(1000)
+                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
+                val id = java.util.UUID.randomUUID().toString()
+                val now = LocalDateTime.now()
+                val dueAtStr = currentDueAt.toString()
+                
+                val nextOccurrence = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
+                    category = "task",
+                    dueAt = dueAtStr
+                )
+
+                val taskDetails = mapOf(
+                    "due_at" to dueAtStr,
+                    "is_completed" to "false"
+                )
+                
+                val recurrenceRules = mapOf(
+                    "frequency" to "none",
+                    "next_occurrence" to (nextOccurrence ?: "")
+                )
+
+                val item = com.remindme.app.domain.models.ReminderItem(
+                    id = id,
+                    userId = userId,
+                    category = com.remindme.app.domain.models.CategoryType.TASK,
+                    name = currentName,
+                    notes = _uiState.value.notes,
+                    iconKey = _uiState.value.iconKey,
+                    createdAt = now,
+                    updatedAt = now,
+                    taskDetails = taskDetails,
+                    recurrenceRules = recurrenceRules
+                )
+
+                repository.addReminder(item)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }

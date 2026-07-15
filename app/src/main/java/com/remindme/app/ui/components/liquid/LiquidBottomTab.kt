@@ -15,14 +15,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.layout.RowScope
+
 import com.kyant.backdrop.Backdrop
 
 internal val LocalLiquidBottomTabScale =
     staticCompositionLocalOf { { 1f } }
 
 @Composable
-fun LiquidBottomTab(
+fun RowScope.LiquidBottomTab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     backdrop: Backdrop = LocalBackdrop.current,

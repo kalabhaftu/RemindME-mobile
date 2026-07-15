@@ -13,8 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.Add
 import androidx.navigation3.runtime.NavKey
 import com.remindme.app.ui.components.liquid.LiquidBottomTab
 import com.remindme.app.ui.components.liquid.LiquidBottomTabs
@@ -36,6 +42,7 @@ fun MainScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
+    var showQuickAdd by remember { mutableStateOf(false) }
 
     LiquidScaffold(
         bottomBar = {
@@ -105,6 +112,27 @@ fun MainScreen(
                 3 -> TasksScreen()
                 4 -> HolidaysScreen()
             }
+            
+            FloatingActionButton(
+                onClick = { showQuickAdd = true },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 110.dp, end = 24.dp),
+                containerColor = AppColors.accent500,
+                contentColor = AppColors.textPrimary
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Quick Add")
+            }
+        }
+        
+        if (showQuickAdd) {
+            QuickAddSheet(
+                onDismiss = { showQuickAdd = false },
+                onNavigateToAddPerson = { onItemClick(AddPerson) },
+                onNavigateToAddSubscription = { onItemClick(AddSubscription) },
+                onNavigateToAddTask = { onItemClick(AddTask) },
+                onNavigateToAddHoliday = { selectedTab = 4 }
+            )
         }
     }
 }
