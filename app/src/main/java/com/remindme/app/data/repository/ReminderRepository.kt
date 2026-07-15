@@ -105,9 +105,9 @@ class ReminderRepository(private val supabase: SupabaseClient) {
                 put("reminder_item_id", item.id)
                 it.forEach { (k, v) -> 
                     when (v) {
-                        is String -> put(k, JsonPrimitive(v))
-                        is Number -> put(k, JsonPrimitive(v))
-                        is Boolean -> put(k, JsonPrimitive(v))
+                        is String -> put(k, JsonPrimitive(v as String))
+                        is Number -> put(k, JsonPrimitive(v as Number))
+                        is Boolean -> put(k, JsonPrimitive(v as Boolean))
                         else -> put(k, JsonPrimitive(v.toString()))
                     }
                 }
@@ -119,9 +119,9 @@ class ReminderRepository(private val supabase: SupabaseClient) {
                 put("reminder_item_id", item.id)
                 it.forEach { (k, v) -> 
                     when (v) {
-                        is String -> put(k, JsonPrimitive(v))
-                        is Number -> put(k, JsonPrimitive(v))
-                        is Boolean -> put(k, JsonPrimitive(v))
+                        is String -> put(k, JsonPrimitive(v as String))
+                        is Number -> put(k, JsonPrimitive(v as Number))
+                        is Boolean -> put(k, JsonPrimitive(v as Boolean))
                         else -> put(k, JsonPrimitive(v.toString()))
                     }
                 }

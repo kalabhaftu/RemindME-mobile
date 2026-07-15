@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,8 +44,41 @@ fun MainScreen(
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     var showQuickAdd by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
 
     LiquidScaffold(
+        appBar = {
+            com.remindme.app.ui.components.liquid.LiquidAppBar(
+                title = "RemindME",
+                actions = {
+                    androidx.compose.material3.IconButton(onClick = { showMenu = true }) {
+                        LiquidIcon(Icons.Default.MoreVert, color = AppColors.textPrimary)
+                    }
+                    androidx.compose.material3.DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        containerColor = AppColors.bgSurface1,
+                    ) {
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = { androidx.compose.material3.Text("Search", color = AppColors.textPrimary) },
+                            onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Search) }
+                        )
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = { androidx.compose.material3.Text("Templates", color = AppColors.textPrimary) },
+                            onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Templates) }
+                        )
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = { androidx.compose.material3.Text("Notifications", color = AppColors.textPrimary) },
+                            onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Notifications) }
+                        )
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = { androidx.compose.material3.Text("Settings", color = AppColors.textPrimary) },
+                            onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Settings) }
+                        )
+                    }
+                }
+            )
+        },
         bottomBar = {
             LiquidBottomTabs(
                 selectedTabIndex = { selectedTab },

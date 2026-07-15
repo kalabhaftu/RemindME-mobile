@@ -208,8 +208,10 @@ class SettingsViewModel : ViewModel() {
             }
             
             supabase.postgrest["user_settings"].upsert(payload)
+            android.util.Log.d("SettingsViewModel", "Successfully synced preferences to Supabase: $payload")
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            android.util.Log.e("SettingsViewModel", "Failed to sync preferences to Supabase", e)
+            _uiState.update { it.copy(error = "Sync Failed: ${e.message}") }
         }
     }
 

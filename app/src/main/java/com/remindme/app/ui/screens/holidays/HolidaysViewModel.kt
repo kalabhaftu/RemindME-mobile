@@ -190,8 +190,8 @@ class HolidaysViewModel : ViewModel() {
                                 "next_occurrence_at" to holiday.date // approximation
                             )
                         )
-                        // Actually repository.createReminder doesn't exist, we must add it or use an insert call.
-                        // Let's add it to ReminderRepository in a moment.
+                        // Save through repository
+
                         repository.addReminder(newItem)
                         _uiState.update { state -> 
                             state.copy(subscribedKeys = state.subscribedKeys + key) 

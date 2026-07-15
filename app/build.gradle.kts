@@ -27,7 +27,7 @@ android {
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
-            localProperties.load(java.io.FileInputStream(localPropertiesFile))
+            localProperties.load(FileInputStream(localPropertiesFile))
         }
         buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL", "")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY", "")}\"")
@@ -61,11 +61,7 @@ android {
       shaders = false
     }
 
-    val localProperties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        localProperties.load(FileInputStream(localPropertiesFile))
-    }
+
 
     packaging {
       resources {

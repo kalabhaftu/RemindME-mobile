@@ -72,22 +72,31 @@ fun MainNavigation() {
             entry<PersonDetail> {
                 PersonDetailScreen(
                     personId = it.personId,
-                    onBack = { backStack.removeLastOrNull() }
+                    onBack = { backStack.removeLastOrNull() },
+                    onEdit = { /* TODO */ }
                 )
             }
             entry<Search> {
                 SearchScreen(
-                    onBack = { backStack.removeLastOrNull() },
-                    onNavigateToDetail = { id -> backStack.add(PersonDetail(id)) }
+                    onItemClick = { id -> backStack.add(PersonDetail(id)) }
                 )
             }
             entry<Settings> {
-                SettingsScreen(onBack = { backStack.removeLastOrNull() })
+                SettingsScreen(
+                    onNavigateHome = { 
+                        backStack.clear()
+                        backStack.add(Main) 
+                    }
+                )
             }
             entry<Templates> {
                 TemplatesScreen(
-                    onBack = { backStack.removeLastOrNull() },
-                    onUseTemplate = { /* handle */ }
+                    onApplyTemplate = { /* handle */ }
+                )
+            }
+            entry<Notifications> {
+                com.remindme.app.ui.screens.notifications.NotificationsScreen(
+                    onOpenReminder = { id -> backStack.add(PersonDetail(id)) }
                 )
             }
         },

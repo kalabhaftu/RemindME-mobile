@@ -474,7 +474,7 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
             LiquidButton(
                 onClick = { viewModel.deleteAccount(onNavigateHome) },
                 modifier = Modifier.fillMaxWidth().height(48.dp),
-                color = Color.Red.copy(alpha = 0.2f)
+                surfaceColor = Color.Red.copy(alpha = 0.2f)
             ) {
                 LiquidIcon(Icons.Rounded.Delete, modifier = Modifier.size(18.dp), color = Color.Red)
                 Spacer(modifier = Modifier.width(8.dp))

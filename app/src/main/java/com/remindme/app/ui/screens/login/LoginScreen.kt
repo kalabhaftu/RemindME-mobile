@@ -28,19 +28,11 @@ fun LoginScreen(
     viewModel: LoginViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val backdrop = com.remindme.app.ui.components.liquid.LocalBackdrop.current
-
-    if (uiState.toastMessage != null) {
-        // Show toast or snackbar
-        LaunchedEffect(uiState.toastMessage) {
-            viewModel.clearToast()
-        }
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
+    com.remindme.app.ui.components.liquid.LiquidScaffold { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             verticalArrangement = Arrangement.Center,
@@ -142,5 +134,13 @@ fun LoginScreen(
                 Text(text = "Send Magic Link", color = Color.White, fontSize = 16.sp)
             }
         }
+        
+        if (uiState.toastMessage != null) {
+            // Show toast or snackbar
+            LaunchedEffect(uiState.toastMessage) {
+                viewModel.clearToast()
+            }
+        }
+    }
     }
 }

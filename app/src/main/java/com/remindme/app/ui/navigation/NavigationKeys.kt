@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable data object Search : NavKey
 @Serializable data object Settings : NavKey
 @Serializable data object Templates : NavKey
+@Serializable data object Notifications : NavKey
 
 @Serializable data object AddPerson : NavKey
 @Serializable data object AddSubscription : NavKey
