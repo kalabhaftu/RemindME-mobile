@@ -3,6 +3,7 @@ package com.remindme.app.ui.components.liquid
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -70,6 +71,7 @@ fun LiquidTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier
+                .fillMaxWidth()
                 .defaultMinSize(minHeight = TextFieldDefaults.MinHeight)
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             textStyle = TextStyle(color = TextPrimary, fontSize = 16.sp),

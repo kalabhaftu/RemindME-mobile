@@ -256,7 +256,7 @@ fun TimezoneSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                 modifier = Modifier.padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Timezone")
+                Text("Timezone", color = TextPrimary)
                 Text(uiState.timezone, color = Accent500, fontWeight = FontWeight.SemiBold)
             }
         }
@@ -303,7 +303,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
                 modifier = Modifier.padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Default Timing")
+                Text("Default Timing", color = TextPrimary)
                 Text(timings.find { it.first == uiState.defaultLeadTime }?.second ?: uiState.defaultLeadTime, color = Accent500, fontWeight = FontWeight.SemiBold)
             }
         }
@@ -347,7 +347,7 @@ fun GlassSwitch(title: String, checked: Boolean, onCheckedChange: (Boolean) -> U
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(title, fontWeight = FontWeight.Medium)
+            Text(title, fontWeight = FontWeight.Medium, color = TextPrimary)
             Switch(checked = checked, onCheckedChange = onCheckedChange, colors = SwitchDefaults.colors(checkedThumbColor = Accent500, checkedTrackColor = Accent500.copy(alpha = 0.5f)))
         }
     }

@@ -51,30 +51,32 @@ fun MainScreen(
             com.remindme.app.ui.components.liquid.LiquidAppBar(
                 title = "RemindME",
                 actions = {
-                    androidx.compose.material3.IconButton(onClick = { showMenu = true }) {
-                        LiquidIcon(Icons.Default.MoreVert, color = AppColors.textPrimary)
-                    }
-                    androidx.compose.material3.DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false },
-                        containerColor = AppColors.bgSurface1,
-                    ) {
-                        androidx.compose.material3.DropdownMenuItem(
-                            text = { androidx.compose.material3.Text("Search", color = AppColors.textPrimary) },
-                            onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Search) }
-                        )
-                        androidx.compose.material3.DropdownMenuItem(
-                            text = { androidx.compose.material3.Text("Templates", color = AppColors.textPrimary) },
-                            onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Templates) }
-                        )
-                        androidx.compose.material3.DropdownMenuItem(
-                            text = { androidx.compose.material3.Text("Notifications", color = AppColors.textPrimary) },
-                            onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Notifications) }
-                        )
-                        androidx.compose.material3.DropdownMenuItem(
-                            text = { androidx.compose.material3.Text("Settings", color = AppColors.textPrimary) },
-                            onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Settings) }
-                        )
+                    androidx.compose.foundation.layout.Box {
+                        androidx.compose.material3.IconButton(onClick = { showMenu = true }) {
+                            LiquidIcon(Icons.Default.MoreVert, color = AppColors.textPrimary)
+                        }
+                        androidx.compose.material3.DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
+                            containerColor = AppColors.bgSurface1,
+                        ) {
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { androidx.compose.material3.Text("Search", color = AppColors.textPrimary) },
+                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Search) }
+                            )
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { androidx.compose.material3.Text("Templates", color = AppColors.textPrimary) },
+                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Templates) }
+                            )
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { androidx.compose.material3.Text("Notifications", color = AppColors.textPrimary) },
+                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Notifications) }
+                            )
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { androidx.compose.material3.Text("Settings", color = AppColors.textPrimary) },
+                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Settings) }
+                            )
+                        }
                     }
                 }
             )

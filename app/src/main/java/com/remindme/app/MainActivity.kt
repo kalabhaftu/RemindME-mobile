@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
             RemindmeMobileTheme {
                 var showCrash by remember { mutableStateOf(lastCrash != null) }
                 if (showCrash) {
+                    val context = androidx.compose.ui.platform.LocalContext.current
                     AlertDialog(
                         onDismissRequest = { 
                             showCrash = false
@@ -71,6 +72,14 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         confirmButton = {
+                            TextButton(onClick = {
+                                val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                val clip = android.content.ClipData.newPlainText("Crash Log", lastCrash)
+                                clipboard.setPrimaryClip(clip)
+                                android.widget.Toast.makeText(context, "Copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+                            }) { Text("Copy") }
+                        },
+                        dismissButton = {
                             TextButton(onClick = {
                                 showCrash = false
                                 prefs.edit().remove("last_crash").apply()

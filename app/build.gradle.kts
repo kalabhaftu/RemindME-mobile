@@ -52,6 +52,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -117,6 +118,7 @@ dependencies {
   implementation(libs.androidx.lifecycle.viewmodel.navigation3)
   
   // Local modules
+  coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
   implementation(project(":backdrop"))
 
   // Firebase
