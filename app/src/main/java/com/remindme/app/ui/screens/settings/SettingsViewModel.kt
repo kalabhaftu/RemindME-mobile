@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.put
 import kotlinx.serialization.Serializable
 import org.json.JSONObject
 import java.io.OutputStreamWriter
@@ -190,23 +193,21 @@ class SettingsViewModel : ViewModel() {
             val user = supabase.auth.currentUserOrNull() ?: return@launch
             val state = _uiState.value
             
-            val payload = buildMap {
-                put("user_id", user.id)
-                put("timezone", state.timezone)
-                put("default_channels", mapOf(
-                    "email" to state.emailEnabled,
-                    "push" to state.pushEnabled,
-                    "telegram" to state.telegramEnabled,
-                    "in_app" to state.inAppEnabled
-                ))
-                put("default_lead_time", state.defaultLeadTime)
-                put("default_custom_time", state.defaultCustomTime)
-                put("nudge_delay_hours", state.nudgeDelayHours)
+            val payload = buildJsonObject {
+                put("user_id", JsonPrimitive(user.id))
+                put("timezone", JsonPrimitive(state.timezone))
+                put("default_channels", buildJsonObject {
+                    put("email", JsonPrimitive(state.emailEnabled))
+                    put("push", JsonPrimitive(state.pushEnabled))
+                    put("telegram", JsonPrimitive(state.telegramEnabled))
+                    put("in_app", JsonPrimitive(state.inAppEnabled))
+                })
+                put("default_lead_time", JsonPrimitive(state.defaultLeadTime))
+                put("default_custom_time", JsonPrimitive(state.defaultCustomTime))
+                put("nudge_delay_hours", JsonPrimitive(state.nudgeDelayHours))
             }
             
-            // Cannot upsert generic map directly with Supabase-kt easily without explicit classes,
-            // but we can use JsonObject. We'll do a simple raw query or use a data class.
-            // Wait, we need a data class for upsert.
+            supabase.postgrest["user_settings"].upsert(payload)
         } catch (e: Exception) {
             _uiState.update { it.copy(error = e.message) }
         }
@@ -371,6 +372,24 @@ class SettingsViewModel : ViewModel() {
         try {
             supabase.auth.signOut()
             withContext(Dispatchers.Main) { onComplete() }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = e.message) }
+        }
+    }
+
+    fun signOutAllDevices(onComplete: () -> Unit) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            supabase.auth.signOut(io.github.jan.supabase.auth.SignOutScope.GLOBAL)
+            withContext(Dispatchers.Main) { onComplete() }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = e.message) }
+        }
+    }
+
+    fun exportData() = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            _uiState.update { it.copy(message = "Exporting data...") }
+            // Mocked for now: logic to export JSON
         } catch (e: Exception) {
             _uiState.update { it.copy(error = e.message) }
         }

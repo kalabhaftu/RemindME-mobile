@@ -41,7 +41,7 @@ class DashboardViewModel : ViewModel() {
 
     private fun setupRealtime() {
         viewModelScope.launch {
-            realtimeChannel = SupabaseManager.client.channel("public:dashboard_mobile")
+            realtimeChannel = SupabaseManager.client.channel("mobile_dashboard")
             val tables = listOf(
                 "reminder_items", "person_details", "subscription_details",
                 "task_details", "holiday_details", "escalation_state"

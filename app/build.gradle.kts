@@ -23,6 +23,15 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(java.io.FileInputStream(localPropertiesFile))
+        }
+        buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL", "")}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY", "")}\"")
+        buildConfigField("String", "WEB_API_URL", "\"${localProperties.getProperty("WEB_API_URL", "http://localhost:3000")}\"")
     }
 
     signingConfigs {
@@ -56,12 +65,6 @@ android {
     val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {
         localProperties.load(FileInputStream(localPropertiesFile))
-    }
-
-    defaultConfig {
-        buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL", "")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY", "")}\"")
-        buildConfigField("String", "WEB_API_URL", "\"${localProperties.getProperty("WEB_API_URL", "http://localhost:3000")}\"")
     }
 
     packaging {

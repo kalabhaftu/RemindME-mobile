@@ -417,15 +417,33 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
         Text("Export your data or sign out on all devices.", color = TextSecondary, fontSize = 13.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = { viewModel.signOut(onNavigateHome) },
-            modifier = Modifier.fillMaxWidth().height(48.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = BgSurface3, contentColor = TextPrimary),
-            shape = RoundedCornerShape(16.dp)
+        LiquidButton(
+            onClick = { viewModel.exportData() },
+            modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            Icon(Icons.Rounded.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
+            LiquidIcon(Icons.Rounded.Download, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Sign Out (This Device)")
+            Text("Export Data (JSON)", color = TextPrimary)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LiquidButton(
+            onClick = { viewModel.signOut(onNavigateHome) },
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) {
+            LiquidIcon(Icons.Rounded.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Sign Out (This Device)", color = TextPrimary)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LiquidButton(
+            onClick = { viewModel.signOutAllDevices(onNavigateHome) },
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) {
+            LiquidIcon(Icons.Rounded.PhonelinkErase, modifier = Modifier.size(18.dp), color = TextPrimary)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Sign Out All Devices", color = TextPrimary)
         }
     }
 }
@@ -453,15 +471,14 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
                 fontSize = 13.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Button(
+            LiquidButton(
                 onClick = { viewModel.deleteAccount(onNavigateHome) },
                 modifier = Modifier.fillMaxWidth().height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.2f), contentColor = Color.Red),
-                shape = RoundedCornerShape(16.dp)
+                color = Color.Red.copy(alpha = 0.2f)
             ) {
-                Icon(Icons.Rounded.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                LiquidIcon(Icons.Rounded.Delete, modifier = Modifier.size(18.dp), color = Color.Red)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Delete Account")
+                Text("Delete Account", color = Color.Red)
             }
         }
     }

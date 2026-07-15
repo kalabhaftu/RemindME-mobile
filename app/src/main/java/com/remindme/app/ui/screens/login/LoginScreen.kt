@@ -130,7 +130,6 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(text = "Continue with Google", color = Color.White, fontSize = 16.sp)
                 }
-                }
             }
             
             Spacer(modifier = Modifier.height(16.dp))

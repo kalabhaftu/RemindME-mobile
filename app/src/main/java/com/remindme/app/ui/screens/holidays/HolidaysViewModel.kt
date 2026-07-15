@@ -192,7 +192,7 @@ class HolidaysViewModel : ViewModel() {
                         )
                         // Actually repository.createReminder doesn't exist, we must add it or use an insert call.
                         // Let's add it to ReminderRepository in a moment.
-                        SupabaseManager.client.postgrest["reminder_items"].insert(newItem)
+                        repository.addReminder(newItem)
                         _uiState.update { state -> 
                             state.copy(subscribedKeys = state.subscribedKeys + key) 
                         }
