@@ -37,12 +37,10 @@ class TasksViewModel : ViewModel() {
 
     val sortedTasks: StateFlow<List<ReminderItem>> = combine(_allTasks, _uiState) { tasks, _ ->
         tasks.sortedWith(Comparator { a, b ->
-            val da = a.taskDetails?.get("due_at") as? String
-            val db = b.taskDetails?.get("due_at") as? String
+            val da = a.task?.dueAt
+            val db = b.task?.dueAt
             if (da == null || db == null) return@Comparator 0
             try {
-                // due_at could be full ISO datetime, let's parse as LocalDate or ZonedDateTime depending
-                // Flutter uses DateTime.parse().compareTo()
                 da.compareTo(db)
             } catch (e: Exception) {
                 0
@@ -97,7 +95,7 @@ class TasksViewModel : ViewModel() {
     }
 
     fun markTaskDone(task: ReminderItem) {
-        val dueStr = task.taskDetails?.get("due_at") as? String ?: return
+        val dueStr = task.task?.dueAt ?: return
         try {
             val due = java.time.LocalDateTime.parse(dueStr.replace("Z", ""))
             val dateStr = String.format("%04d-%02d-%02d", due.year, due.monthValue, due.dayOfMonth)

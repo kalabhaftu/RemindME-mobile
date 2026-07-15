@@ -95,159 +95,78 @@ class ReminderRepository(private val supabase: SupabaseClient) {
         supabase.postgrest["snooze_state"].upsert(payload)
     }
 
-    suspend fun addReminder(item: ReminderItem) = withContext(Dispatchers.IO) {
-        // Insert main item
-        supabase.postgrest["reminder_items"].insert(item)
+    private suspend fun insertOrUpsertDetails(item: ReminderItem, isUpdate: Boolean) {
+        val personTable = supabase.postgrest["person_details"]
+        val subscriptionTable = supabase.postgrest["subscription_details"]
+        val taskTable = supabase.postgrest["task_details"]
+        val holidayTable = supabase.postgrest["holiday_details"]
+        val recurrenceTable = supabase.postgrest["recurrence_rules"]
 
-        // Insert details depending on category
-        item.personDetails?.let {
+        item.person?.let {
             val payload = buildJsonObject {
                 put("reminder_item_id", item.id)
-                it.forEach { (k, v) -> 
-                    when (v) {
-                        is String -> put(k, JsonPrimitive(v as String))
-                        is Number -> put(k, JsonPrimitive(v as Number))
-                        is Boolean -> put(k, JsonPrimitive(v as Boolean))
-                        else -> put(k, JsonPrimitive(v.toString()))
-                    }
-                }
+                it.birthdate?.let { put("birthdate", it) }
+                it.gender?.let { put("gender", it) }
+                it.relationship?.let { put("relationship", it) }
+                it.customRelationship?.let { put("custom_relationship", it) }
+                it.avatarUrl?.let { put("avatar_url", it) }
             }
-            supabase.postgrest["person_details"].insert(payload)
+            if (isUpdate) personTable.upsert(payload) else personTable.insert(payload)
         }
-        item.subscriptionDetails?.let {
+
+        item.subscription?.let {
             val payload = buildJsonObject {
                 put("reminder_item_id", item.id)
-                it.forEach { (k, v) -> 
-                    when (v) {
-                        is String -> put(k, JsonPrimitive(v as String))
-                        is Number -> put(k, JsonPrimitive(v as Number))
-                        is Boolean -> put(k, JsonPrimitive(v as Boolean))
-                        else -> put(k, JsonPrimitive(v.toString()))
-                    }
-                }
+                it.logoUrl?.let { put("logo_url", it) }
+                it.logoDomain?.let { put("logo_domain", it) }
+                it.billingAmount?.let { put("billing_amount", it) }
+                it.billingCurrency?.let { put("billing_currency", it) }
+                it.renewalDate?.let { put("renewal_date", it) }
+                it.cycle?.let { put("cycle", it) }
             }
-            supabase.postgrest["subscription_details"].insert(payload)
+            if (isUpdate) subscriptionTable.upsert(payload) else subscriptionTable.insert(payload)
         }
-        item.taskDetails?.let {
+
+        item.task?.let {
             val payload = buildJsonObject {
                 put("reminder_item_id", item.id)
-                it.forEach { (k, v) -> 
-                    when (v) {
-                        is String -> put(k, JsonPrimitive(v))
-                        is Number -> put(k, JsonPrimitive(v))
-                        is Boolean -> put(k, JsonPrimitive(v))
-                        else -> put(k, JsonPrimitive(v.toString()))
-                    }
-                }
+                it.dueAt?.let { put("due_at", it) }
             }
-            supabase.postgrest["task_details"].insert(payload)
+            if (isUpdate) taskTable.upsert(payload) else taskTable.insert(payload)
         }
-        item.holidayDetails?.let {
+
+        item.holiday?.let {
             val payload = buildJsonObject {
                 put("reminder_item_id", item.id)
-                it.forEach { (k, v) -> 
-                    when (v) {
-                        is String -> put(k, JsonPrimitive(v))
-                        is Number -> put(k, JsonPrimitive(v))
-                        is Boolean -> put(k, JsonPrimitive(v))
-                        else -> put(k, JsonPrimitive(v.toString()))
-                    }
-                }
+                put("country_code", it.countryCode)
+                put("holiday_key", it.holidayKey)
+                put("holiday_date", it.holidayDate)
+                it.isCustom?.let { put("is_custom", it) }
             }
-            supabase.postgrest["holiday_details"].insert(payload)
+            if (isUpdate) holidayTable.upsert(payload) else holidayTable.insert(payload)
         }
-        item.recurrenceRules?.let {
+
+        item.recurrence?.let {
             val payload = buildJsonObject {
                 put("reminder_item_id", item.id)
-                it.forEach { (k, v) -> 
-                    when (v) {
-                        is String -> put(k, JsonPrimitive(v))
-                        is Number -> put(k, JsonPrimitive(v))
-                        is Boolean -> put(k, JsonPrimitive(v))
-                        else -> put(k, JsonPrimitive(v.toString()))
-                    }
-                }
+                put("frequency", it.frequency)
+                put("interval_count", it.intervalCount)
+                put("ends", it.ends)
+                it.endsValue?.let { put("ends_value", it) }
             }
-            supabase.postgrest["recurrence_rules"].insert(payload)
+            if (isUpdate) recurrenceTable.upsert(payload) else recurrenceTable.insert(payload)
         }
     }
 
+    suspend fun addReminder(item: ReminderItem) = withContext(Dispatchers.IO) {
+        supabase.postgrest["reminder_items"].insert(item)
+        insertOrUpsertDetails(item, isUpdate = false)
+    }
+
     suspend fun updateReminder(item: ReminderItem) = withContext(Dispatchers.IO) {
-        // Since we are updating, we should probably update the main item, then upsert the details.
         supabase.postgrest["reminder_items"].update(item) {
             filter { eq("id", item.id) }
         }
-
-        // Upsert details
-        item.personDetails?.let {
-            val payload = buildJsonObject {
-                put("reminder_item_id", item.id)
-                it.forEach { (k, v) -> 
-                    when (v) {
-                        is String -> put(k, JsonPrimitive(v))
-                        is Number -> put(k, JsonPrimitive(v))
-                        is Boolean -> put(k, JsonPrimitive(v))
-                        else -> put(k, JsonPrimitive(v.toString()))
-                    }
-                }
-            }
-            supabase.postgrest["person_details"].upsert(payload)
-        }
-        item.subscriptionDetails?.let {
-            val payload = buildJsonObject {
-                put("reminder_item_id", item.id)
-                it.forEach { (k, v) -> 
-                    when (v) {
-                        is String -> put(k, JsonPrimitive(v))
-                        is Number -> put(k, JsonPrimitive(v))
-                        is Boolean -> put(k, JsonPrimitive(v))
-                        else -> put(k, JsonPrimitive(v.toString()))
-                    }
-                }
-            }
-            supabase.postgrest["subscription_details"].upsert(payload)
-        }
-        item.taskDetails?.let {
-            val payload = buildJsonObject {
-                put("reminder_item_id", item.id)
-                it.forEach { (k, v) -> 
-                    when (v) {
-                        is String -> put(k, JsonPrimitive(v))
-                        is Number -> put(k, JsonPrimitive(v))
-                        is Boolean -> put(k, JsonPrimitive(v))
-                        else -> put(k, JsonPrimitive(v.toString()))
-                    }
-                }
-            }
-            supabase.postgrest["task_details"].upsert(payload)
-        }
-        item.holidayDetails?.let {
-            val payload = buildJsonObject {
-                put("reminder_item_id", item.id)
-                it.forEach { (k, v) -> 
-                    when (v) {
-                        is String -> put(k, JsonPrimitive(v))
-                        is Number -> put(k, JsonPrimitive(v))
-                        is Boolean -> put(k, JsonPrimitive(v))
-                        else -> put(k, JsonPrimitive(v.toString()))
-                    }
-                }
-            }
-            supabase.postgrest["holiday_details"].upsert(payload)
-        }
-        item.recurrenceRules?.let {
-            val payload = buildJsonObject {
-                put("reminder_item_id", item.id)
-                it.forEach { (k, v) -> 
-                    when (v) {
-                        is String -> put(k, JsonPrimitive(v))
-                        is Number -> put(k, JsonPrimitive(v))
-                        is Boolean -> put(k, JsonPrimitive(v))
-                        else -> put(k, JsonPrimitive(v.toString()))
-                    }
-                }
-            }
-            supabase.postgrest["recurrence_rules"].upsert(payload)
-        }
+        insertOrUpsertDetails(item, isUpdate = true)
     }
 }

@@ -175,15 +175,15 @@ fun PeopleScreen(
 
 @Composable
 fun PersonRow(person: ReminderItem, onClick: () -> Unit) {
-    val bdStr = person.personDetails?.get("birthdate")?.toString()
+    val bdStr = person.person?.birthdate
     val birthdate = bdStr?.takeIf { it.isNotBlank() }?.let {
         try { LocalDate.parse(it.substring(0, 10)) } catch (e: Exception) { null }
     }
     val age = birthdate?.let { ComputedFields.calculateAge(it) } ?: 0
     val days = birthdate?.let { ComputedFields.calculateDaysToBirthday(it) } ?: 9999
     val zodiac = birthdate?.let { ComputedFields.getZodiacSign(it) } ?: "Unknown"
-    val gender = person.personDetails?.get("gender")?.toString() ?: "unspecified"
-    val relationship = person.personDetails?.get("relationship")?.toString() ?: "other"
+    val gender = person.person?.gender ?: "unspecified"
+    val relationship = person.person?.relationship ?: "other"
     val relPair = AppConstants.RELATIONSHIP_LABELS[relationship]
     val glyph = AppConstants.ZODIAC_GLYPHS[zodiac] ?: "★"
 

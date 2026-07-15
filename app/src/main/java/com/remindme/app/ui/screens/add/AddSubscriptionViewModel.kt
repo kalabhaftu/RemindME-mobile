@@ -107,17 +107,17 @@ class AddSubscriptionViewModel : ViewModel() {
                     cycle = _uiState.value.cycle
                 )
 
-                val subscriptionDetails = mapOf(
-                    "cost" to _uiState.value.amount,
-                    "currency" to _uiState.value.currency,
-                    "cycle" to _uiState.value.cycle,
-                    "renewal_date" to renewalDateStr,
-                    "logo_url" to (_uiState.value.logoUrl ?: "")
+                val subscriptionDetails = com.remindme.app.domain.models.SubscriptionDetails(
+                    billingAmount = _uiState.value.amount.toDoubleOrNull(),
+                    billingCurrency = _uiState.value.currency,
+                    cycle = _uiState.value.cycle,
+                    renewalDate = renewalDateStr,
+                    logoUrl = _uiState.value.logoUrl
                 )
                 
-                val recurrenceRules = mapOf(
-                    "frequency" to _uiState.value.cycle,
-                    "next_occurrence" to (nextOccurrence ?: "")
+                val recurrenceRules = com.remindme.app.domain.models.RecurrenceRules(
+                    frequency = _uiState.value.cycle,
+                    ends = "never"
                 )
 
                 val item = com.remindme.app.domain.models.ReminderItem(
@@ -129,8 +129,8 @@ class AddSubscriptionViewModel : ViewModel() {
                     iconKey = null,
                     createdAt = now,
                     updatedAt = now,
-                    subscriptionDetails = subscriptionDetails,
-                    recurrenceRules = recurrenceRules
+                    subscriptionDetails = listOf(subscriptionDetails),
+                    recurrenceRules = listOf(recurrenceRules)
                 )
 
                 repository.addReminder(item)

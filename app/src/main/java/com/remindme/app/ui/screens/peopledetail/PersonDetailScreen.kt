@@ -63,22 +63,29 @@ fun PersonDetailScreen(
     LiquidScaffold(
         snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
         appBar = {
-            LiquidAppBar(
-                title = uiState.person?.name ?: "",
-                leading = {
-                    IconButton(onClick = onBack) {
-                        LiquidIcon(imageVector = Icons.Rounded.ArrowBack, color = TextSecondary)
+            Row(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircledBackButton(onClick = onBack)
+                Spacer(modifier = Modifier.width(12.dp))
+                LiquidAppBar(
+                    title = uiState.person?.name ?: "",
+                    statusBarsPadding = false,
+                    modifier = Modifier.weight(1f),
+                    actions = {
+                        IconButton(onClick = { onEdit(personId) }) {
+                            LiquidIcon(imageVector = Icons.Rounded.Edit, color = TextSecondary)
+                        }
+                        IconButton(onClick = { showDeleteConfirm = true }) {
+                            LiquidIcon(imageVector = Icons.Rounded.Delete, color = StateDanger)
+                        }
                     }
-                },
-                actions = {
-                    IconButton(onClick = { onEdit(personId) }) {
-                        LiquidIcon(imageVector = Icons.Rounded.Edit, color = TextSecondary)
-                    }
-                    IconButton(onClick = { showDeleteConfirm = true }) {
-                        LiquidIcon(imageVector = Icons.Rounded.Delete, color = StateDanger)
-                    }
-                }
-            )
+                )
+            }
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -88,15 +95,15 @@ fun PersonDetailScreen(
                 }
             } else if (uiState.person != null) {
                     val person = uiState.person!!
-                    val bdStr = person.personDetails?.get("birthdate")?.toString()
+                    val bdStr = person.person?.birthdate
                     val birthdate = bdStr?.takeIf { it.isNotBlank() }?.let { 
                         try { LocalDate.parse(it.substring(0, 10)) } catch (e: Exception) { null } 
                     }
                     val age = birthdate?.let { ComputedFields.calculateAge(it) }
                     val days = birthdate?.let { ComputedFields.calculateDaysToBirthday(it) }
                     val zodiac = birthdate?.let { ComputedFields.getZodiacSign(it) }
-                    val genderKey = person.personDetails?.get("gender")?.toString() ?: "unspecified"
-                    val relKey = person.personDetails?.get("relationship")?.toString() ?: "other"
+                    val genderKey = person.person?.gender ?: "unspecified"
+                    val relKey = person.person?.relationship ?: "other"
                     
                     val rel = AppConstants.RELATIONSHIP_LABELS[relKey]
                     val gender = AppConstants.GENDER_LABELS[genderKey]

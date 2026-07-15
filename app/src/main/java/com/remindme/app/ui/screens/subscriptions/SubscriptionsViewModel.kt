@@ -37,8 +37,8 @@ class SubscriptionsViewModel : ViewModel() {
 
     val sortedSubscriptions: StateFlow<List<ReminderItem>> = combine(_allSubscriptions, _uiState) { subs, _ ->
         subs.sortedWith(Comparator { a, b ->
-            val ra = a.subscriptionDetails?.get("renewal_date")?.toString()
-            val rb = b.subscriptionDetails?.get("renewal_date")?.toString()
+            val ra = a.subscription?.renewalDate
+            val rb = b.subscription?.renewalDate
             if (ra.isNullOrBlank() || rb.isNullOrBlank()) return@Comparator 0
             try {
                 val da = LocalDate.parse(ra!!)

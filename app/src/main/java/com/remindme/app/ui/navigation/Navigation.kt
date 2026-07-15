@@ -53,13 +53,16 @@ fun MainNavigation() {
     var sessionStatus by remember { mutableStateOf<io.github.jan.supabase.auth.status.SessionStatus?>(null) }
     var glassStyle by remember { mutableStateOf(LiquidGlassPrefs.getStyle(context)) }
 
-    androidx.compose.runtime.DisposableEffect(context) {
-        val prefs = context.getSharedPreferences("liquid_glass_prefs", android.content.Context.MODE_PRIVATE)
-        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+    val listener = remember {
+        android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == "glass_style") {
                 glassStyle = LiquidGlassPrefs.getStyle(context)
             }
         }
+    }
+
+    androidx.compose.runtime.DisposableEffect(context) {
+        val prefs = context.getSharedPreferences("liquid_glass_prefs", android.content.Context.MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose {
             prefs.unregisterOnSharedPreferenceChangeListener(listener)
@@ -155,7 +158,8 @@ fun MainNavigation() {
             entry<Search> {
                 WithBackdrop {
                     SearchScreen(
-                        onItemClick = { id -> backStack.add(PersonDetail(id)) }
+                        onItemClick = { id -> backStack.add(PersonDetail(id)) },
+                        onBack = { backStack.removeLastOrNull() }
                     )
                 }
             }

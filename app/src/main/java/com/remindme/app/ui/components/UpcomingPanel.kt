@@ -214,16 +214,16 @@ fun getSubtitle(occurrence: ReminderOccurrence): String {
     val item = occurrence.item
     return when (item.category) {
         CategoryType.PERSON -> {
-            val bdStr = item.personDetails?.get("birthdate")?.toString()
+            val bdStr = item.person?.birthdate
             if (bdStr != null) {
                 val age = occurrence.date.year - LocalDate.parse(bdStr.substringBefore("T")).year
                 "Turns $age"
             } else "Birthday"
         }
         CategoryType.SUBSCRIPTION -> {
-            val amount = item.subscriptionDetails?.get("billing_amount")
-            val curr = item.subscriptionDetails?.get("billing_currency") ?: "USD"
-            val cycle = item.subscriptionDetails?.get("cycle") ?: "monthly"
+            val amount = item.subscription?.billingAmount
+            val curr = item.subscription?.billingCurrency ?: "USD"
+            val cycle = item.subscription?.cycle ?: "monthly"
             if (amount != null) "$curr $amount / $cycle" else "Subscription renewal"
         }
         else -> "Task"

@@ -3,6 +3,7 @@ package com.remindme.app.ui.screens.main
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CreditCard
@@ -15,6 +16,8 @@ import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.foundation.clickable
+import com.remindme.app.ui.components.liquid.FloatingGlassContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -158,15 +161,28 @@ fun MainScreen(
                 4 -> HolidaysScreen()
             }
             
-            FloatingActionButton(
-                onClick = { showQuickAdd = true },
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(bottom = 110.dp, end = 24.dp),
-                containerColor = AppColors.accent500,
-                contentColor = AppColors.textPrimary
+                    .padding(bottom = 110.dp, end = 24.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Quick Add")
+                FloatingGlassContainer(
+                    borderRadius = 50.dp,
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clickable { showQuickAdd = true }
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LiquidIcon(
+                            imageVector = Icons.Default.Add,
+                            color = Accent500,
+                            size = 28.dp
+                        )
+                    }
+                }
             }
         }
         

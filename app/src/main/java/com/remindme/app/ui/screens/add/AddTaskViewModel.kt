@@ -75,14 +75,13 @@ class AddTaskViewModel : ViewModel() {
                     dueAt = dueAtStr
                 )
 
-                val taskDetails = mapOf(
-                    "due_at" to dueAtStr,
-                    "is_completed" to "false"
+                val taskDetails = com.remindme.app.domain.models.TaskDetails(
+                    dueAt = dueAtStr
                 )
                 
-                val recurrenceRules = mapOf(
-                    "frequency" to "none",
-                    "next_occurrence" to (nextOccurrence ?: "")
+                val recurrenceRules = com.remindme.app.domain.models.RecurrenceRules(
+                    frequency = "none",
+                    ends = "never"
                 )
 
                 val item = com.remindme.app.domain.models.ReminderItem(
@@ -94,8 +93,8 @@ class AddTaskViewModel : ViewModel() {
                     iconKey = _uiState.value.iconKey,
                     createdAt = now,
                     updatedAt = now,
-                    taskDetails = taskDetails,
-                    recurrenceRules = recurrenceRules
+                    taskDetails = listOf(taskDetails),
+                    recurrenceRules = listOf(recurrenceRules)
                 )
 
                 repository.addReminder(item)

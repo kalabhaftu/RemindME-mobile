@@ -48,7 +48,7 @@ class PeopleViewModel : ViewModel() {
         }
 
         fun getBirthdate(item: ReminderItem): LocalDate? {
-            val bd = item.personDetails?.get("birthdate")?.toString()?.takeIf { it.isNotBlank() } ?: return null
+            val bd = item.person?.birthdate?.takeIf { it.isNotBlank() } ?: return null
             return try { LocalDate.parse(bd.substring(0, 10)) } catch (e: Exception) { null }
         }
 

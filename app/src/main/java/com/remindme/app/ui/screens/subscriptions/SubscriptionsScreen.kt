@@ -109,12 +109,12 @@ fun SubscriptionsScreen(
 
 @Composable
 fun SubscriptionRow(item: ReminderItem, onClick: () -> Unit) {
-    val sub = item.subscriptionDetails
-    val renewalStr = sub?.get("renewal_date")?.toString()
-    val logo = sub?.get("logo_url")?.toString()
-    val amount = sub?.get("billing_amount")?.toString()
-    val currency = sub?.get("billing_currency")?.toString() ?: "USD"
-    val cycle = sub?.get("cycle")?.toString() ?: "monthly"
+    val sub = item.subscription
+    val renewalStr = sub?.renewalDate
+    val logo = sub?.logoUrl
+    val amount = sub?.billingAmount?.toString()
+    val currency = sub?.billingCurrency ?: "USD"
+    val cycle = sub?.cycle ?: "monthly"
     
     fun daysUntil(rdStr: String?): Int {
         if (rdStr.isNullOrBlank()) return 0

@@ -25,11 +25,12 @@ fun LiquidAppBar(
     leading: @Composable (() -> Unit)? = null,
     actions: @Composable (RowScope.() -> Unit)? = null,
     bottom: @Composable (() -> Unit)? = null,
+    statusBarsPadding: Boolean = true,
     backdrop: Backdrop = LocalBackdrop.current
 ) {
     Column(
         modifier = modifier
-            .statusBarsPadding()
+            .run { if (statusBarsPadding) statusBarsPadding() else this }
             .padding(top = 8f.dp, start = 16f.dp, end = 16f.dp, bottom = 8f.dp)
             .fillMaxWidth()
             .drawBackdrop(

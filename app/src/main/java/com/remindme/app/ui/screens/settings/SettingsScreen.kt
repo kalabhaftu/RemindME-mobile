@@ -55,7 +55,21 @@ fun SettingsScreen(
     LiquidScaffold(
         snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
         appBar = {
-            LiquidAppBar(title = "Settings")
+            Row(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircledBackButton(onClick = onNavigateHome)
+                Spacer(modifier = Modifier.width(12.dp))
+                LiquidAppBar(
+                    title = "Settings",
+                    statusBarsPadding = false,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -193,7 +207,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
             Spacer(modifier = Modifier.height(24.dp))
             HorizontalDivider(color = GlassBorder)
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Chat ID", style = MaterialTheme.typography.titleSmall)
+            Text("Chat ID", style = MaterialTheme.typography.titleSmall, color = TextPrimary)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "Send /start to your bot on Telegram, then tap Detect — or paste your Chat ID manually.",
@@ -344,7 +358,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
         GlassSwitch("In-App Notifications", uiState.inAppEnabled) { viewModel.updatePreference("default_channel_in_app", it) }
         
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Default Timing", style = MaterialTheme.typography.titleMedium)
+        Text("Default Timing", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
         Spacer(modifier = Modifier.height(8.dp))
 
         var showTimingPicker by remember { mutableStateOf(false) }
@@ -375,7 +389,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text("Escalation Nudge Delay (Hours)", style = MaterialTheme.typography.titleMedium)
+        Text("Escalation Nudge Delay (Hours)", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
         Spacer(modifier = Modifier.height(8.dp))
         var nudgeVal by remember(uiState.nudgeDelayHours) { mutableStateOf(uiState.nudgeDelayHours.toString()) }
         LiquidTextField(
@@ -403,7 +417,10 @@ fun GlassSwitch(title: String, checked: Boolean, onCheckedChange: (Boolean) -> U
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(title, fontWeight = FontWeight.Medium, color = TextPrimary)
-            Switch(checked = checked, onCheckedChange = onCheckedChange, colors = SwitchDefaults.colors(checkedThumbColor = Accent500, checkedTrackColor = Accent500.copy(alpha = 0.5f)))
+            LiquidToggle(
+                selected = { checked },
+                onSelect = onCheckedChange
+            )
         }
     }
 }
@@ -559,14 +576,21 @@ fun ThemeSelectorScreen(
 
     LiquidScaffold(
         appBar = {
-            LiquidAppBar(
-                title = "Theme Selector",
-                leading = {
-                    IconButton(onClick = onBack) {
-                        LiquidIcon(Icons.Rounded.ArrowBack, color = TextPrimary)
-                    }
-                }
-            )
+            Row(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircledBackButton(onClick = onBack)
+                Spacer(modifier = Modifier.width(12.dp))
+                LiquidAppBar(
+                    title = "Theme Selector",
+                    statusBarsPadding = false,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     ) { paddingValues ->
         Column(

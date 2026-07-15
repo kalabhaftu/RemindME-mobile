@@ -6,6 +6,8 @@ import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
 import com.remindme.app.domain.models.CategoryType
 import com.remindme.app.domain.models.ReminderItem
+import com.remindme.app.domain.models.HolidayDetails
+import com.remindme.app.domain.models.RecurrenceRules
 import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.RealtimeChannel
 import io.github.jan.supabase.realtime.channel
@@ -142,7 +144,7 @@ class HolidaysViewModel : ViewModel() {
             try {
                 val all = repository.getReminders()
                 val custom = all.filter { it.category == CategoryType.CUSTOM_HOLIDAY }
-                val keys = custom.mapNotNull { it.holidayDetails?.get("holiday_key") as? String }.toSet()
+                val keys = custom.mapNotNull { it.holiday?.holidayKey }.toSet()
                 _uiState.update { it.copy(subscribedKeys = keys, subscribedItems = custom) }
             } catch (e: Exception) {
                 // Ignore
@@ -158,7 +160,7 @@ class HolidaysViewModel : ViewModel() {
                 val isSubscribed = _uiState.value.subscribedKeys.contains(key)
                 if (isSubscribed) {
                     val item = _uiState.value.subscribedItems.firstOrNull { 
-                        it.holidayDetails?.get("holiday_key") == key 
+                        it.holiday?.holidayKey == key 
                     }
                     if (item != null) {
                         repository.deleteReminder(item.id)
@@ -177,17 +179,20 @@ class HolidaysViewModel : ViewModel() {
                             name = holiday.localName,
                             createdAt = java.time.LocalDateTime.now(),
                             updatedAt = java.time.LocalDateTime.now(),
-                            holidayDetails = mapOf(
-                                "country_code" to holiday.countryCode,
-                                "holiday_key" to key,
-                                "holiday_date" to holiday.date,
-                                "is_custom" to false
+                            holidayDetails = listOf(
+                                HolidayDetails(
+                                    countryCode = holiday.countryCode,
+                                    holidayKey = key,
+                                    holidayDate = holiday.date,
+                                    isCustom = false
+                                )
                             ),
-                            recurrenceRules = mapOf(
-                                "frequency" to "yearly",
-                                "interval_count" to 1,
-                                "ends" to "never",
-                                "next_occurrence_at" to holiday.date // approximation
+                            recurrenceRules = listOf(
+                                RecurrenceRules(
+                                    frequency = "yearly",
+                                    intervalCount = 1,
+                                    ends = "never"
+                                )
                             )
                         )
                         // Save through repository
@@ -210,7 +215,7 @@ class HolidaysViewModel : ViewModel() {
     fun removeSubscribed(key: String) {
         viewModelScope.launch {
             val item = _uiState.value.subscribedItems.firstOrNull { 
-                it.holidayDetails?.get("holiday_key") == key 
+                it.holiday?.holidayKey == key 
             }
             if (item != null) {
                 try {

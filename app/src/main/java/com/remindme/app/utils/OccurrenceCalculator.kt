@@ -16,11 +16,9 @@ object OccurrenceCalculator {
         val dateStr = date.toString()
 
         // Check escalation state
-        if (item.escalationState != null) {
-            val state = item.escalationState.firstOrNull { it["occurrence_date"] == dateStr }
-            if (state != null && state["marked_done_at"] != null) {
-                return OccurrenceStatus.COMPLETED_PAST
-            }
+        val state = item.escalationState?.firstOrNull { it.occurrenceDate == dateStr }
+        if (state != null && state.markedDoneAt != null) {
+            return OccurrenceStatus.COMPLETED_PAST
         }
 
         return when {
@@ -47,7 +45,7 @@ object OccurrenceCalculator {
 
             when (item.category) {
                 CategoryType.PERSON -> {
-                    val bdStr = item.personDetails?.get("birthdate")?.toString()?.trim()
+                    val bdStr = item.person?.birthdate?.trim()
                     if (!bdStr.isNullOrEmpty()) {
                         val bd = LocalDate.parse(bdStr)
                         var curr = LocalDate.of(startDate.year, bd.monthValue, bd.dayOfMonth)
@@ -69,10 +67,10 @@ object OccurrenceCalculator {
                     }
                 }
                 CategoryType.SUBSCRIPTION -> {
-                    val rdStr = item.subscriptionDetails?.get("renewal_date")?.toString()?.trim()
+                    val rdStr = item.subscription?.renewalDate?.trim()
                     if (!rdStr.isNullOrEmpty()) {
                         val rd = LocalDate.parse(rdStr)
-                        val cycle = item.subscriptionDetails?.get("cycle")?.toString() ?: "monthly"
+                        val cycle = item.subscription?.cycle ?: "monthly"
                         var curr = rd
 
                         while (curr.isBefore(startDate)) {
@@ -96,7 +94,7 @@ object OccurrenceCalculator {
                     }
                 }
                 CategoryType.CUSTOM_HOLIDAY -> {
-                    val hdStr = item.holidayDetails?.get("holiday_date")?.toString()?.trim()
+                    val hdStr = item.holiday?.holidayDate?.trim()
                     if (!hdStr.isNullOrEmpty()) {
                         val hd = LocalDate.parse(hdStr)
                         var curr = LocalDate.of(startDate.year, hd.monthValue, hd.dayOfMonth)
@@ -110,23 +108,23 @@ object OccurrenceCalculator {
                     }
                 }
                 CategoryType.TASK -> {
-                    val dueStr = item.taskDetails?.get("due_at")?.toString()?.trim()
+                    val dueStr = item.task?.dueAt?.trim()
                     if (!dueStr.isNullOrEmpty()) {
-                        val due = LocalDate.parse(dueStr)
-                        val rr = item.recurrenceRules
+                        val due = LocalDate.parse(dueStr.substring(0, 10))
+                        val rr = item.recurrence
 
-                        if (rr == null || rr["frequency"] == "none") {
+                        if (rr == null || rr.frequency == "none") {
                             if (!due.isBefore(startDate) && !due.isAfter(endDate)) {
                                 currentDates.add(due)
                             }
                         } else {
                             var curr = due
-                            val freq = rr["frequency"]?.toString()
-                            val interval = (rr["interval_count"] as? Number)?.toLong() ?: 1L
+                            val freq = rr.frequency
+                            val interval = rr.intervalCount.toLong()
                             var count = 0
 
-                            val ends = rr["ends"]?.toString()
-                            val endsValue = rr["ends_value"]?.toString()
+                            val ends = rr.ends
+                            val endsValue = rr.endsValue
 
                             while (curr.isBefore(startDate)) {
                                 if (ends == "after_occurrences" && endsValue != null && count >= endsValue.toInt()) break

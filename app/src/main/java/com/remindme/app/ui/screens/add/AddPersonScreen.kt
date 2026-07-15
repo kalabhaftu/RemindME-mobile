@@ -78,12 +78,21 @@ fun AddPersonScreen(
 
     LiquidScaffold(
         appBar = {
-            LiquidAppBar(
-                title = "Add Person",
-                actions = {
-                    // if editing, show delete
-                }
-            )
+            Row(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircledBackButton(onClick = onBack)
+                Spacer(modifier = Modifier.width(12.dp))
+                LiquidAppBar(
+                    title = if (personId != null) "Edit Person" else "Add Person",
+                    statusBarsPadding = false,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         },
         snackbarHost = {
             LiquidSnackbarHost(hostState = snackbarHostState)

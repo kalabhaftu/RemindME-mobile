@@ -109,7 +109,7 @@ fun TasksScreen(
 
 @Composable
 fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
-    val dueStr = item.taskDetails?.get("due_at") as? String
+    val dueStr = item.task?.dueAt
 
     fun getIconForKey(key: String?): ImageVector {
         return when (key) {

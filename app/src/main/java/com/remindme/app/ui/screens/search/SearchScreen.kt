@@ -22,13 +22,15 @@ import com.remindme.app.ui.components.liquid.FloatingGlassContainer
 import com.remindme.app.ui.components.liquid.LiquidIcon
 import com.remindme.app.ui.components.liquid.LiquidSpinner
 import com.remindme.app.ui.components.liquid.LiquidTextField
+import com.remindme.app.ui.components.liquid.CircledBackButton
 import com.remindme.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = viewModel(),
-    onItemClick: (String) -> Unit
+    onItemClick: (String) -> Unit,
+    onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -38,16 +40,20 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Box(
+            Row(
                 modifier = Modifier
+                    .statusBarsPadding()
                     .fillMaxWidth()
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                CircledBackButton(onClick = onBack)
+                Spacer(modifier = Modifier.width(12.dp))
                 LiquidTextField(
                     value = uiState.query,
                     onValueChange = viewModel::updateQuery,
                     placeholder = "Search reminders, notes, people…",
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.weight(1f)
                 )
             }
 

@@ -66,16 +66,16 @@ class AddPersonViewModel : ViewModel() {
             try {
                 val item = repository.getReminder(personId)
                 if (item != null) {
-                    val personDetails = item.personDetails ?: emptyMap()
+                    val personDetails = item.person
                     _uiState.update { state ->
                         state.copy(
                             name = item.name,
                             notes = item.notes ?: "",
-                            birthdate = personDetails["birthdate"]?.toString()?.let { 
+                            birthdate = personDetails?.birthdate?.let { 
                                 try { LocalDateTime.parse(it) } catch (e: Exception) { null }
                             },
-                            gender = personDetails["gender"]?.toString() ?: "unspecified",
-                            relationship = personDetails["relationship"]?.toString() ?: "friend",
+                            gender = personDetails?.gender ?: "unspecified",
+                            relationship = personDetails?.relationship ?: "friend",
                             avatarUrl = item.iconKey,
                             isLoading = false
                         )
@@ -93,7 +93,7 @@ class AddPersonViewModel : ViewModel() {
         val currentName = _uiState.value.name
         val currentBirthdate = _uiState.value.birthdate
         if (currentName.isBlank()) {
-            _uiState.update { it.copy(error = "Name is required") }
+            _uiState.update { it.copy(error = "Please enter a name") }
             return
         }
         if (currentBirthdate == null) {
@@ -114,16 +114,16 @@ class AddPersonViewModel : ViewModel() {
                     birthdate = birthdateStr
                 )
 
-                val personDetails = mapOf(
-                    "birthdate" to birthdateStr,
-                    "gender" to _uiState.value.gender,
-                    "relationship" to _uiState.value.relationship,
-                    "custom_relationship" to _uiState.value.customRelationship
+                val personDetails = com.remindme.app.domain.models.PersonDetails(
+                    birthdate = birthdateStr,
+                    gender = _uiState.value.gender,
+                    relationship = _uiState.value.relationship,
+                    customRelationship = _uiState.value.customRelationship
                 )
                 
-                val recurrenceRules = mapOf(
-                    "frequency" to "yearly",
-                    "next_occurrence" to (nextOccurrence ?: "")
+                val recurrenceRules = com.remindme.app.domain.models.RecurrenceRules(
+                    frequency = "yearly",
+                    ends = "never"
                 )
 
                 val item = com.remindme.app.domain.models.ReminderItem(
@@ -135,8 +135,8 @@ class AddPersonViewModel : ViewModel() {
                     iconKey = _uiState.value.avatarUrl,
                     createdAt = now,
                     updatedAt = now,
-                    personDetails = personDetails,
-                    recurrenceRules = recurrenceRules
+                    personDetails = listOf(personDetails),
+                    recurrenceRules = listOf(recurrenceRules)
                 )
 
                 if (_uiState.value.existingPersonId != null) {
