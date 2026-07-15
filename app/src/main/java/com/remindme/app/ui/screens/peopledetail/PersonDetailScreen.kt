@@ -1,0 +1,225 @@
+package com.remindme.app.ui.screens.peopledetail
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.remindme.app.ui.components.liquid.*
+import com.remindme.app.ui.components.liquid.LiquidSnackbarHost
+import com.remindme.app.ui.theme.*
+import com.remindme.app.utils.AppConstants
+import com.remindme.app.utils.ComputedFields
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+@Composable
+fun PersonDetailScreen(
+    personId: String,
+    onBack: () -> Unit,
+    onEdit: (String) -> Unit
+) {
+    val viewModel: PersonDetailViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return PersonDetailViewModel(personId) as T
+            }
+        }
+    )
+    
+    val uiState by viewModel.uiState.collectAsState()
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(uiState.isDeleted) {
+        if (uiState.isDeleted) {
+            onBack()
+        }
+    }
+    
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
+            containerColor = Color.Transparent,
+            topBar = {
+                LiquidAppBar(
+                    title = uiState.person?.name ?: "",
+                    leading = {
+                        IconButton(onClick = onBack) {
+                            LiquidIcon(imageVector = Icons.Rounded.ArrowBack, color = TextSecondary)
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { onEdit(personId) }) {
+                            LiquidIcon(imageVector = Icons.Rounded.Edit, color = TextSecondary)
+                        }
+                        IconButton(onClick = { showDeleteConfirm = true }) {
+                            LiquidIcon(imageVector = Icons.Rounded.Delete, color = StateDanger)
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                if (uiState.isLoading) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        LiquidSpinner()
+                    }
+                } else if (uiState.person != null) {
+                    val person = uiState.person!!
+                    val bdStr = person.personDetails?.get("birthdate")?.toString()
+                    val birthdate = bdStr?.takeIf { it.isNotBlank() }?.let { 
+                        try { LocalDate.parse(it.substring(0, 10)) } catch (e: Exception) { null } 
+                    }
+                    val age = birthdate?.let { ComputedFields.calculateAge(it) }
+                    val days = birthdate?.let { ComputedFields.calculateDaysToBirthday(it) }
+                    val zodiac = birthdate?.let { ComputedFields.getZodiacSign(it) }
+                    val genderKey = person.personDetails?.get("gender")?.toString() ?: "unspecified"
+                    val relKey = person.personDetails?.get("relationship")?.toString() ?: "other"
+                    
+                    val rel = AppConstants.RELATIONSHIP_LABELS[relKey]
+                    val gender = AppConstants.GENDER_LABELS[genderKey]
+                    val glyph = zodiac?.let { AppConstants.ZODIAC_GLYPHS[it] }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp)
+                    ) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            FloatingGlassContainer(
+                                borderRadius = 32.dp,
+                                modifier = Modifier.wrapContentSize()
+                            ) {
+                                Box(modifier = Modifier.padding(16.dp)) {
+                                    LiquidIcon(imageVector = Icons.Rounded.Person, size = 32.dp, color = Accent500)
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text(person.name, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                                if (birthdate != null) {
+                                    Text(
+                                        birthdate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")),
+                                        fontSize = 14.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        color = TextSecondary
+                                    )
+                                }
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.heightIn(max = 300.dp),
+                            userScrollEnabled = false
+                        ) {
+                            if (age != null) {
+                                item { StatCard("AGE", "$age") }
+                            }
+                            if (days != null) {
+                                item { StatCard("DAYS TO BIRTHDAY", "$days", valueColor = Accent500) }
+                            }
+                            if (zodiac != null && glyph != null) {
+                                item { StatCard("ZODIAC", "$glyph $zodiac") }
+                            }
+                            if (rel != null) {
+                                item { StatCard("RELATIONSHIP", "${rel.second} ${rel.first}") }
+                            }
+                        }
+
+                        if (gender != null && gender != "—") {
+                            Spacer(modifier = Modifier.height(24.dp))
+                            FloatingGlassContainer(
+                                borderRadius = 16.dp,
+                                modifier = Modifier.wrapContentSize()
+                            ) {
+                                Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                                    Text(gender, color = TextPrimary)
+                                }
+                            }
+                        }
+
+                        if (!person.notes.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text("NOTES", fontSize = 10.sp, color = TextTertiary, letterSpacing = 0.5.sp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(person.notes, fontSize = 14.sp, color = TextSecondary)
+                            Spacer(modifier = Modifier.height(24.dp))
+                        }
+                    }
+                }
+            }
+        }
+
+        if (showDeleteConfirm) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirm = false },
+                title = { Text("Delete ${uiState.person?.name}?") },
+                text = { Text("Are you sure you want to delete this person?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showDeleteConfirm = false
+                        viewModel.deletePerson()
+                    }) {
+                        Text("Delete", color = StateDanger)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirm = false }) {
+                        Text("Cancel", color = TextSecondary)
+                    }
+                },
+                containerColor = BgElevated,
+                titleContentColor = TextPrimary,
+                textContentColor = TextSecondary
+            )
+        }
+    }
+}
+
+@Composable
+fun StatCard(label: String, value: String, valueColor: Color = TextPrimary) {
+    FloatingGlassContainer(
+        borderRadius = 16.dp,
+        modifier = Modifier.fillMaxWidth().aspectRatio(2.5f)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp).fillMaxSize(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(label, fontSize = 10.sp, color = TextTertiary, letterSpacing = 0.5.sp)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(value, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, color = valueColor)
+        }
+    }
+}

@@ -1,0 +1,231 @@
+package com.remindme.app.ui.components
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.remindme.app.domain.models.CategoryType
+import com.remindme.app.domain.models.OccurrenceStatus
+import com.remindme.app.domain.models.ReminderOccurrence
+import com.remindme.app.ui.components.liquid.FloatingGlassContainer
+import com.remindme.app.ui.components.liquid.LiquidFilterChip
+import com.remindme.app.ui.components.liquid.LiquidIcon
+import com.remindme.app.ui.theme.AppColors
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+
+enum class UpcomingFilter { ThreeDays, SevenDays, Month, All }
+
+@Composable
+fun UpcomingPanel(
+    occurrences: List<ReminderOccurrence>,
+    onMarkDone: (String, LocalDate) -> Unit,
+    onSnooze: (String, LocalDate) -> Unit,
+    onEdit: (com.remindme.app.domain.models.ReminderItem) -> Unit
+) {
+    var filter by remember { mutableStateOf(UpcomingFilter.SevenDays) }
+
+    val filtered = remember(occurrences, filter) {
+        val today = LocalDate.now()
+        val days = when (filter) {
+            UpcomingFilter.ThreeDays -> 3L
+            UpcomingFilter.SevenDays -> 7L
+            UpcomingFilter.Month -> 30L
+            UpcomingFilter.All -> 365L
+        }
+        val end = today.plusDays(days)
+
+        occurrences.filter {
+            it.status != OccurrenceStatus.COMPLETED_PAST && !it.date.isAfter(end)
+        }.sortedBy { it.date }
+    }
+
+    FloatingGlassContainer(
+        borderRadius = 24.dp,
+        padding = 16.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                "Upcoming",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = AppColors.textPrimary
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                LiquidFilterChip("Next 3 Days", filter == UpcomingFilter.ThreeDays, onSelected = { filter = UpcomingFilter.ThreeDays })
+                LiquidFilterChip("Next 7 Days", filter == UpcomingFilter.SevenDays, onSelected = { filter = UpcomingFilter.SevenDays })
+                LiquidFilterChip("This Month", filter == UpcomingFilter.Month, onSelected = { filter = UpcomingFilter.Month })
+                LiquidFilterChip("All Upcoming", filter == UpcomingFilter.All, onSelected = { filter = UpcomingFilter.All })
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (filtered.isEmpty()) {
+                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        LiquidIcon(Icons.Rounded.Notifications, size = 32.dp, color = AppColors.textTertiary)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("All caught up", color = AppColors.textSecondary, fontSize = 14.sp)
+                    }
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    filtered.forEach { occ ->
+                        UpcomingItem(
+                            occurrence = occ,
+                            onMarkDone = { onMarkDone(occ.item.id, occ.date) },
+                            onSnooze = { onSnooze(occ.item.id, occ.date) },
+                            onEdit = { onEdit(occ.item) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun UpcomingItem(
+    occurrence: ReminderOccurrence,
+    onMarkDone: () -> Unit,
+    onSnooze: () -> Unit,
+    onEdit: () -> Unit
+) {
+    val item = occurrence.item
+    val isDone = occurrence.status == OccurrenceStatus.COMPLETED_PAST
+
+    val iconRes = when (item.category) {
+        CategoryType.TASK -> Icons.Rounded.Checklist
+        CategoryType.PERSON -> Icons.Rounded.Person
+        CategoryType.SUBSCRIPTION -> Icons.Rounded.CreditCard
+        CategoryType.CUSTOM_HOLIDAY -> Icons.Rounded.Cake
+    }
+
+    FloatingGlassContainer(
+        borderRadius = 16.dp,
+        padding = PaddingValues(0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .clickable { onEdit() }
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FloatingGlassContainer(
+                borderRadius = 10.dp,
+                padding = PaddingValues(9.dp)
+            ) {
+                LiquidIcon(
+                    icon = iconRes,
+                    size = 18.dp,
+                    color = if (isDone) AppColors.textTertiary else AppColors.accent500
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    item.name,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isDone) AppColors.textTertiary else AppColors.textPrimary,
+                    decoration = if (isDone) TextDecoration.LineThrough else null
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    formatRelativeDate(occurrence.date).uppercase(),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AppColors.textTertiary,
+                    letterSpacing = 0.5.sp
+                )
+                Spacer(modifier = Modifier.height(1.dp))
+                Text(
+                    getSubtitle(occurrence),
+                    fontSize = 12.sp,
+                    color = AppColors.textSecondary
+                )
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (item.category == CategoryType.TASK && !isDone) {
+                    FloatingGlassContainer(
+                        borderRadius = 20.dp,
+                        padding = 8.dp,
+                        modifier = Modifier.clickable { onSnooze() }
+                    ) {
+                        LiquidIcon(imageVector = Icons.Rounded.Snooze, size = 18.dp, color = AppColors.stateWarning)
+                    }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    FloatingGlassContainer(
+                        borderRadius = 20.dp,
+                        padding = 8.dp,
+                        modifier = Modifier.clickable { onMarkDone() }
+                    ) {
+                        LiquidIcon(imageVector = Icons.Rounded.CheckCircle, size = 18.dp, color = AppColors.stateSuccess)
+                    }
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+                if (item.category != CategoryType.CUSTOM_HOLIDAY) {
+                    FloatingGlassContainer(
+                        borderRadius = 20.dp,
+                        padding = 8.dp,
+                        modifier = Modifier.clickable { onEdit() }
+                    ) {
+                        LiquidIcon(imageVector = Icons.Rounded.Edit, size = 18.dp, color = AppColors.textTertiary)
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun formatRelativeDate(date: LocalDate): String {
+    val today = LocalDate.now()
+    val diff = ChronoUnit.DAYS.between(today, date)
+    return when {
+        diff == 0L -> "Today"
+        diff == 1L -> "Tomorrow"
+        diff > 0L -> "In $diff days"
+        else -> "${kotlin.math.abs(diff)} days ago"
+    }
+}
+
+fun getSubtitle(occurrence: ReminderOccurrence): String {
+    val item = occurrence.item
+    return when (item.category) {
+        CategoryType.PERSON -> {
+            val bdStr = item.personDetails?.get("birthdate")?.toString()
+            if (bdStr != null) {
+                val age = occurrence.date.year - LocalDate.parse(bdStr.substringBefore("T")).year
+                "Turns $age"
+            } else "Birthday"
+        }
+        CategoryType.SUBSCRIPTION -> {
+            val amount = item.subscriptionDetails?.get("billing_amount")
+            val curr = item.subscriptionDetails?.get("billing_currency") ?: "USD"
+            val cycle = item.subscriptionDetails?.get("cycle") ?: "monthly"
+            if (amount != null) "$curr $amount / $cycle" else "Subscription renewal"
+        }
+        else -> "Task"
+    }
+}
