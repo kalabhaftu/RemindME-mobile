@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -58,7 +59,8 @@ fun MainScreen(
                         androidx.compose.material3.DropdownMenu(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false },
-                            containerColor = AppColors.bgSurface1,
+                            containerColor = AppColors.bgElevated,
+                            offset = DpOffset(0.dp, 4.dp)
                         ) {
                             androidx.compose.material3.DropdownMenuItem(
                                 text = { androidx.compose.material3.Text("Search", color = AppColors.textPrimary) },

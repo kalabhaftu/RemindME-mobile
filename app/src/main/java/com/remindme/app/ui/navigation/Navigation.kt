@@ -3,17 +3,23 @@ package com.remindme.app.ui.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.remindme.app.data.remote.SupabaseManager
+import com.remindme.app.ui.components.liquid.LiquidGlassPrefs
+import com.remindme.app.ui.components.liquid.LocalBackdrop
+import com.remindme.app.ui.components.liquid.LocalLiquidGlassStyle
 import com.remindme.app.ui.screens.main.MainScreen
 import com.remindme.app.ui.screens.add.AddPersonScreen
 import com.remindme.app.ui.screens.add.AddSubscriptionScreen
@@ -25,6 +31,19 @@ import com.remindme.app.ui.screens.settings.SettingsScreen
 import com.remindme.app.ui.screens.templates.TemplatesScreen
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.collectLatest
+
+@Composable
+private fun WithBackdrop(content: @Composable () -> Unit) {
+    val backdrop = rememberLayerBackdrop()
+    val context = LocalContext.current
+    val glassStyle = remember { LiquidGlassPrefs.getStyle(context) }
+    CompositionLocalProvider(
+        LocalBackdrop provides backdrop,
+        LocalLiquidGlassStyle provides glassStyle
+    ) {
+        content()
+    }
+}
 
 @Composable
 fun MainNavigation() {
@@ -66,51 +85,61 @@ fun MainNavigation() {
                 MainScreen(onItemClick = { navKey -> backStack.add(navKey) }, modifier = Modifier.safeDrawingPadding().padding(16.dp))
             }
             entry<AddPerson> {
-                AddPersonScreen(onBack = { backStack.removeLastOrNull() })
+                WithBackdrop { AddPersonScreen(onBack = { backStack.removeLastOrNull() }) }
             }
             entry<AddSubscription> {
-                AddSubscriptionScreen(onBack = { backStack.removeLastOrNull() })
+                WithBackdrop { AddSubscriptionScreen(onBack = { backStack.removeLastOrNull() }) }
             }
             entry<AddTask> {
-                AddTaskScreen(onBack = { backStack.removeLastOrNull() })
+                WithBackdrop { AddTaskScreen(onBack = { backStack.removeLastOrNull() }) }
             }
             entry<PersonDetail> { key ->
-                PersonDetailScreen(
-                    personId = key.personId,
-                    onBack = { backStack.removeLastOrNull() },
-                    onEdit = { backStack.add(EditPerson(key.personId)) }
-                )
+                WithBackdrop {
+                    PersonDetailScreen(
+                        personId = key.personId,
+                        onBack = { backStack.removeLastOrNull() },
+                        onEdit = { backStack.add(EditPerson(key.personId)) }
+                    )
+                }
             }
             entry<EditPerson> { key ->
-                // For now use AddPersonScreen but we need to pass personId to ViewModel.
-                // We'll pass it to AddPersonScreen directly.
-                AddPersonScreen(
-                    personId = key.personId,
-                    onBack = { backStack.removeLastOrNull() }
-                )
+                WithBackdrop {
+                    AddPersonScreen(
+                        personId = key.personId,
+                        onBack = { backStack.removeLastOrNull() }
+                    )
+                }
             }
             entry<Search> {
-                SearchScreen(
-                    onItemClick = { id -> backStack.add(PersonDetail(id)) }
-                )
+                WithBackdrop {
+                    SearchScreen(
+                        onItemClick = { id -> backStack.add(PersonDetail(id)) }
+                    )
+                }
             }
             entry<Settings> {
-                SettingsScreen(
-                    onNavigateHome = { 
-                        backStack.clear()
-                        backStack.add(Main) 
-                    }
-                )
+                WithBackdrop {
+                    SettingsScreen(
+                        onNavigateHome = { 
+                            backStack.clear()
+                            backStack.add(Main) 
+                        }
+                    )
+                }
             }
             entry<Templates> {
-                TemplatesScreen(
-                    onApplyTemplate = { /* handle */ }
-                )
+                WithBackdrop {
+                    TemplatesScreen(
+                        onApplyTemplate = { /* handle */ }
+                    )
+                }
             }
             entry<Notifications> {
-                com.remindme.app.ui.screens.notifications.NotificationsScreen(
-                    onOpenReminder = { id -> backStack.add(PersonDetail(id)) }
-                )
+                WithBackdrop {
+                    com.remindme.app.ui.screens.notifications.NotificationsScreen(
+                        onOpenReminder = { id -> backStack.add(PersonDetail(id)) }
+                    )
+                }
             }
         },
     )

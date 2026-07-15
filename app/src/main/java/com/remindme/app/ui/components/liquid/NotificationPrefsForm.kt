@@ -11,10 +11,12 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Send
+import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Smartphone
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
@@ -32,29 +34,50 @@ import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextTertiary
 
 data class ChannelPref(
-    val enabled: Boolean = false,
+    val enabled: Boolean = true,
     val leadTime: String = "morning_of",
     val customTime: String = "09:00",
     val offsetDays: Int = 0
 )
+
+private fun formatTime12h(time: String): String {
+    val parts = time.split(":")
+    val hour = parts.getOrNull(0)?.toIntOrNull() ?: return time
+    val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+    val amPm = if (hour < 12) "AM" else "PM"
+    val displayHour = when {
+        hour == 0 -> 12
+        hour > 12 -> hour - 12
+        else -> hour
+    }
+    return buildString {
+        append(displayHour)
+        append(":")
+        append(String.format("%02d", minute))
+        append(" ")
+        append(amPm)
+    }
+}
 
 val CHANNELS = listOf("email", "push", "telegram", "in_app")
 
 val LEAD_TIME_OPTIONS = mapOf(
     "at_time" to "At time of event",
     "morning_of" to "Morning of",
-    "evening_before" to "Evening before",
+    "noon_of" to "Noon of",
+    "evening_of" to "Evening of",
     "custom" to "Custom time"
 )
 
 val OFFSET_DAY_OPTIONS = mapOf(
     0 to "On the day",
     1 to "1 day before",
-    2 to "2 days before",
     3 to "3 days before",
-    7 to "1 week before"
+    7 to "1 week before",
+    14 to "2 weeks before"
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationPrefsForm(
     matrix: Map<String, ChannelPref>,
@@ -152,13 +175,17 @@ fun NotificationPrefsForm(
                         }
                         
                         if (pref.leadTime == "custom") {
-                            // Custom Time Picker Trigger
-                            // For simplicity, we just use a clickable row here. 
-                            // Real app would open a TimePickerDialog.
+                            var showTimePicker by remember { mutableStateOf(false) }
+                            val timePickerState = rememberTimePickerState(
+                                initialHour = pref.customTime.substringBefore(":").toIntOrNull() ?: 9,
+                                initialMinute = pref.customTime.substringAfter(":").toIntOrNull() ?: 0,
+                                is24Hour = false
+                            )
+
                             FloatingGlassContainer(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { /* TODO open Time Picker */ },
+                                    .clickable { showTimePicker = true },
                                 borderRadius = 12.dp,
                                 tintColor = Color.Transparent
                             ) {
@@ -180,7 +207,7 @@ fun NotificationPrefsForm(
                                     }
                                     Spacer(modifier = Modifier.width(10.dp))
                                     Text(
-                                        text = "Time: ${pref.customTime}",
+                                        text = "Time: ${formatTime12h(pref.customTime)}",
                                         fontSize = 13.sp,
                                         color = TextPrimary,
                                         modifier = Modifier.weight(1f)
@@ -191,6 +218,40 @@ fun NotificationPrefsForm(
                                         modifier = Modifier.size(16.dp)
                                     )
                                 }
+                            }
+
+                            if (showTimePicker) {
+                                AlertDialog(
+                                    onDismissRequest = { showTimePicker = false },
+                                    containerColor = com.remindme.app.ui.theme.BgSurface2,
+                                    titleContentColor = com.remindme.app.ui.theme.TextPrimary,
+                                    textContentColor = com.remindme.app.ui.theme.TextSecondary,
+                                    title = { Text("Select custom time", color = com.remindme.app.ui.theme.TextPrimary) },
+                                    text = {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            TimePicker(state = timePickerState)
+                                        }
+                                    },
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            val time = String.format("%02d:%02d", timePickerState.hour, timePickerState.minute)
+                                            val next = matrix.toMutableMap()
+                                            next[channel] = pref.copy(customTime = time)
+                                            onChanged(next)
+                                            showTimePicker = false
+                                        }) {
+                                            Text("Done", color = com.remindme.app.ui.theme.Accent500)
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showTimePicker = false }) {
+                                            Text("Cancel", color = com.remindme.app.ui.theme.TextSecondary)
+                                        }
+                                    }
+                                )
                             }
                         }
                     }
@@ -203,7 +264,7 @@ fun NotificationPrefsForm(
 private fun getChannelIcon(channel: String) = when(channel) {
     "email" -> Icons.Rounded.Email
     "push" -> Icons.Rounded.Notifications
-    "telegram" -> Icons.Rounded.Send
+    "telegram" -> Icons.AutoMirrored.Rounded.Send
     "in_app" -> Icons.Rounded.Smartphone
     else -> Icons.Rounded.Notifications
 }

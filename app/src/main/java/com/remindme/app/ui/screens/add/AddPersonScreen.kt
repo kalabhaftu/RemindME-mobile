@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,6 +47,7 @@ fun AddPersonScreen(
     }
 
     var showDatePicker by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
     
     val context = LocalContext.current
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -207,7 +210,10 @@ fun AddPersonScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             LiquidButton(
-                onClick = { viewModel.savePerson() },
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    viewModel.savePerson()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (uiState.isLoading) {

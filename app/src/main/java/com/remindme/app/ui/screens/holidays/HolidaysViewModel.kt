@@ -130,7 +130,7 @@ class HolidaysViewModel : ViewModel() {
                         countryCode = obj.getString("countryCode")
                     ))
                 }
-                _uiState.update { it.copy(holidays = list, isLoadingHolidays = false) }
+                _uiState.update { it.copy(holidays = list.distinctBy { it.holidayKey }, isLoadingHolidays = false) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoadingHolidays = false, error = e.message) }
             }

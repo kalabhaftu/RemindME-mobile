@@ -388,10 +388,43 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    fun exportData() = viewModelScope.launch(Dispatchers.IO) {
+    fun exportData(context: android.content.Context) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            _uiState.update { it.copy(message = "Exporting data...") }
-            // Mocked for now: logic to export JSON
+            val token = supabase.auth.currentSessionOrNull()?.accessToken ?: throw Exception("Not logged in")
+            val url = URL("$webApiUrl/api/account/export")
+            val conn = url.openConnection() as HttpURLConnection
+            conn.setRequestProperty("Authorization", "Bearer $token")
+            conn.requestMethod = "GET"
+
+            if (conn.responseCode == 200) {
+                val json = conn.inputStream.bufferedReader().use { it.readText() }
+                val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                clipboard.setPrimaryClip(android.content.ClipData.newPlainText("RemindME Export", json))
+                withContext(Dispatchers.Main) {
+                    _uiState.update { it.copy(message = "Data exported and copied to clipboard!") }
+                }
+            } else {
+                _uiState.update { it.copy(error = "Export failed: HTTP ${conn.responseCode}") }
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = e.message) }
+        }
+    }
+
+    fun checkForUpdate(context: android.content.Context) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val info = com.remindme.app.services.UpdateService.checkForUpdate(
+                context.packageManager, context.packageName
+            )
+            if (info != null && info.updateAvailable) {
+                _uiState.update { it.copy(
+                    message = "Update available: v${info.latestVersion} (current: v${info.currentVersion})"
+                ) }
+            } else if (info != null) {
+                _uiState.update { it.copy(message = "You're up to date (v${info.currentVersion})!") }
+            } else {
+                _uiState.update { it.copy(error = "Could not check for updates.") }
+            }
         } catch (e: Exception) {
             _uiState.update { it.copy(error = e.message) }
         }

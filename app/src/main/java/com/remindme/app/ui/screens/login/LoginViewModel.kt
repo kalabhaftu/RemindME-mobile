@@ -104,6 +104,8 @@ class LoginViewModel : ViewModel() {
                         this.provider = io.github.jan.supabase.auth.providers.Google
                         this.idToken = idToken
                     }
+
+                    _uiState.update { it.copy(showSetPasswordDialog = true) }
                 } else {
                     _uiState.update { it.copy(error = "Unexpected credential type") }
                 }

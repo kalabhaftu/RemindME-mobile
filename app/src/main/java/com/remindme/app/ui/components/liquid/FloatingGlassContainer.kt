@@ -26,10 +26,12 @@ fun FloatingGlassContainer(
     content: @Composable () -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
-    val activeTintColor = tintColor ?: if (isDark) {
-        Color.Black.copy(alpha = 0.15f)
-    } else {
-        Color.White.copy(alpha = 0.25f)
+    val glassStyle = LocalLiquidGlassStyle.current
+    val activeTintColor = tintColor ?: when {
+        glassStyle == LiquidGlassStyle.Clear && isDark -> Color.White.copy(alpha = 0.04f)
+        glassStyle == LiquidGlassStyle.Clear -> Color.White.copy(alpha = 0.08f)
+        isDark -> Color.Black.copy(alpha = 0.15f)
+        else -> Color.White.copy(alpha = 0.25f)
     }
 
     Box(

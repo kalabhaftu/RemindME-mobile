@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,7 +21,7 @@ import java.time.LocalDateTime
 val TASK_ICONS = listOf(
     Triple("trash", Icons.Default.Delete, "Take out trash"),
     Triple("water", Icons.Default.WaterDrop, "Drink water"),
-    Triple("fitness", Icons.Default.DirectionsRun, "Exercise"),
+    Triple("fitness", Icons.AutoMirrored.Filled.DirectionsRun, "Exercise"),
     Triple("study", Icons.Default.Book, "Study"),
     Triple("rent", Icons.Default.Home, "Pay rent"),
     Triple("medication", Icons.Default.MedicalServices, "Medication")

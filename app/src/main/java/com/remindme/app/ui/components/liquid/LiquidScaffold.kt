@@ -22,6 +22,7 @@ fun LiquidScaffold(
     appBar: @Composable (() -> Unit)? = null,
     bottomBar: @Composable (() -> Unit)? = null,
     snackbarHost: @Composable () -> Unit = {},
+    glassStyle: LiquidGlassStyle = LocalLiquidGlassStyle.current,
     content: @Composable (PaddingValues) -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
@@ -31,7 +32,10 @@ fun LiquidScaffold(
         listOf(Color(0xFFE0EAFC), Color(0xFFCFDEF3))
     }
 
-    CompositionLocalProvider(LocalBackdrop provides backdrop) {
+    CompositionLocalProvider(
+        LocalBackdrop provides backdrop,
+        LocalLiquidGlassStyle provides glassStyle
+    ) {
         Box(modifier = modifier.fillMaxSize()) {
             // Fluid Background Layer
             Box(

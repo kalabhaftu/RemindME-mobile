@@ -33,10 +33,10 @@ class AddTaskViewModel : ViewModel() {
     init {
         // Load default notification prefs
         val defaultPrefs = mapOf(
-            "email" to ChannelPref(enabled = true),
-            "push" to ChannelPref(enabled = false),
-            "telegram" to ChannelPref(enabled = false),
-            "in_app" to ChannelPref(enabled = true)
+            "email" to ChannelPref(),
+            "push" to ChannelPref(),
+            "telegram" to ChannelPref(),
+            "in_app" to ChannelPref()
         )
         _uiState.update { it.copy(notificationPrefs = defaultPrefs) }
     }

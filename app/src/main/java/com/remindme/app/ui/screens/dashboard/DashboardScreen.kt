@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -28,6 +29,9 @@ import com.remindme.app.ui.theme.Accent500
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +43,8 @@ fun DashboardScreen(
     onNavigateToHolidays: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val haptic = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
 
     if (uiState.isLoading && uiState.reminders.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
@@ -99,7 +105,10 @@ fun DashboardScreen(
         
         com.remindme.app.ui.components.UpcomingPanel(
             occurrences = uiState.occurrences,
-            onMarkDone = { id, date -> viewModel.markDone(id, date) },
+            onMarkDone = { id, date ->
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                viewModel.markDone(id, date)
+            },
             onSnooze = { id, date -> viewModel.snooze(id, date) },
             onEdit = { /* TODO */ }
         )
@@ -108,11 +117,14 @@ fun DashboardScreen(
             SelectedDaySheet(
                 date = date,
                 occurrences = uiState.occurrences.filter { it.date == date },
-                onMarkDone = { id, occDate -> viewModel.markDone(id, occDate) },
+                onMarkDone = { id, occDate ->
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    viewModel.markDone(id, occDate)
+                },
                 onDismiss = { viewModel.clearSelectedDate() }
             )
         }
-        }
+    }
     }
 }
 

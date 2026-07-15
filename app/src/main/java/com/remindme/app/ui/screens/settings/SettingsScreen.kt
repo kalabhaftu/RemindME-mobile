@@ -8,12 +8,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.*
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -82,6 +84,10 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
+                        AppearanceSection()
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+                    item {
                         AccountSection(viewModel, onNavigateHome)
                         Spacer(modifier = Modifier.height(24.dp))
                     }
@@ -110,6 +116,57 @@ fun SettingsSection(title: String, content: @Composable () -> Unit) {
             Text(title, style = MaterialTheme.typography.titleMedium, color = TextPrimary)
             Spacer(modifier = Modifier.height(16.dp))
             content()
+        }
+    }
+}
+
+@Composable
+fun AppearanceSection() {
+    val context = LocalContext.current
+    val currentStyle = remember { LiquidGlassPrefs.getStyle(context) }
+
+    SettingsSection(title = "Appearance") {
+        LiquidGlassStyle.entries.forEach { style ->
+            val label = when (style) {
+                LiquidGlassStyle.Frosted -> "Colored Glass"
+                LiquidGlassStyle.Clear -> "Clear Glass"
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        LiquidGlassPrefs.setStyle(context, style)
+                    }
+                    .padding(vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FloatingGlassContainer(
+                    borderRadius = 12.dp,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LiquidIcon(
+                            imageVector = if (currentStyle == style) Icons.Rounded.CheckCircle else Icons.Rounded.Circle,
+                            tint = if (currentStyle == style) Accent500 else TextTertiary,
+                            size = 18.dp
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(label, color = TextPrimary, fontSize = 14.sp)
+                    Text(
+                        text = when (style) {
+                            LiquidGlassStyle.Frosted -> "Dark tinted glass, richer backdrop"
+                            LiquidGlassStyle.Clear -> "Lighter glass, more transparent finish"
+                        },
+                        color = TextSecondary, fontSize = 11.sp
+                    )
+                }
+            }
         }
     }
 }
@@ -277,7 +334,22 @@ fun TimezoneSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
 @Composable
 fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
     SettingsSection("Global Notification Defaults") {
-        Text("These settings will be inherited by new reminders unless you override them per-item.", color = TextSecondary, fontSize = 13.sp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("These settings will be inherited by new reminders unless you override them per-item.", color = TextSecondary, fontSize = 13.sp, modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(8.dp))
+            TextButton(
+                onClick = { /* NotificationHelpScreen is shown as overlay via NavKey */ },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                LiquidIcon(Icons.AutoMirrored.Rounded.HelpOutline, modifier = Modifier.size(16.dp), color = Accent500)
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Help", color = Accent500, fontSize = 13.sp)
+            }
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
         GlassSwitch("Email Notifications", uiState.emailEnabled) { viewModel.updatePreference("default_channel_email", it) }
@@ -359,7 +431,7 @@ fun TestNotificationsSection(viewModel: SettingsViewModel) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TestButton("Email", Icons.Rounded.Email, Modifier.weight(1f)) { viewModel.testChannel("email") }
             TestButton("Push", Icons.Rounded.Notifications, Modifier.weight(1f)) { viewModel.testChannel("push") }
-            TestButton("Telegram", Icons.Rounded.Send, Modifier.weight(1f)) { viewModel.testChannel("telegram") }
+            TestButton("Telegram", Icons.AutoMirrored.Rounded.Send, Modifier.weight(1f)) { viewModel.testChannel("telegram") }
         }
     }
 }
@@ -413,12 +485,23 @@ fun DeliveryLogSection(uiState: SettingsUiState) {
 
 @Composable
 fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     SettingsSection("Account") {
         Text("Export your data or sign out on all devices.", color = TextSecondary, fontSize = 13.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
         LiquidButton(
-            onClick = { viewModel.exportData() },
+            onClick = { viewModel.checkForUpdate(context) },
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) {
+            LiquidIcon(Icons.Rounded.Update, modifier = Modifier.size(18.dp), color = TextPrimary)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Check for Updates", color = TextPrimary)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LiquidButton(
+            onClick = { viewModel.exportData(context) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
             LiquidIcon(Icons.Rounded.Download, modifier = Modifier.size(18.dp), color = TextPrimary)
@@ -431,7 +514,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             onClick = { viewModel.signOut(onNavigateHome) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            LiquidIcon(Icons.Rounded.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
+            LiquidIcon(Icons.AutoMirrored.Rounded.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sign Out (This Device)", color = TextPrimary)
         }
