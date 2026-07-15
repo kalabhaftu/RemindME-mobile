@@ -29,6 +29,7 @@ import java.time.LocalDateTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPersonScreen(
+    personId: String? = null,
     viewModel: AddPersonViewModel = viewModel(),
     onBack: () -> Unit = {}
 ) {
@@ -37,6 +38,12 @@ fun AddPersonScreen(
     // Snackbar state for errors
     val snackbarHostState = remember { SnackbarHostState() }
     
+    LaunchedEffect(personId) {
+        if (personId != null) {
+            viewModel.loadPerson(personId)
+        }
+    }
+
     var showDatePicker by remember { mutableStateOf(false) }
     
     val context = LocalContext.current

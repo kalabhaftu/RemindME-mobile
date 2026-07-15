@@ -76,11 +76,37 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun googleSignIn() {
+    fun googleSignIn(context: android.content.Context) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                SupabaseManager.client.auth.signInWith(Google)
+                val credentialManager = androidx.credentials.CredentialManager.create(context)
+                val googleIdOption = com.google.android.libraries.identity.googleid.GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(com.remindme.app.BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                    .setAutoSelectEnabled(true)
+                    .build()
+
+                val request = androidx.credentials.GetCredentialRequest.Builder()
+                    .addCredentialOption(googleIdOption)
+                    .build()
+
+                val result = credentialManager.getCredential(context, request)
+                val credential = result.credential
+
+                if (credential is androidx.credentials.CustomCredential &&
+                    credential.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                ) {
+                    val googleIdTokenCredential = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(credential.data)
+                    val idToken = googleIdTokenCredential.idToken
+
+                    SupabaseManager.client.auth.signInWith(io.github.jan.supabase.auth.providers.builtin.IDToken) {
+                        this.provider = io.github.jan.supabase.auth.providers.Google
+                        this.idToken = idToken
+                    }
+                } else {
+                    _uiState.update { it.copy(error = "Unexpected credential type") }
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = "Google sign-in failed: ${e.message}") }
             } finally {
@@ -106,6 +132,22 @@ class LoginViewModel : ViewModel() {
                 _uiState.update { it.copy(toastMessage = "Magic link sent! Check your email to sign in.") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = "Failed to send magic link: ${e.message}") }
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun savePassword(password: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                SupabaseManager.client.auth.updateUser {
+                    this.password = password
+                }
+                _uiState.update { it.copy(toastMessage = "Password set! You can now sign in with email too.", showSetPasswordDialog = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(toastMessage = "Failed to set password: ${e.message}") }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }

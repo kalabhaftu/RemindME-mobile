@@ -32,6 +32,7 @@ android {
         buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL", "")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY", "")}\"")
         buildConfigField("String", "WEB_API_URL", "\"${localProperties.getProperty("WEB_API_URL", "http://localhost:3000")}\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProperties.getProperty("GOOGLE_WEB_CLIENT_ID", "")}\"")
     }
 
     signingConfigs {
@@ -129,4 +130,9 @@ dependencies {
   implementation(libs.supabase.realtime)
   implementation(libs.supabase.storage)
   implementation(libs.ktor.client.android)
+  
+  // Credentials (Google Sign-In)
+  implementation("androidx.credentials:credentials:1.3.0-beta01")
+  implementation("androidx.credentials:credentials-play-services-auth:1.3.0-beta01")
+  implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 }

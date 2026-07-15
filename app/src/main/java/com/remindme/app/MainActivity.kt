@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import com.remindme.app.ui.navigation.MainNavigation
 import com.remindme.app.ui.theme.RemindmeMobileTheme
+import io.github.jan.supabase.auth.handleDeeplinks
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -80,6 +81,13 @@ class MainActivity : ComponentActivity() {
                 MainNavigation()
             }
         }
+        
+        com.remindme.app.data.remote.SupabaseManager.client.handleDeeplinks(intent)
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        com.remindme.app.data.remote.SupabaseManager.client.handleDeeplinks(intent)
     }
 
     private fun askNotificationPermission() {

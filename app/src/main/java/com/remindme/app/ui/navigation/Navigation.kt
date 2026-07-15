@@ -55,7 +55,12 @@ fun MainNavigation() {
         entryProvider =
         entryProvider {
             entry<Login> {
-                LoginScreen()
+                LoginScreen(
+                    onNavigateHome = {
+                        backStack.clear()
+                        backStack.add(Main)
+                    }
+                )
             }
             entry<Main> {
                 MainScreen(onItemClick = { navKey -> backStack.add(navKey) }, modifier = Modifier.safeDrawingPadding().padding(16.dp))
@@ -69,11 +74,19 @@ fun MainNavigation() {
             entry<AddTask> {
                 AddTaskScreen(onBack = { backStack.removeLastOrNull() })
             }
-            entry<PersonDetail> {
+            entry<PersonDetail> { key ->
                 PersonDetailScreen(
-                    personId = it.personId,
+                    personId = key.personId,
                     onBack = { backStack.removeLastOrNull() },
-                    onEdit = { /* TODO */ }
+                    onEdit = { backStack.add(EditPerson(key.personId)) }
+                )
+            }
+            entry<EditPerson> { key ->
+                // For now use AddPersonScreen but we need to pass personId to ViewModel.
+                // We'll pass it to AddPersonScreen directly.
+                AddPersonScreen(
+                    personId = key.personId,
+                    onBack = { backStack.removeLastOrNull() }
                 )
             }
             entry<Search> {

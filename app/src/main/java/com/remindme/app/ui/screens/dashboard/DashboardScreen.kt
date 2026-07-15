@@ -27,7 +27,9 @@ import com.remindme.app.ui.components.liquid.LiquidSpinner
 import com.remindme.app.ui.theme.Accent500
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
+import androidx.compose.material3.ExperimentalMaterial3Api
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel = viewModel(),
@@ -38,7 +40,7 @@ fun DashboardScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    if (uiState.isLoading) {
+    if (uiState.isLoading && uiState.reminders.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
             LiquidSpinner()
         }
@@ -49,15 +51,16 @@ fun DashboardScreen(
     val subsCount = uiState.reminders.count { it.category == CategoryType.SUBSCRIPTION }
     val tasksCount = uiState.reminders.count { it.category == CategoryType.TASK }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             StatCard(modifier = Modifier.weight(1f), label = "People", count = peopleCount)
@@ -108,6 +111,7 @@ fun DashboardScreen(
                 onMarkDone = { id, occDate -> viewModel.markDone(id, occDate) },
                 onDismiss = { viewModel.clearSelectedDate() }
             )
+        }
         }
     }
 }

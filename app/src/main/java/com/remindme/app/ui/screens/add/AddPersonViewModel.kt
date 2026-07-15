@@ -27,7 +27,8 @@ data class AddPersonUiState(
     val isUploadingAvatar: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isSuccess: Boolean = false
+    val isSuccess: Boolean = false,
+    val existingPersonId: String? = null
 )
 
 class AddPersonViewModel : ViewModel() {
@@ -59,6 +60,35 @@ class AddPersonViewModel : ViewModel() {
     fun clearError() = _uiState.update { it.copy(error = null) }
     fun setError(error: String) = _uiState.update { it.copy(error = error) }
 
+    fun loadPerson(personId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null, existingPersonId = personId) }
+            try {
+                val item = repository.getReminder(personId)
+                if (item != null) {
+                    val personDetails = item.personDetails ?: emptyMap()
+                    _uiState.update { state ->
+                        state.copy(
+                            name = item.name,
+                            notes = item.notes ?: "",
+                            birthdate = personDetails["birthdate"]?.toString()?.let { 
+                                try { LocalDateTime.parse(it) } catch (e: Exception) { null }
+                            },
+                            gender = personDetails["gender"]?.toString() ?: "unspecified",
+                            relationship = personDetails["relationship"]?.toString() ?: "friend",
+                            avatarUrl = item.iconKey,
+                            isLoading = false
+                        )
+                    }
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Person not found") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
     fun savePerson() {
         val currentName = _uiState.value.name
         val currentBirthdate = _uiState.value.birthdate
@@ -75,7 +105,7 @@ class AddPersonViewModel : ViewModel() {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
-                val id = java.util.UUID.randomUUID().toString()
+                val id = _uiState.value.existingPersonId ?: java.util.UUID.randomUUID().toString()
                 val now = LocalDateTime.now()
                 val birthdateStr = currentBirthdate.toString()
                 
@@ -109,7 +139,11 @@ class AddPersonViewModel : ViewModel() {
                     recurrenceRules = recurrenceRules
                 )
 
-                repository.addReminder(item)
+                if (_uiState.value.existingPersonId != null) {
+                    repository.updateReminder(item)
+                } else {
+                    repository.addReminder(item)
+                }
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
