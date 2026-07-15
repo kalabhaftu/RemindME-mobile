@@ -5,11 +5,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object Main : NavKey
 
+@Serializable data object AuthCheck : NavKey
 @Serializable data object Login : NavKey
 @Serializable data object Search : NavKey
 @Serializable data object Settings : NavKey
 @Serializable data object Templates : NavKey
 @Serializable data object Notifications : NavKey
+@Serializable data object ThemeSelector : NavKey
 
 @Serializable data object AddPerson : NavKey
 @Serializable data class EditPerson(val personId: String) : NavKey

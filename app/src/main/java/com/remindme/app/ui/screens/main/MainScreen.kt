@@ -10,6 +10,11 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.rounded.Book
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -22,7 +27,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material.icons.filled.Add
 import androidx.navigation3.runtime.NavKey
 import com.remindme.app.ui.components.liquid.LiquidBottomTab
 import com.remindme.app.ui.components.liquid.LiquidBottomTabs
@@ -56,27 +60,30 @@ fun MainScreen(
                         androidx.compose.material3.IconButton(onClick = { showMenu = true }) {
                             LiquidIcon(Icons.Default.MoreVert, color = AppColors.textPrimary)
                         }
-                        androidx.compose.material3.DropdownMenu(
+                        com.remindme.app.ui.components.liquid.LiquidPopupMenu(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false },
-                            containerColor = AppColors.bgElevated,
                             offset = DpOffset(0.dp, 4.dp)
                         ) {
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { androidx.compose.material3.Text("Search", color = AppColors.textPrimary) },
-                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Search) }
+                            com.remindme.app.ui.components.liquid.LiquidPopupMenuItem(
+                                text = "Search",
+                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Search) },
+                                icon = Icons.Rounded.Search
                             )
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { androidx.compose.material3.Text("Templates", color = AppColors.textPrimary) },
-                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Templates) }
+                            com.remindme.app.ui.components.liquid.LiquidPopupMenuItem(
+                                text = "Templates",
+                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Templates) },
+                                icon = Icons.Rounded.Book
                             )
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { androidx.compose.material3.Text("Notifications", color = AppColors.textPrimary) },
-                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Notifications) }
+                            com.remindme.app.ui.components.liquid.LiquidPopupMenuItem(
+                                text = "Notifications",
+                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Notifications) },
+                                icon = Icons.Rounded.Notifications
                             )
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { androidx.compose.material3.Text("Settings", color = AppColors.textPrimary) },
-                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Settings) }
+                            com.remindme.app.ui.components.liquid.LiquidPopupMenuItem(
+                                text = "Settings",
+                                onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Settings) },
+                                icon = Icons.Rounded.Settings
                             )
                         }
                     }

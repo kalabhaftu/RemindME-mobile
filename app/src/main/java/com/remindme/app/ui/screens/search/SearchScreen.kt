@@ -32,44 +32,50 @@ fun SearchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(
+    com.remindme.app.ui.components.liquid.LiquidScaffold { paddingValues ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 56.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            LiquidTextField(
-                value = uiState.query,
-                onValueChange = viewModel::updateQuery,
-                placeholder = "Search reminders, notes, people…",
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                LiquidSpinner()
-            }
-        } else if (uiState.results.isEmpty()) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 60.dp, start = 32.dp, end = 32.dp),
-                contentAlignment = Alignment.TopCenter
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
             ) {
-                Text(
-                    text = if (uiState.query.isEmpty()) "Search birthdays, tasks, subscriptions…" else "No results for \"${uiState.query}\"",
-                    color = TextSecondary,
-                    textAlign = TextAlign.Center
+                LiquidTextField(
+                    value = uiState.query,
+                    onValueChange = viewModel::updateQuery,
+                    placeholder = "Search reminders, notes, people…",
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 40.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(uiState.results, key = { it.id }) { item ->
-                    SearchResultItem(item = item, onClick = { onItemClick(item.id) })
+
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    LiquidSpinner()
+                }
+            } else if (uiState.results.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 60.dp, start = 32.dp, end = 32.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Text(
+                        text = if (uiState.query.isEmpty()) "Search birthdays, tasks, subscriptions…" else "No results for \"${uiState.query}\"",
+                        color = TextSecondary,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 40.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(uiState.results, key = { it.id }) { item ->
+                        SearchResultItem(item = item, onClick = { onItemClick(item.id) })
+                    }
                 }
             }
         }

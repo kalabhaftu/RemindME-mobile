@@ -31,15 +31,17 @@ import com.remindme.app.ui.screens.settings.SettingsScreen
 import com.remindme.app.ui.screens.templates.TemplatesScreen
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.background
 
 @Composable
 private fun WithBackdrop(content: @Composable () -> Unit) {
     val backdrop = rememberLayerBackdrop()
-    val context = LocalContext.current
-    val glassStyle = remember { LiquidGlassPrefs.getStyle(context) }
     CompositionLocalProvider(
-        LocalBackdrop provides backdrop,
-        LocalLiquidGlassStyle provides glassStyle
+        LocalBackdrop provides backdrop
     ) {
         content()
     }
@@ -47,40 +49,80 @@ private fun WithBackdrop(content: @Composable () -> Unit) {
 
 @Composable
 fun MainNavigation() {
-    var isAuthenticated by remember { mutableStateOf(SupabaseManager.client.auth.currentUserOrNull() != null) }
+    val context = LocalContext.current
+    var sessionStatus by remember { mutableStateOf<io.github.jan.supabase.auth.status.SessionStatus?>(null) }
+    var glassStyle by remember { mutableStateOf(LiquidGlassPrefs.getStyle(context)) }
+
+    androidx.compose.runtime.DisposableEffect(context) {
+        val prefs = context.getSharedPreferences("liquid_glass_prefs", android.content.Context.MODE_PRIVATE)
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == "glass_style") {
+                glassStyle = LiquidGlassPrefs.getStyle(context)
+            }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
 
     LaunchedEffect(Unit) {
         SupabaseManager.client.auth.sessionStatus.collectLatest { status ->
-            isAuthenticated = status is io.github.jan.supabase.auth.status.SessionStatus.Authenticated
+            sessionStatus = status
         }
     }
 
-    val backStack = rememberNavBackStack(if (isAuthenticated) Main else Login)
+    val backStack = rememberNavBackStack(AuthCheck)
 
-    // Ensure we redirect if auth state changes
-    LaunchedEffect(isAuthenticated) {
-        if (!isAuthenticated) {
-            backStack.clear()
-            backStack.add(Login)
-        } else if (backStack.lastOrNull() == Login) {
-            backStack.clear()
-            backStack.add(Main)
-        }
-    }
-
-    NavDisplay(
-        backStack = backStack,
-        onBack = { backStack.removeLastOrNull() },
-        entryProvider =
-        entryProvider {
-            entry<Login> {
-                LoginScreen(
-                    onNavigateHome = {
-                        backStack.clear()
-                        backStack.add(Main)
-                    }
-                )
+    LaunchedEffect(sessionStatus) {
+        val status = sessionStatus ?: return@LaunchedEffect
+        when (status) {
+            is io.github.jan.supabase.auth.status.SessionStatus.Initializing -> {
+                // Stay on AuthCheck / splash
             }
+            is io.github.jan.supabase.auth.status.SessionStatus.Authenticated -> {
+                if (backStack.lastOrNull() == AuthCheck || backStack.lastOrNull() == Login) {
+                    backStack.clear()
+                    backStack.add(Main)
+                }
+            }
+            else -> {
+                if (backStack.lastOrNull() == AuthCheck || backStack.lastOrNull() == Main) {
+                    backStack.clear()
+                    backStack.add(Login)
+                }
+            }
+        }
+    }
+
+    CompositionLocalProvider(
+        LocalLiquidGlassStyle provides glassStyle
+    ) {
+        NavDisplay(
+            backStack = backStack,
+            onBack = { backStack.removeLastOrNull() },
+            entryProvider =
+            entryProvider {
+                entry<AuthCheck> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(com.remindme.app.ui.theme.AppColors.bgCanvas),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        com.remindme.app.ui.components.liquid.LiquidSpinner(
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+                }
+                entry<Login> {
+                    LoginScreen(
+                        onNavigateHome = {
+                            backStack.clear()
+                            backStack.add(Main)
+                        }
+                    )
+                }
             entry<Main> {
                 MainScreen(onItemClick = { navKey -> backStack.add(navKey) }, modifier = Modifier.safeDrawingPadding().padding(16.dp))
             }
@@ -123,7 +165,17 @@ fun MainNavigation() {
                         onNavigateHome = { 
                             backStack.clear()
                             backStack.add(Main) 
+                        },
+                        onNavigateToThemeSelector = {
+                            backStack.add(ThemeSelector)
                         }
+                    )
+                }
+            }
+            entry<ThemeSelector> {
+                WithBackdrop {
+                    com.remindme.app.ui.screens.settings.ThemeSelectorScreen(
+                        onBack = { backStack.removeLastOrNull() }
                     )
                 }
             }
@@ -143,4 +195,5 @@ fun MainNavigation() {
             }
         },
     )
+    }
 }

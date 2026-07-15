@@ -51,6 +51,10 @@ fun CalendarGrid(
 ) {
     var viewType by remember { mutableStateOf(CalendarViewType.Month) }
 
+    val occurrencesByDate = remember(occurrences) {
+        occurrences.groupBy { it.date }
+    }
+
     fun navigate(dir: Int) {
         if (viewType == CalendarViewType.Week) {
             onMonthChange(currentMonth.plusDays((dir * 7).toLong()))
@@ -115,9 +119,9 @@ fun CalendarGrid(
                 label = "calendar_view_anim"
             ) { targetView ->
                 when (targetView) {
-                    CalendarViewType.Month -> MonthView(currentMonth, occurrences, selectedDate, onSelectDate)
-                    CalendarViewType.Week -> WeekView(currentMonth, occurrences, selectedDate, onSelectDate)
-                    CalendarViewType.Agenda -> AgendaView(occurrences, onSelectDate)
+                    CalendarViewType.Month -> MonthView(currentMonth, occurrencesByDate, selectedDate, onSelectDate)
+                    CalendarViewType.Week -> WeekView(currentMonth, occurrencesByDate, selectedDate, onSelectDate)
+                    CalendarViewType.Agenda -> AgendaView(occurrencesByDate, onSelectDate)
                 }
             }
         }
@@ -147,7 +151,7 @@ private fun ViewChip(label: String, selected: Boolean, onClick: () -> Unit) {
 @Composable
 private fun MonthView(
     currentMonth: LocalDate,
-    occurrences: List<ReminderOccurrence>,
+    occurrencesByDate: Map<LocalDate, List<ReminderOccurrence>>,
     selectedDate: LocalDate?,
     onSelectDate: (LocalDate) -> Unit
 ) {
@@ -177,7 +181,7 @@ private fun MonthView(
                 DayCell(
                     day = day,
                     isCurrentMonth = day.month == currentMonth.month,
-                    occurrences = occurrences.filter { it.date == day },
+                    occurrences = occurrencesByDate[day] ?: emptyList(),
                     isSelected = day == selectedDate,
                     compact = false,
                     showWeekday = false,
@@ -191,7 +195,7 @@ private fun MonthView(
 @Composable
 private fun WeekView(
     currentMonth: LocalDate,
-    occurrences: List<ReminderOccurrence>,
+    occurrencesByDate: Map<LocalDate, List<ReminderOccurrence>>,
     selectedDate: LocalDate?,
     onSelectDate: (LocalDate) -> Unit
 ) {
@@ -208,7 +212,7 @@ private fun WeekView(
             DayCell(
                 day = day,
                 isCurrentMonth = true,
-                occurrences = occurrences.filter { it.date == day },
+                occurrences = occurrencesByDate[day] ?: emptyList(),
                 isSelected = day == selectedDate,
                 compact = true,
                 showWeekday = true,
@@ -220,15 +224,16 @@ private fun WeekView(
 
 @Composable
 private fun AgendaView(
-    occurrences: List<ReminderOccurrence>,
+    occurrencesByDate: Map<LocalDate, List<ReminderOccurrence>>,
     onSelectDate: (LocalDate) -> Unit
 ) {
     val today = LocalDate.now()
-    val end = today.plusDays(13)
     
-    val daysWithOccurrences = (0..13).map { today.plusDays(it.toLong()) }
-        .associateWith { day -> occurrences.filter { it.date == day } }
-        .filterValues { it.isNotEmpty() }
+    val daysWithOccurrences = remember(today, occurrencesByDate) {
+        (0..13).map { today.plusDays(it.toLong()) }
+            .associateWith { day -> occurrencesByDate[day] ?: emptyList() }
+            .filterValues { it.isNotEmpty() }
+    }
 
     if (daysWithOccurrences.isEmpty()) {
         Box(
@@ -282,7 +287,6 @@ private fun AgendaView(
         }
     }
 }
-
 @Composable
 private fun DayCell(
     day: LocalDate,
@@ -377,12 +381,16 @@ private fun DayCell(
     }
 }
 
+private val colorCache = mutableMapOf<String, Color>()
+
 private fun hexToColor(hex: String?): Color {
     if (hex == null) return AppColors.accent500
-    val colorString = if (hex.length == 7) "#FF" + hex.substring(1) else hex
-    return try {
-        Color(android.graphics.Color.parseColor(colorString))
-    } catch (e: Exception) {
-        AppColors.accent500
+    return colorCache.getOrPut(hex) {
+        val colorString = if (hex.length == 7) "#FF" + hex.substring(1) else hex
+        try {
+            Color(android.graphics.Color.parseColor(colorString))
+        } catch (e: Exception) {
+            AppColors.accent500
+        }
     }
 }

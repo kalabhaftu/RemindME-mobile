@@ -45,61 +45,59 @@ fun NotificationsScreen(
         "Missed (${missed.size})"
     )
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                LiquidAppBar(
-                    title = "Notifications",
-                    actions = {
-                        if (selectedTab == 1 && inAppUnreadCount > 0) {
-                            TextButton(onClick = { viewModel.markAllRead() }) {
-                                Text("Mark all read", color = Accent500)
-                            }
-                        }
-                    },
-                    bottom = {
-                        TabRow(
-                            selectedTabIndex = selectedTab,
-                            containerColor = Color.Transparent,
-                            contentColor = TextPrimary,
-                            indicator = { tabPositions ->
-                                TabRowDefaults.SecondaryIndicator(
-                                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                                    color = Accent500
-                                )
-                            },
-                            divider = { Divider(color = Color.Transparent) }
-                        ) {
-                            tabs.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTab == index,
-                                    onClick = { selectedTab = index },
-                                    text = { 
-                                        Text(
-                                            title,
-                                            color = if (selectedTab == index) TextPrimary else TextTertiary,
-                                            fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal
-                                        ) 
-                                    }
-                                )
-                            }
+    LiquidScaffold(
+        snackbarHost = {},
+        appBar = {
+            LiquidAppBar(
+                title = "Notifications",
+                actions = {
+                    if (selectedTab == 1 && inAppUnreadCount > 0) {
+                        TextButton(onClick = { viewModel.markAllRead() }) {
+                            Text("Mark all read", color = Accent500)
                         }
                     }
-                )
-            }
-        ) { paddingValues ->
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                if (uiState.isLoading && uiState.inAppNotifications.isEmpty() && uiState.allOccurrences.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        LiquidSpinner()
+                },
+                bottom = {
+                    TabRow(
+                        selectedTabIndex = selectedTab,
+                        containerColor = Color.Transparent,
+                        contentColor = TextPrimary,
+                        indicator = { tabPositions ->
+                            TabRowDefaults.SecondaryIndicator(
+                                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                                color = Accent500
+                            )
+                        },
+                        divider = { HorizontalDivider(color = Color.Transparent) }
+                    ) {
+                        tabs.forEachIndexed { index, title ->
+                            Tab(
+                                selected = selectedTab == index,
+                                onClick = { selectedTab = index },
+                                text = { 
+                                    Text(
+                                        title,
+                                        color = if (selectedTab == index) TextPrimary else TextTertiary,
+                                        fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal
+                                    ) 
+                                }
+                            )
+                        }
                     }
-                } else {
-                    when (selectedTab) {
-                        0 -> UpcomingTab(upcoming, onOpenReminder)
-                        1 -> InAppTab(uiState.inAppNotifications, viewModel::markRead)
-                        2 -> MissedTab(missed, onOpenReminder)
-                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            if (uiState.isLoading && uiState.inAppNotifications.isEmpty() && uiState.allOccurrences.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    LiquidSpinner()
+                }
+            } else {
+                when (selectedTab) {
+                    0 -> UpcomingTab(upcoming, onOpenReminder)
+                    1 -> InAppTab(uiState.inAppNotifications, viewModel::markRead)
+                    2 -> MissedTab(missed, onOpenReminder)
                 }
             }
         }

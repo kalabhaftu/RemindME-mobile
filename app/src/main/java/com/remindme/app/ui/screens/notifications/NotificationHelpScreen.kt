@@ -19,31 +19,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.remindme.app.ui.components.liquid.FloatingGlassContainer
 import com.remindme.app.ui.components.liquid.LiquidAppBar
+import com.remindme.app.ui.components.liquid.LiquidScaffold
 import com.remindme.app.ui.theme.*
 
 @Composable
 fun NotificationHelpScreen(onBack: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                LiquidAppBar(
-                    title = "Notification Help",
-                    leading = {
-                        androidx.compose.material3.IconButton(onClick = onBack) {
-                            com.remindme.app.ui.components.liquid.LiquidIcon(
-                                imageVector = Icons.Rounded.ArrowBack,
-                                color = TextPrimary
-                            )
-                        }
+    LiquidScaffold(
+        snackbarHost = {},
+        appBar = {
+            LiquidAppBar(
+                title = "Notification Help",
+                leading = {
+                    androidx.compose.material3.IconButton(onClick = onBack) {
+                        com.remindme.app.ui.components.liquid.LiquidIcon(
+                            imageVector = Icons.Rounded.ArrowBack,
+                            color = TextPrimary
+                        )
                     }
-                )
-            }
-        ) { paddingValues ->
-            LazyColumn(
-                contentPadding = PaddingValues(top = 16.dp, bottom = 40.dp, start = 16.dp, end = 16.dp),
-                modifier = Modifier.fillMaxSize().padding(paddingValues)
-            ) {
+                }
+            )
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            contentPadding = PaddingValues(top = 16.dp, bottom = 40.dp, start = 16.dp, end = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(paddingValues)
+        ) {
                 item {
                     Text(
                         text = "How Notifications Work",
@@ -101,7 +101,6 @@ fun NotificationHelpScreen(onBack: () -> Unit) {
                         description = "The notification is sent exactly 7 days before the event.",
                         icon = Icons.Rounded.CalendarViewWeek
                     )
-                }
             }
         }
     }

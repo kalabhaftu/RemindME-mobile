@@ -60,35 +60,33 @@ fun PersonDetailScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
-            containerColor = Color.Transparent,
-            topBar = {
-                LiquidAppBar(
-                    title = uiState.person?.name ?: "",
-                    leading = {
-                        IconButton(onClick = onBack) {
-                            LiquidIcon(imageVector = Icons.Rounded.ArrowBack, color = TextSecondary)
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { onEdit(personId) }) {
-                            LiquidIcon(imageVector = Icons.Rounded.Edit, color = TextSecondary)
-                        }
-                        IconButton(onClick = { showDeleteConfirm = true }) {
-                            LiquidIcon(imageVector = Icons.Rounded.Delete, color = StateDanger)
-                        }
+    LiquidScaffold(
+        snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
+        appBar = {
+            LiquidAppBar(
+                title = uiState.person?.name ?: "",
+                leading = {
+                    IconButton(onClick = onBack) {
+                        LiquidIcon(imageVector = Icons.Rounded.ArrowBack, color = TextSecondary)
                     }
-                )
-            }
-        ) { paddingValues ->
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                if (uiState.isLoading) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        LiquidSpinner()
+                },
+                actions = {
+                    IconButton(onClick = { onEdit(personId) }) {
+                        LiquidIcon(imageVector = Icons.Rounded.Edit, color = TextSecondary)
                     }
-                } else if (uiState.person != null) {
+                    IconButton(onClick = { showDeleteConfirm = true }) {
+                        LiquidIcon(imageVector = Icons.Rounded.Delete, color = StateDanger)
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    LiquidSpinner()
+                }
+            } else if (uiState.person != null) {
                     val person = uiState.person!!
                     val bdStr = person.personDetails?.get("birthdate")?.toString()
                     val birthdate = bdStr?.takeIf { it.isNotBlank() }?.let { 
@@ -205,7 +203,6 @@ fun PersonDetailScreen(
             )
         }
     }
-}
 
 @Composable
 fun StatCard(label: String, value: String, valueColor: Color = TextPrimary) {

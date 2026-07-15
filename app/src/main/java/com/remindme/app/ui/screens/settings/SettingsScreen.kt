@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +34,8 @@ import com.remindme.app.ui.theme.*
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
-    onNavigateHome: () -> Unit
+    onNavigateHome: () -> Unit,
+    onNavigateToThemeSelector: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -49,9 +52,11 @@ fun SettingsScreen(
         }
     }
 
-    Scaffold(
+    LiquidScaffold(
         snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
-        containerColor = BgCanvas
+        appBar = {
+            LiquidAppBar(title = "Settings")
+        }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             if (uiState.isLoading) {
@@ -60,7 +65,7 @@ fun SettingsScreen(
                 }
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(top = 100.dp, bottom = 32.dp, start = 16.dp, end = 16.dp),
+                    contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp, start = 16.dp, end = 16.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     item {
@@ -84,7 +89,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
-                        AppearanceSection()
+                        AppearanceSection(onNavigateToThemeSelector)
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
@@ -97,11 +102,6 @@ fun SettingsScreen(
                     }
                 }
             }
-
-            LiquidAppBar(
-                title = "Settings",
-                modifier = Modifier.align(Alignment.TopCenter)
-            )
         }
     }
 }
@@ -121,50 +121,33 @@ fun SettingsSection(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-fun AppearanceSection() {
-    val context = LocalContext.current
-    val currentStyle = remember { LiquidGlassPrefs.getStyle(context) }
+fun AppearanceSection(onNavigateToThemeSelector: () -> Unit) {
+    val currentStyle = LocalLiquidGlassStyle.current
+    val label = when (currentStyle) {
+        LiquidGlassStyle.Frosted -> "Colored Glass"
+        LiquidGlassStyle.Clear -> "Clear Glass"
+    }
 
     SettingsSection(title = "Appearance") {
-        LiquidGlassStyle.entries.forEach { style ->
-            val label = when (style) {
-                LiquidGlassStyle.Frosted -> "Colored Glass"
-                LiquidGlassStyle.Clear -> "Clear Glass"
-            }
+        FloatingGlassContainer(
+            borderRadius = 16.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onNavigateToThemeSelector() }
+        ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        LiquidGlassPrefs.setStyle(context, style)
-                    }
-                    .padding(vertical = 10.dp),
+                modifier = Modifier.padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                FloatingGlassContainer(
-                    borderRadius = 12.dp,
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize().padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        LiquidIcon(
-                            imageVector = if (currentStyle == style) Icons.Rounded.CheckCircle else Icons.Rounded.Circle,
-                            tint = if (currentStyle == style) Accent500 else TextTertiary,
-                            size = 18.dp
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(label, color = TextPrimary, fontSize = 14.sp)
-                    Text(
-                        text = when (style) {
-                            LiquidGlassStyle.Frosted -> "Dark tinted glass, richer backdrop"
-                            LiquidGlassStyle.Clear -> "Lighter glass, more transparent finish"
-                        },
-                        color = TextSecondary, fontSize = 11.sp
-                    )
+                    Text("Liquid Glass Style", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text("Choose between transparent and colored glass", color = TextSecondary, fontSize = 12.sp)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(label, color = Accent500, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    LiquidIcon(Icons.Rounded.ChevronRight, color = TextTertiary, size = 18.dp)
                 }
             }
         }
@@ -562,6 +545,129 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
                 LiquidIcon(Icons.Rounded.Delete, modifier = Modifier.size(18.dp), color = Color.Red)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Delete Account", color = Color.Red)
+            }
+        }
+    }
+}
+
+@Composable
+fun ThemeSelectorScreen(
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val currentStyle = LocalLiquidGlassStyle.current
+
+    LiquidScaffold(
+        appBar = {
+            LiquidAppBar(
+                title = "Theme Selector",
+                leading = {
+                    IconButton(onClick = onBack) {
+                        LiquidIcon(Icons.Rounded.ArrowBack, color = TextPrimary)
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Choose your Liquid Glass style. The entire app's backdrop and card elements will update instantly to reflect your choice.",
+                color = TextSecondary,
+                fontSize = 14.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            LiquidGlassStyle.entries.forEach { style ->
+                val isSelected = currentStyle == style
+                val title = when (style) {
+                    LiquidGlassStyle.Clear -> "Clear Glass (Reference Style)"
+                    LiquidGlassStyle.Frosted -> "Colored Glass (Frosted Style)"
+                }
+                val desc = when (style) {
+                    LiquidGlassStyle.Clear -> "Perfect transparency. Blends directly into the background using a glassmorphic shader overlay."
+                    LiquidGlassStyle.Frosted -> "A beautiful frosted effect with solid color tints, enhancing text readability and UI depth."
+                }
+
+                FloatingGlassContainer(
+                    borderRadius = 24.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp)
+                        .clickable {
+                            LiquidGlassPrefs.setStyle(context, style)
+                        }
+                        .border(
+                            width = 2.dp,
+                            color = if (isSelected) Accent500 else Color.Transparent,
+                            shape = RoundedCornerShape(24.dp)
+                        )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = title,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary,
+                                fontSize = 16.sp
+                            )
+                            if (isSelected) {
+                                LiquidIcon(Icons.Rounded.CheckCircle, color = Accent500, size = 20.dp)
+                            } else {
+                                LiquidIcon(Icons.Rounded.Circle, color = TextTertiary, size = 20.dp)
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = desc,
+                            color = TextSecondary,
+                            fontSize = 13.sp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Render the mockup using the specific theme style override
+                        CompositionLocalProvider(LocalLiquidGlassStyle provides style) {
+                            FloatingGlassContainer(
+                                borderRadius = 16.dp,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(Accent500.copy(alpha = 0.2f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        LiquidIcon(Icons.Rounded.Notifications, color = Accent500, size = 20.dp)
+                                    }
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column {
+                                        Text("Sample Reminder Card", fontWeight = FontWeight.SemiBold, color = TextPrimary, fontSize = 14.sp)
+                                        Text("Mockup card showing the selected glass style", color = TextSecondary, fontSize = 11.sp)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

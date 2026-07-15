@@ -40,50 +40,48 @@ fun TemplatesScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
-            containerColor = Color.Transparent,
-            topBar = {
-                LiquidAppBar(
-                    title = "Templates",
-                    actions = {
-                        IconButton(onClick = { showCreate = true }) {
-                            LiquidIcon(imageVector = Icons.Rounded.Add, color = TextPrimary)
-                        }
+    LiquidScaffold(
+        snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
+        appBar = {
+            LiquidAppBar(
+                title = "Templates",
+                actions = {
+                    IconButton(onClick = { showCreate = true }) {
+                        LiquidIcon(imageVector = Icons.Rounded.Add, color = TextPrimary)
                     }
-                )
-            }
-        ) { paddingValues ->
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                if (uiState.isLoading) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        LiquidSpinner()
+                }
+            )
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    LiquidSpinner()
+                }
+            } else if (uiState.templates.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Rounded.ViewList, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("No templates yet", color = TextSecondary, fontSize = 16.sp)
                     }
-                } else if (uiState.templates.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Rounded.ViewList, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text("No templates yet", color = TextSecondary, fontSize = 16.sp)
-                        }
-                    }
-                } else {
-                    LazyColumn(
-                        contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp, start = 16.dp, end = 16.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(uiState.templates, key = { it.id }) { template ->
-                            TemplateItem(
-                                template = template,
-                                onApply = { onApplyTemplate(template.category) },
-                                onDelete = { viewModel.deleteTemplate(template.id) }
-                            )
-                        }
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp, start = 16.dp, end = 16.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(uiState.templates, key = { it.id }) { template ->
+                        TemplateItem(
+                            template = template,
+                            onApply = { onApplyTemplate(template.category) },
+                            onDelete = { viewModel.deleteTemplate(template.id) }
+                        )
                     }
                 }
             }
         }
+    }
 
         if (showCreate) {
             Box(
@@ -108,7 +106,6 @@ fun TemplatesScreen(
             }
         }
     }
-}
 
 @Composable
 fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -> Unit) {

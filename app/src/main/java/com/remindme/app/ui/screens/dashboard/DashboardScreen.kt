@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,9 +54,9 @@ fun DashboardScreen(
         return
     }
 
-    val peopleCount = uiState.reminders.count { it.category == CategoryType.PERSON }
-    val subsCount = uiState.reminders.count { it.category == CategoryType.SUBSCRIPTION }
-    val tasksCount = uiState.reminders.count { it.category == CategoryType.TASK }
+    val peopleCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.PERSON } }
+    val subsCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.SUBSCRIPTION } }
+    val tasksCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.TASK } }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -114,9 +115,12 @@ fun DashboardScreen(
         )
 
         uiState.selectedDate?.let { date ->
+            val filteredOccurrences = remember(uiState.occurrences, date) {
+                uiState.occurrences.filter { it.date == date }
+            }
             SelectedDaySheet(
                 date = date,
-                occurrences = uiState.occurrences.filter { it.date == date },
+                occurrences = filteredOccurrences,
                 onMarkDone = { id, occDate ->
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     viewModel.markDone(id, occDate)
