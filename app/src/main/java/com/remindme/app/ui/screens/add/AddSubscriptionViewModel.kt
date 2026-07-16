@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import io.github.jan.supabase.auth.auth
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
 
 data class AddSubscriptionUiState(
     val name: String = "",
@@ -72,10 +75,30 @@ class AddSubscriptionViewModel : ViewModel() {
         if (query.isBlank()) return
         _uiState.update { it.copy(isResolvingLogo = true) }
         try {
-            // TODO: Call backend logo resolver
-            // For now, let's pretend it resolved something generic if we wanted to
-            delay(500)
-            _uiState.update { it.copy(isResolvingLogo = false) }
+            val resolvedDomain = withContext(Dispatchers.IO) {
+                try {
+                    val url = "https://autocomplete.clearbit.com/v1/companies/suggest?query=${java.net.URLEncoder.encode(query, "UTF-8")}"
+                    val response = java.net.URL(url).readText()
+                    val jsonArray = JSONArray(response)
+                    if (jsonArray.length() > 0) {
+                        jsonArray.getJSONObject(0).optString("domain")
+                    } else {
+                        null
+                    }
+                } catch (e: Exception) {
+                    null
+                }
+            } ?: run {
+                val clean = query.lowercase().replace(Regex("[^a-z0-9]"), "")
+                if (clean.isNotEmpty()) "$clean.com" else null
+            }
+
+            if (resolvedDomain != null) {
+                val logoUrl = "https://logo.clearbit.com/$resolvedDomain"
+                _uiState.update { it.copy(logoUrl = logoUrl, logoDomain = resolvedDomain, isResolvingLogo = false) }
+            } else {
+                _uiState.update { it.copy(isResolvingLogo = false) }
+            }
         } catch (e: Exception) {
             _uiState.update { it.copy(isResolvingLogo = false) }
         }

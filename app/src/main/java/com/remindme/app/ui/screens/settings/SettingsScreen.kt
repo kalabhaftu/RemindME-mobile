@@ -37,41 +37,61 @@ fun SettingsScreen(
     onNavigateHome: () -> Unit,
     onNavigateToThemeSelector: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    var glassStyle by remember { mutableStateOf(LiquidGlassPrefs.getStyle(context)) }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    
-    LaunchedEffect(uiState.message, uiState.error) {
-        uiState.message?.let {
-            snackbarHostState.showSnackbar(it)
-            viewModel.clearMessage()
-        }
-        uiState.error?.let {
-            snackbarHostState.showSnackbar(it)
-            viewModel.clearMessage()
+    val listener = remember {
+        android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == "glass_style") {
+                glassStyle = LiquidGlassPrefs.getStyle(context)
+            }
         }
     }
 
-    LiquidScaffold(
-        snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
-        appBar = {
-            Row(
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CircledBackButton(onClick = onNavigateHome)
-                Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
-                    title = "Settings",
-                    statusBarsPadding = false,
-                    modifier = Modifier.weight(1f)
-                )
+    androidx.compose.runtime.DisposableEffect(context) {
+        val prefs = context.getSharedPreferences("liquid_glass_prefs", android.content.Context.MODE_PRIVATE)
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+
+    CompositionLocalProvider(LocalLiquidGlassStyle provides glassStyle) {
+        val uiState by viewModel.uiState.collectAsState()
+
+        val snackbarHostState = remember { SnackbarHostState() }
+        
+        LaunchedEffect(uiState.message, uiState.error) {
+            uiState.message?.let {
+                snackbarHostState.showSnackbar(it)
+                viewModel.clearMessage()
+            }
+            uiState.error?.let {
+                snackbarHostState.showSnackbar(it)
+                viewModel.clearMessage()
             }
         }
-    ) { paddingValues ->
+
+        LiquidScaffold(
+            snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
+            appBar = {
+                Row(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircledBackButton(onClick = onNavigateHome)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    LiquidAppBar(
+                        title = "Settings",
+                        statusBarsPadding = false,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -118,6 +138,7 @@ fun SettingsScreen(
             }
         }
     }
+}
 }
 
 @Composable
@@ -412,7 +433,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
 fun GlassSwitch(title: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     FloatingGlassContainer(borderRadius = 16.dp, modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -572,27 +593,44 @@ fun ThemeSelectorScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val currentStyle = LocalLiquidGlassStyle.current
+    var currentStyle by remember { mutableStateOf(LiquidGlassPrefs.getStyle(context)) }
 
-    LiquidScaffold(
-        appBar = {
-            Row(
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CircledBackButton(onClick = onBack)
-                Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
-                    title = "Theme Selector",
-                    statusBarsPadding = false,
-                    modifier = Modifier.weight(1f)
-                )
+    val listener = remember {
+        android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == "glass_style") {
+                currentStyle = LiquidGlassPrefs.getStyle(context)
             }
         }
-    ) { paddingValues ->
+    }
+
+    androidx.compose.runtime.DisposableEffect(context) {
+        val prefs = context.getSharedPreferences("liquid_glass_prefs", android.content.Context.MODE_PRIVATE)
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+
+    CompositionLocalProvider(LocalLiquidGlassStyle provides currentStyle) {
+        LiquidScaffold(
+            appBar = {
+                Row(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircledBackButton(onClick = onBack)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    LiquidAppBar(
+                        title = "Theme Selector",
+                        statusBarsPadding = false,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -695,4 +733,5 @@ fun ThemeSelectorScreen(
             }
         }
     }
+}
 }

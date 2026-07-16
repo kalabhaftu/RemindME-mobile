@@ -30,6 +30,7 @@ import com.remindme.app.ui.screens.search.SearchScreen
 import com.remindme.app.ui.screens.settings.SettingsScreen
 import com.remindme.app.ui.screens.templates.TemplatesScreen
 import io.github.jan.supabase.auth.auth
+import com.remindme.app.domain.models.CategoryType
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -156,9 +157,21 @@ fun MainNavigation() {
                 }
             }
             entry<Search> {
+                val context = LocalContext.current
                 WithBackdrop {
                     SearchScreen(
-                        onItemClick = { id -> backStack.add(PersonDetail(id)) },
+                        onItemClick = { id, category ->
+                            when (category) {
+                                CategoryType.PERSON -> backStack.add(PersonDetail(id))
+                                else -> {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Viewing/editing for ${category.name.lowercase()} is coming soon!",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        },
                         onBack = { backStack.removeLastOrNull() }
                     )
                 }

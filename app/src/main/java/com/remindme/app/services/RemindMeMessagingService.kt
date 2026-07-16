@@ -25,10 +25,10 @@ class RemindMeMessagingService : FirebaseMessagingService() {
                 if (user != null) {
                     val payload = buildJsonObject {
                         put("user_id", JsonPrimitive(user.id))
-                        put("fcm_token", JsonPrimitive(token))
-                        put("updated_at", JsonPrimitive(java.time.LocalDateTime.now().toString()))
+                        put("channel", JsonPrimitive("push"))
+                        put("encrypted_token", JsonPrimitive(token))
                     }
-                    com.remindme.app.data.remote.SupabaseManager.client.postgrest["user_fcm_tokens"].upsert(payload)
+                    com.remindme.app.data.remote.SupabaseManager.client.postgrest["notification_channels"].upsert(payload)
                 }
             } catch (e: Exception) {
                 Log.e("FCM", "Failed to sync token to Supabase", e)

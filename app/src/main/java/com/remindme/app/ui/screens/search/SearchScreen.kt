@@ -29,7 +29,7 @@ import com.remindme.app.ui.theme.*
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = viewModel(),
-    onItemClick: (String) -> Unit,
+    onItemClick: (String, CategoryType) -> Unit,
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -80,7 +80,7 @@ fun SearchScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(uiState.results, key = { it.id }) { item ->
-                        SearchResultItem(item = item, onClick = { onItemClick(item.id) })
+                        SearchResultItem(item = item, onClick = { onItemClick(item.id, item.category) })
                     }
                 }
             }
