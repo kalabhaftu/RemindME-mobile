@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
 
@@ -40,8 +39,7 @@ fun FloatingGlassContainer(
                 shape = { RoundedCornerShape(borderRadius) },
                 effects = {
                     vibrancy()
-                    blur(16f.dp.toPx())
-                    lens(12f.dp.toPx(), 24f.dp.toPx())
+                    lens(16f.dp.toPx(), 32f.dp.toPx())
                 },
                 onDrawSurface = {
                     drawRect(activeTintColor, blendMode = BlendMode.SrcOver)

@@ -160,13 +160,14 @@ fun SubscriptionRow(item: ReminderItem, onClick: () -> Unit) {
                         error = painterResource(id = R.drawable.ic_launcher_foreground) // Placeholder
                     )
                 } else {
-                    FloatingGlassContainer(
-                        borderRadius = 12.dp,
-                        modifier = Modifier.fillMaxSize()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(BgSurface3),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                            Text("💳", fontSize = 22.sp) // fallback icon
-                        }
+                        Text("💳", fontSize = 22.sp)
                     }
                 }
             }
@@ -205,9 +206,11 @@ fun SubscriptionRow(item: ReminderItem, onClick: () -> Unit) {
             
             Spacer(modifier = Modifier.width(8.dp))
             
-            FloatingGlassContainer(
-                borderRadius = 20.dp,
-                modifier = Modifier.wrapContentSize()
+            Box(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(BgSurface3)
             ) {
                 Text(
                     text = "$days d",

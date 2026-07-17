@@ -10,19 +10,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.ui.components.liquid.LiquidGlassPrefs
-import com.remindme.app.ui.components.liquid.LocalBackdrop
 import com.remindme.app.ui.components.liquid.LocalLiquidGlassStyle
 import com.remindme.app.ui.screens.main.MainScreen
 import com.remindme.app.ui.screens.add.AddPersonScreen
@@ -41,38 +35,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.background
-
-@Composable
-private fun WithBackdrop(content: @Composable () -> Unit) {
-    val backdrop = rememberLayerBackdrop()
-    val context = LocalContext.current
-    val isDark = androidx.compose.foundation.isSystemInDarkTheme()
-    val gradientColors = if (isDark) {
-        listOf(Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460))
-    } else {
-        listOf(Color(0xFFE0EAFC), Color(0xFFCFDEF3))
-    }
-
-    CompositionLocalProvider(
-        LocalBackdrop provides backdrop
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .layerBackdrop(backdrop)
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = gradientColors,
-                            start = Offset.Zero,
-                            end = Offset(0f, Float.POSITIVE_INFINITY)
-                        )
-                    )
-            )
-            content()
-        }
-    }
-}
 
 @Composable
 fun MainNavigation() {
@@ -157,86 +119,72 @@ fun MainNavigation() {
                 MainScreen(onItemClick = { navKey -> backStack.add(navKey) }, modifier = Modifier.safeDrawingPadding().padding(16.dp))
             }
             entry<AddPerson> {
-                WithBackdrop { AddPersonScreen(onBack = { backStack.removeLastOrNull() }) }
+                AddPersonScreen(onBack = { backStack.removeLastOrNull() })
             }
             entry<AddSubscription> {
-                WithBackdrop { AddSubscriptionScreen(onBack = { backStack.removeLastOrNull() }) }
+                AddSubscriptionScreen(onBack = { backStack.removeLastOrNull() })
             }
             entry<AddTask> {
-                WithBackdrop { AddTaskScreen(onBack = { backStack.removeLastOrNull() }) }
+                AddTaskScreen(onBack = { backStack.removeLastOrNull() })
             }
             entry<PersonDetail> { key ->
-                WithBackdrop {
-                    PersonDetailScreen(
-                        personId = key.personId,
-                        onBack = { backStack.removeLastOrNull() },
-                        onEdit = { backStack.add(EditPerson(key.personId)) }
-                    )
-                }
+                PersonDetailScreen(
+                    personId = key.personId,
+                    onBack = { backStack.removeLastOrNull() },
+                    onEdit = { backStack.add(EditPerson(key.personId)) }
+                )
             }
             entry<EditPerson> { key ->
-                WithBackdrop {
-                    AddPersonScreen(
-                        personId = key.personId,
-                        onBack = { backStack.removeLastOrNull() }
-                    )
-                }
+                AddPersonScreen(
+                    personId = key.personId,
+                    onBack = { backStack.removeLastOrNull() }
+                )
             }
             entry<Search> {
                 val context = LocalContext.current
-                WithBackdrop {
-                    SearchScreen(
-                        onItemClick = { id, category ->
-                            when (category) {
-                                CategoryType.PERSON -> backStack.add(PersonDetail(id))
-                                else -> {
-                                    android.widget.Toast.makeText(
-                                        context,
-                                        "Viewing/editing for ${category.name.lowercase()} is coming soon!",
-                                        android.widget.Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                SearchScreen(
+                    onItemClick = { id, category ->
+                        when (category) {
+                            CategoryType.PERSON -> backStack.add(PersonDetail(id))
+                            else -> {
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "Viewing/editing for ${category.name.lowercase()} is coming soon!",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
                             }
-                        },
-                        onBack = { backStack.removeLastOrNull() }
-                    )
-                }
+                        }
+                    },
+                    onBack = { backStack.removeLastOrNull() }
+                )
             }
             entry<Settings> {
-                WithBackdrop {
-                    SettingsScreen(
-                        onNavigateHome = { 
-                            backStack.clear()
-                            backStack.add(Main) 
-                        },
-                        onNavigateToThemeSelector = {
-                            backStack.add(ThemeSelector)
-                        }
-                    )
-                }
+                SettingsScreen(
+                    onNavigateHome = { 
+                        backStack.clear()
+                        backStack.add(Main) 
+                    },
+                    onNavigateToThemeSelector = {
+                        backStack.add(ThemeSelector)
+                    }
+                )
             }
             entry<ThemeSelector> {
-                WithBackdrop {
-                    com.remindme.app.ui.screens.settings.ThemeSelectorScreen(
-                        onBack = { backStack.removeLastOrNull() }
-                    )
-                }
+                com.remindme.app.ui.screens.settings.ThemeSelectorScreen(
+                    onBack = { backStack.removeLastOrNull() }
+                )
             }
             entry<Templates> {
-                WithBackdrop {
-                    TemplatesScreen(
-                        onApplyTemplate = { /* handle */ },
-                        onBack = { backStack.removeLastOrNull() }
-                    )
-                }
+                TemplatesScreen(
+                    onApplyTemplate = { /* handle */ },
+                    onBack = { backStack.removeLastOrNull() }
+                )
             }
             entry<Notifications> {
-                WithBackdrop {
-                    com.remindme.app.ui.screens.notifications.NotificationsScreen(
-                        onOpenReminder = { id -> backStack.add(PersonDetail(id)) },
-                        onBack = { backStack.removeLastOrNull() }
-                    )
-                }
+                com.remindme.app.ui.screens.notifications.NotificationsScreen(
+                    onOpenReminder = { id -> backStack.add(PersonDetail(id)) },
+                    onBack = { backStack.removeLastOrNull() }
+                )
             }
         },
     )

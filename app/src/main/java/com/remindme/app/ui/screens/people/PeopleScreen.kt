@@ -220,9 +220,11 @@ fun PersonRow(person: ReminderItem, onClick: () -> Unit) {
                     modifier = Modifier.weight(1f)
                 )
                 Box(modifier = Modifier.weight(1f)) {
-                    FloatingGlassContainer(
-                        borderRadius = 6.dp,
-                        modifier = Modifier.wrapContentSize()
+                    Box(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(BgSurface3)
                     ) {
                         Text(
                             text = if (birthdate != null) "${days} d" else "—",
@@ -270,9 +272,11 @@ fun PersonRow(person: ReminderItem, onClick: () -> Unit) {
 
 @Composable
 fun Pill(text: String) {
-    FloatingGlassContainer(
-        borderRadius = 8.dp,
-        modifier = Modifier.wrapContentSize()
+    Box(
+        modifier = Modifier
+            .wrapContentSize()
+            .clip(RoundedCornerShape(8.dp))
+            .background(BgSurface3)
     ) {
         Text(
             text = text,

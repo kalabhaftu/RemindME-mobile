@@ -136,9 +136,11 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
                 .padding(horizontal = 14.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FloatingGlassContainer(
-                borderRadius = 12.dp,
-                modifier = Modifier.wrapContentSize()
+            Box(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(BgSurface3)
             ) {
                 Box(modifier = Modifier.padding(10.dp)) {
                     LiquidIcon(
@@ -184,9 +186,12 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
             
             Spacer(modifier = Modifier.width(8.dp))
             
-            FloatingGlassContainer(
-                borderRadius = 20.dp,
-                modifier = Modifier.wrapContentSize().clickable { onMarkDone() }
+            Box(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(BgSurface3)
+                    .clickable { onMarkDone() }
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
                     LiquidIcon(
