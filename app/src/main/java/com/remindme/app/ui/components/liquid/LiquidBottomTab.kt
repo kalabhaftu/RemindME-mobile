@@ -14,7 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.CircleShape
+import com.kyant.shapes.Capsule
 
 import com.kyant.backdrop.Backdrop
 
@@ -32,7 +32,7 @@ fun RowScope.LiquidBottomTab(
     val scale = LocalLiquidBottomTabScale.current
     Column(
         modifier
-            .clip(CircleShape)
+            .clip(Capsule())
             .clickable(
                 interactionSource = null,
                 indication = null,

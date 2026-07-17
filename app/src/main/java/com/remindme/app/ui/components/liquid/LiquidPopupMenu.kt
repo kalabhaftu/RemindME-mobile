@@ -32,12 +32,11 @@ fun LiquidPopupMenu(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    // A raw Popup draws nothing of its own -- no forced Surface, shape,
-    // tonal/shadow elevation, or min-width like Material3's DropdownMenu.
-    // FloatingGlassContainer is the only visual chrome, matching the rest
-    // of the liquid glass system instead of a Material dropdown with the
-    // fill color merely swapped for transparent.
-    if (expanded) {
+    AnimatedVisibility(
+        visible = expanded,
+        enter = fadeIn(tween(140)) + scaleIn(tween(140), initialScale = 0.92f),
+        exit = fadeOut(tween(100)) + scaleOut(tween(100), targetScale = 0.92f)
+    ) {
         Popup(
             offset = androidx.compose.ui.unit.IntOffset(
                 with(androidx.compose.ui.platform.LocalDensity.current) { offset.x.roundToPx() },
@@ -46,22 +45,16 @@ fun LiquidPopupMenu(
             onDismissRequest = onDismissRequest,
             properties = PopupProperties(focusable = true)
         ) {
-            AnimatedVisibility(
-                visible = expanded,
-                enter = fadeIn(tween(140)) + scaleIn(tween(140), initialScale = 0.92f),
-                exit = fadeOut(tween(100)) + scaleOut(tween(100), targetScale = 0.92f)
+            FloatingGlassContainer(
+                borderRadius = 16.dp,
+                modifier = modifier.width(180.dp)
             ) {
-                FloatingGlassContainer(
-                    borderRadius = 16.dp,
-                    modifier = modifier.width(180.dp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    ) {
-                        content()
-                    }
+                    content()
                 }
             }
         }

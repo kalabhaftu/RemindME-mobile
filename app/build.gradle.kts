@@ -120,6 +120,7 @@ dependencies {
   // Local modules
   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
   implementation(project(":backdrop"))
+  implementation(libs.kyant.shapes)
 
   // Firebase
   implementation(platform(libs.firebase.bom))

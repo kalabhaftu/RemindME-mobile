@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.ui.components.liquid.LiquidGlassPrefs
@@ -62,7 +63,7 @@ private fun WithBackdrop(content: @Composable () -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .com.kyant.backdrop.backdrops.layerBackdrop(backdrop)
+                    .layerBackdrop(backdrop)
                     .background(
                         brush = androidx.compose.ui.graphics.Brush.linearGradient(
                             colors = gradientColors,
