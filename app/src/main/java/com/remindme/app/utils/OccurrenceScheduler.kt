@@ -2,6 +2,7 @@ package com.remindme.app.utils
 
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 object OccurrenceScheduler {
@@ -12,6 +13,21 @@ object OccurrenceScheduler {
 
     private fun startOfDay(date: LocalDateTime): LocalDateTime {
         return date.with(LocalTime.MIDNIGHT)
+    }
+
+    /**
+     * next_occurrence_at is a Postgres `timestamptz`, matched against
+     * now() (UTC) by the dispatch cron job. LocalDateTime has no timezone,
+     * and ISO_LOCAL_DATE_TIME emits no offset/'Z' -- Postgres would read a
+     * naive string as if it WERE UTC, silently shifting every reminder by
+     * the device's UTC offset (and potentially into the past, so it never
+     * matches a future now() tick). Always convert through the device zone
+     * to a real UTC instant before formatting.
+     */
+    private fun toUtcIso(local: LocalDateTime): String {
+        return local.atZone(ZoneId.systemDefault())
+            .withZoneSameInstant(ZoneId.of("UTC"))
+            .format(DateTimeFormatter.ISO_INSTANT)
     }
 
     fun nextBirthday(birthdateStr: String): LocalDateTime {
@@ -66,6 +82,6 @@ object OccurrenceScheduler {
             "custom_holiday" -> holidayDate?.let { nextHoliday(it) }
             else -> null
         }
-        return nextDate?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        return nextDate?.let { toUtcIso(it) }
     }
 }

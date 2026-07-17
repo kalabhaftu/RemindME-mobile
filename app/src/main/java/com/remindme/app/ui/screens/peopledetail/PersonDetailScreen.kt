@@ -89,12 +89,12 @@ fun PersonDetailScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            val person = uiState.person
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     LiquidSpinner()
                 }
-            } else if (uiState.person != null) {
-                    val person = uiState.person!!
+            } else if (person != null) {
                     val bdStr = person.person?.birthdate
                     val birthdate = bdStr?.takeIf { it.isNotBlank() }?.let { 
                         try { LocalDate.parse(it.substring(0, 10)) } catch (e: Exception) { null } 
@@ -183,7 +183,6 @@ fun PersonDetailScreen(
                         }
                     }
                 }
-            }
         }
 
         if (showDeleteConfirm) {
@@ -210,6 +209,7 @@ fun PersonDetailScreen(
             )
         }
     }
+}
 
 @Composable
 fun StatCard(label: String, value: String, valueColor: Color = TextPrimary) {

@@ -1,5 +1,6 @@
 package com.remindme.app.ui.screens.main
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -33,14 +34,31 @@ fun QuickAddSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = AppColors.bgElevated,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = AppColors.textSecondary.copy(alpha = 0.5f)) }
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+        contentColor = AppColors.textPrimary,
+        scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.4f),
+        dragHandle = null
     ) {
+        FloatingGlassContainer(
+            borderRadius = 32.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 8.dp)
         ) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 8.dp, bottom = 4.dp)
+                    .size(width = 36.dp, height = 4.dp)
+                    .background(
+                        color = AppColors.textSecondary.copy(alpha = 0.4f),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(2.dp)
+                    )
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -107,6 +125,7 @@ fun QuickAddSheet(
                 )
             }
             Spacer(modifier = Modifier.height(32.dp))
+        }
         }
     }
 }

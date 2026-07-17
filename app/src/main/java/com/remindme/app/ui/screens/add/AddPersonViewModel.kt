@@ -123,7 +123,8 @@ class AddPersonViewModel : ViewModel() {
                 
                 val recurrenceRules = com.remindme.app.domain.models.RecurrenceRules(
                     frequency = "yearly",
-                    ends = "never"
+                    ends = "never",
+                    nextOccurrenceAt = nextOccurrence
                 )
 
                 val item = com.remindme.app.domain.models.ReminderItem(

@@ -30,7 +30,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun NotificationsScreen(
     viewModel: NotificationsViewModel = viewModel(),
-    onOpenReminder: (String) -> Unit
+    onOpenReminder: (String) -> Unit,
+    onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by remember { mutableStateOf(0) }
@@ -48,16 +49,27 @@ fun NotificationsScreen(
     LiquidScaffold(
         snackbarHost = {},
         appBar = {
-            LiquidAppBar(
-                title = "Notifications",
-                actions = {
-                    if (selectedTab == 1 && inAppUnreadCount > 0) {
-                        TextButton(onClick = { viewModel.markAllRead() }) {
-                            Text("Mark all read", color = Accent500)
+            Row(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircledBackButton(onClick = onBack)
+                Spacer(modifier = Modifier.width(12.dp))
+                LiquidAppBar(
+                    title = "Notifications",
+                    statusBarsPadding = false,
+                    modifier = Modifier.weight(1f),
+                    actions = {
+                        if (selectedTab == 1 && inAppUnreadCount > 0) {
+                            TextButton(onClick = { viewModel.markAllRead() }) {
+                                Text("Mark all read", color = Accent500)
+                            }
                         }
-                    }
-                },
-                bottom = {
+                    },
+                    bottom = {
                     TabRow(
                         selectedTabIndex = selectedTab,
                         containerColor = Color.Transparent,
@@ -86,6 +98,7 @@ fun NotificationsScreen(
                     }
                 }
             )
+            }
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {

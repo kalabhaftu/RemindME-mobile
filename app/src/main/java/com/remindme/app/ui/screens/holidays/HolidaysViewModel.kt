@@ -172,8 +172,20 @@ class HolidaysViewModel : ViewModel() {
                     // We need user id. 
                     val user = SupabaseManager.client.auth.currentUserOrNull()
                     if (user != null) {
+                        // holiday.date is a bare "YYYY-MM-DD" from the public
+                        // holidays API. Route it through OccurrenceScheduler
+                        // (same as person/subscription/task) for correct
+                        // year-rollover, time-of-day, and UTC conversion.
+                        val nextOccurrence = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
+                            category = "custom_holiday",
+                            holidayDate = "${holiday.date}T00:00:00"
+                        )
                         val newItem = ReminderItem(
-                            id = "",
+                            // id = "" was being sent as-is to a `uuid primary
+                            // key` column -- Postgres rejects an empty string
+                            // as invalid UUID syntax, so every holiday
+                            // subscription was failing outright.
+                            id = java.util.UUID.randomUUID().toString(),
                             userId = user.id,
                             category = CategoryType.CUSTOM_HOLIDAY,
                             name = holiday.localName,
@@ -191,7 +203,8 @@ class HolidaysViewModel : ViewModel() {
                                 RecurrenceRules(
                                     frequency = "yearly",
                                     intervalCount = 1,
-                                    ends = "never"
+                                    ends = "never",
+                                    nextOccurrenceAt = nextOccurrence
                                 )
                             )
                         )

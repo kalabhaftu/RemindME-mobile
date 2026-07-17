@@ -68,6 +68,12 @@ class RemindMeMessagingService : FirebaseMessagingService() {
             .setAutoCancel(true)
             .setPriority(androidx.core.app.NotificationCompat.PRIORITY_DEFAULT)
 
-        notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
+        // System.currentTimeMillis().toInt() truncates a 64-bit timestamp to
+        // 32 bits and can produce the same ID for notifications dispatched
+        // close together, silently overwriting one instead of showing both.
+        // A hash of title+message+a random component is a lot less likely
+        // to collide across near-simultaneous notifications.
+        val notificationId = (title + message + System.nanoTime()).hashCode()
+        notificationManager.notify(notificationId, builder.build())
     }
 }

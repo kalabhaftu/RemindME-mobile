@@ -140,7 +140,8 @@ class AddSubscriptionViewModel : ViewModel() {
                 
                 val recurrenceRules = com.remindme.app.domain.models.RecurrenceRules(
                     frequency = _uiState.value.cycle,
-                    ends = "never"
+                    ends = "never",
+                    nextOccurrenceAt = nextOccurrence
                 )
 
                 val item = com.remindme.app.domain.models.ReminderItem(

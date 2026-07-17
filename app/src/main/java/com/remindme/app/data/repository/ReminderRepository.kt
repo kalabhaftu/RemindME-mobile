@@ -153,6 +153,8 @@ class ReminderRepository(private val supabase: SupabaseClient) {
                 put("interval_count", it.intervalCount)
                 put("ends", it.ends)
                 it.endsValue?.let { put("ends_value", it) }
+                // Previously omitted -- see RecurrenceRules.nextOccurrenceAt.
+                it.nextOccurrenceAt?.let { put("next_occurrence_at", it) }
             }
             if (isUpdate) recurrenceTable.upsert(payload) else recurrenceTable.insert(payload)
         }

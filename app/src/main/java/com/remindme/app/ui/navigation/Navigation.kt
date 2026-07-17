@@ -41,10 +41,38 @@ import androidx.compose.foundation.background
 @Composable
 private fun WithBackdrop(content: @Composable () -> Unit) {
     val backdrop = rememberLayerBackdrop()
+    val isDark = androidx.compose.foundation.isSystemInDarkTheme()
+    val gradientColors = if (isDark) {
+        listOf(
+            androidx.compose.ui.graphics.Color(0xFF1A1A2E),
+            androidx.compose.ui.graphics.Color(0xFF16213E),
+            androidx.compose.ui.graphics.Color(0xFF0F3460)
+        )
+    } else {
+        listOf(
+            androidx.compose.ui.graphics.Color(0xFFE0EAFC),
+            androidx.compose.ui.graphics.Color(0xFFCFDEF3)
+        )
+    }
+
     CompositionLocalProvider(
         LocalBackdrop provides backdrop
     ) {
-        content()
+        Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .com.kyant.backdrop.backdrops.layerBackdrop(backdrop)
+                    .background(
+                        brush = androidx.compose.ui.graphics.Brush.linearGradient(
+                            colors = gradientColors,
+                            start = androidx.compose.ui.geometry.Offset.Zero,
+                            end = androidx.compose.ui.geometry.Offset.Infinite
+                        )
+                    )
+            )
+            content()
+        }
     }
 }
 
@@ -199,14 +227,16 @@ fun MainNavigation() {
             entry<Templates> {
                 WithBackdrop {
                     TemplatesScreen(
-                        onApplyTemplate = { /* handle */ }
+                        onApplyTemplate = { /* handle */ },
+                        onBack = { backStack.removeLastOrNull() }
                     )
                 }
             }
             entry<Notifications> {
                 WithBackdrop {
                     com.remindme.app.ui.screens.notifications.NotificationsScreen(
-                        onOpenReminder = { id -> backStack.add(PersonDetail(id)) }
+                        onOpenReminder = { id -> backStack.add(PersonDetail(id)) },
+                        onBack = { backStack.removeLastOrNull() }
                     )
                 }
             }

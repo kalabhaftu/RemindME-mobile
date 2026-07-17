@@ -91,7 +91,13 @@ data class RecurrenceRules(
     val intervalCount: Int = 1,
     val ends: String,
     @SerialName("ends_value")
-    val endsValue: String? = null
+    val endsValue: String? = null,
+    // This was missing entirely from the model. next_occurrence_at is the
+    // column the Supabase cron dispatcher (reminder_occurrences_due) reads
+    // to decide what's due -- without it, nothing ever gets written here,
+    // so nothing was ever found as "due" for ANY reminder category.
+    @SerialName("next_occurrence_at")
+    val nextOccurrenceAt: String? = null
 )
 
 @Serializable

@@ -370,13 +370,14 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        GlassSwitch("Email Notifications", uiState.emailEnabled) { viewModel.updatePreference("default_channel_email", it) }
-        Spacer(modifier = Modifier.height(8.dp))
-        GlassSwitch("Push Notifications", uiState.pushEnabled) { viewModel.updatePreference("default_channel_push", it) }
-        Spacer(modifier = Modifier.height(8.dp))
-        GlassSwitch("Telegram Notifications", uiState.telegramEnabled) { viewModel.updatePreference("default_channel_telegram", it) }
-        Spacer(modifier = Modifier.height(8.dp))
-        GlassSwitch("In-App Notifications", uiState.inAppEnabled) { viewModel.updatePreference("default_channel_in_app", it) }
+        GlassSwitchGroup(
+            listOf(
+                Triple("Email Notifications", uiState.emailEnabled) { checked: Boolean -> viewModel.updatePreference("default_channel_email", checked) },
+                Triple("Push Notifications", uiState.pushEnabled) { checked: Boolean -> viewModel.updatePreference("default_channel_push", checked) },
+                Triple("Telegram Notifications", uiState.telegramEnabled) { checked: Boolean -> viewModel.updatePreference("default_channel_telegram", checked) },
+                Triple("In-App Notifications", uiState.inAppEnabled) { checked: Boolean -> viewModel.updatePreference("default_channel_in_app", checked) }
+            )
+        )
         
         Spacer(modifier = Modifier.height(16.dp))
         Text("Default Timing", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
@@ -442,6 +443,36 @@ fun GlassSwitch(title: String, checked: Boolean, onCheckedChange: (Boolean) -> U
                 selected = { checked },
                 onSelect = onCheckedChange
             )
+        }
+    }
+}
+
+@Composable
+fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
+    FloatingGlassContainer(borderRadius = 16.dp, modifier = Modifier.fillMaxWidth()) {
+        Column {
+            rows.forEachIndexed { index, (title, checked, onCheckedChange) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(title, fontWeight = FontWeight.Medium, color = TextPrimary)
+                    LiquidToggle(
+                        selected = { checked },
+                        onSelect = onCheckedChange
+                    )
+                }
+                if (index != rows.lastIndex) {
+                    androidx.compose.material3.HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        thickness = 1.dp,
+                        color = GlassBorder
+                    )
+                }
+            }
         }
     }
 }

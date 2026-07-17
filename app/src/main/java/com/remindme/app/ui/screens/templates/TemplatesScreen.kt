@@ -27,7 +27,8 @@ import com.remindme.app.ui.theme.*
 @Composable
 fun TemplatesScreen(
     viewModel: TemplatesViewModel = viewModel(),
-    onApplyTemplate: (String) -> Unit
+    onApplyTemplate: (String) -> Unit,
+    onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showCreate by remember { mutableStateOf(false) }
@@ -43,14 +44,26 @@ fun TemplatesScreen(
     LiquidScaffold(
         snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
         appBar = {
-            LiquidAppBar(
-                title = "Templates",
-                actions = {
-                    IconButton(onClick = { showCreate = true }) {
-                        LiquidIcon(imageVector = Icons.Rounded.Add, color = TextPrimary)
+            Row(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircledBackButton(onClick = onBack)
+                Spacer(modifier = Modifier.width(12.dp))
+                LiquidAppBar(
+                    title = "Templates",
+                    statusBarsPadding = false,
+                    modifier = Modifier.weight(1f),
+                    actions = {
+                        IconButton(onClick = { showCreate = true }) {
+                            LiquidIcon(imageVector = Icons.Rounded.Add, color = TextPrimary)
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
