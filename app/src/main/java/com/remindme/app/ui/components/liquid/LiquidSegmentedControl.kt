@@ -35,7 +35,6 @@ fun <T> LiquidSegmentedControl(
     FloatingGlassContainer(
         borderRadius = 24.dp,
         padding = 4.dp,
-        backdrop = backdrop,
         modifier = modifier
     ) {
         BoxWithConstraints(

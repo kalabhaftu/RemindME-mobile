@@ -28,7 +28,6 @@ fun LiquidSnackbar(
     FloatingGlassContainer(
         borderRadius = 20.dp,
         padding = 0.dp,
-        backdrop = backdrop,
         modifier = modifier.fillMaxWidth()
     ) {
         Row(

@@ -48,7 +48,6 @@ fun LiquidFilterChip(
         FloatingGlassContainer(
             borderRadius = 24.dp,
             padding = 0.dp, // Content handles padding
-            backdrop = backdrop
         ) {
             Box(
                 modifier = Modifier
