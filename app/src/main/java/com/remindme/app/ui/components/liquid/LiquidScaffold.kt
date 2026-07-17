@@ -37,7 +37,6 @@ fun LiquidScaffold(
         LocalLiquidGlassStyle provides glassStyle
     ) {
         Box(modifier = modifier.fillMaxSize()) {
-            // Fluid Background Layer
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -46,31 +45,27 @@ fun LiquidScaffold(
                         brush = Brush.linearGradient(
                             colors = gradientColors,
                             start = Offset.Zero,
-                            end = Offset.Infinite
+                            end = Offset(0f, Float.POSITIVE_INFINITY)
                         )
                     )
             )
 
-            // Main Content
             val topPadding = if (appBar != null) 90.dp else 0.dp
             val bottomPadding = if (bottomBar != null) 90.dp else 0.dp
             content(PaddingValues(top = topPadding, bottom = bottomPadding))
 
-            // App Bar
             if (appBar != null) {
                 Box(modifier = Modifier.align(Alignment.TopCenter)) {
                     appBar()
                 }
             }
 
-            // Bottom Bar
             if (bottomBar != null) {
                 Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp)) {
                     bottomBar()
                 }
             }
 
-            // Snackbar
             Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp)) {
                 snackbarHost()
             }

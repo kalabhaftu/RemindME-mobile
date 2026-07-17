@@ -2,6 +2,7 @@ package com.remindme.app.ui.components.liquid
 
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceAtMost
 import androidx.compose.ui.util.lerp
 import com.kyant.backdrop.Backdrop
+import com.remindme.app.ui.theme.Accent500
 import com.remindme.app.ui.utils.InteractiveHighlight
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
@@ -44,6 +46,7 @@ fun LiquidButton(
     content: @Composable RowScope.() -> Unit
 ) {
     val animationScope = rememberCoroutineScope()
+    val glassStyle = LocalLiquidGlassStyle.current
 
     val interactiveHighlight = remember(animationScope) {
         InteractiveHighlight(
@@ -93,6 +96,8 @@ fun LiquidButton(
                     if (tint.isSpecified) {
                         drawRect(tint, blendMode = BlendMode.Hue)
                         drawRect(tint.copy(alpha = 0.75f))
+                    } else if (glassStyle == LiquidGlassStyle.Frosted) {
+                        drawRect(Accent500.copy(alpha = 0.08f))
                     }
                     if (surfaceColor.isSpecified) {
                         drawRect(surfaceColor)

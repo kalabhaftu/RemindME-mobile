@@ -8,4 +8,4 @@ enum class LiquidGlassStyle {
     Clear
 }
 
-val LocalLiquidGlassStyle = staticCompositionLocalOf { LiquidGlassStyle.Frosted }
+val LocalLiquidGlassStyle = staticCompositionLocalOf { LiquidGlassStyle.Clear }

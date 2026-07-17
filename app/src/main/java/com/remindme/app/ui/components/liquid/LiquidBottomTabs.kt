@@ -49,6 +49,7 @@ import com.kyant.backdrop.effects.vibrancy
 import com.kyant.backdrop.highlight.Highlight
 import com.kyant.backdrop.shadow.InnerShadow
 import com.kyant.backdrop.shadow.Shadow
+import com.remindme.app.ui.theme.Accent500
 import com.kyant.shapes.Capsule
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
@@ -66,6 +67,7 @@ fun LiquidBottomTabs(
     content: @Composable RowScope.() -> Unit
 ) {
     val isLightTheme = !isSystemInDarkTheme()
+    val glassStyle = LocalLiquidGlassStyle.current
     val accentColor =
         if (isLightTheme) Color(0xFF0088FF)
         else Color(0xFF0091FF)
@@ -177,7 +179,12 @@ fun LiquidBottomTabs(
                         scaleX = scale
                         scaleY = scale
                     },
-                    onDrawSurface = { drawRect(containerColor) }
+                    onDrawSurface = {
+                        drawRect(containerColor)
+                        if (glassStyle == LiquidGlassStyle.Frosted) {
+                            drawRect(Accent500.copy(alpha = 0.08f))
+                        }
+                    }
                 )
                 .then(interactiveHighlight.modifier)
                 .height(64f.dp)
@@ -216,7 +223,12 @@ fun LiquidBottomTabs(
                             val progress = dampedDragAnimation.pressProgress
                             Highlight.Default.copy(alpha = progress)
                         },
-                        onDrawSurface = { drawRect(containerColor) }
+                        onDrawSurface = {
+                            drawRect(containerColor)
+                            if (glassStyle == LiquidGlassStyle.Frosted) {
+                                drawRect(Accent500.copy(alpha = 0.08f))
+                            }
+                        }
                     )
                     .then(interactiveHighlight.modifier)
                     .height(56f.dp)
@@ -279,6 +291,9 @@ fun LiquidBottomTabs(
                             alpha = 1f - progress
                         )
                         drawRect(Color.Black.copy(alpha = 0.03f * progress))
+                        if (glassStyle == LiquidGlassStyle.Frosted) {
+                            drawRect(Accent500.copy(alpha = 0.08f))
+                        }
                     }
                 )
                 .height(56f.dp)
