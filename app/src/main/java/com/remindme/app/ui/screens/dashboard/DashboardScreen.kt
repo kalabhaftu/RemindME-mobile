@@ -135,19 +135,20 @@ fun DashboardScreen(
                 onDismiss = { viewModel.clearSelectedDate() }
             )
         }
-        uiState.error?.let { error ->
-            androidx.compose.material3.Snackbar(
-                modifier = Modifier.align(androidx.compose.ui.Alignment.BottomCenter).padding(16.dp),
-                action = {
-                    androidx.compose.material3.TextButton(onClick = { viewModel.fetchReminders() }) {
-                        androidx.compose.material3.Text("Retry")
-                    }
+    }
+    uiState.error?.let { error ->
+        androidx.compose.material3.Snackbar(
+            modifier = Modifier.padding(16.dp),
+            action = {
+                androidx.compose.material3.TextButton(onClick = { viewModel.fetchReminders() }) {
+                    androidx.compose.material3.Text("Retry")
                 }
-            ) {
-                androidx.compose.material3.Text(error)
             }
+        ) {
+            androidx.compose.material3.Text(error)
         }
     }
+}
 }
 
 @Composable
