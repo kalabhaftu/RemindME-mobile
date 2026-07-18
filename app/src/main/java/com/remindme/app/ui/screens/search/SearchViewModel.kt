@@ -49,7 +49,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                 val results = repository.searchReminders(query)
                 _uiState.update { it.copy(results = results, isLoading = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Search failed. Please try again.") }
             }
         }
     }

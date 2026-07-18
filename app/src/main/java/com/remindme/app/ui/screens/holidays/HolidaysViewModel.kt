@@ -106,7 +106,7 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
                 _uiState.update { it.copy(countries = list, isLoadingCountries = false) }
                 loadHolidays(_uiState.value.selectedCountry)
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoadingCountries = false, error = e.message) }
+                _uiState.update { it.copy(isLoadingCountries = false, error = "Failed to load countries") }
             }
         }
     }
@@ -137,7 +137,7 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
                 }
                 _uiState.update { it.copy(holidays = list.distinctBy { it.holidayKey }, isLoadingHolidays = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoadingHolidays = false, error = e.message) }
+                _uiState.update { it.copy(isLoadingHolidays = false, error = "Failed to load holidays") }
             }
         }
     }
@@ -216,7 +216,7 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
                     }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = "Failed to update subscription") }
             } finally {
                 _uiState.update { it.copy(togglingKey = null) }
                 fetchSubscribed()
@@ -237,7 +237,7 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
                     }
                     fetchSubscribed()
                 } catch (e: Exception) {
-                    _uiState.update { it.copy(error = e.message) }
+                    _uiState.update { it.copy(error = "Failed to remove subscription") }
                 }
             }
         }

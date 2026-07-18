@@ -92,7 +92,7 @@ class TasksViewModel(application: Application) : AndroidViewModel(application) {
                 _allTasks.value = tasks
                 _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load tasks") }
             }
         }
     }
@@ -107,11 +107,11 @@ class TasksViewModel(application: Application) : AndroidViewModel(application) {
                     repository.markTaskDone(task.id, dateStr)
                     fetchTasks(showLoading = false)
                 } catch (e: Exception) {
-                    _uiState.update { it.copy(error = e.message) }
+                    _uiState.update { it.copy(error = "Failed to mark task as done") }
                 }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to mark task as done") }
         }
     }
 
@@ -121,7 +121,7 @@ class TasksViewModel(application: Application) : AndroidViewModel(application) {
                 _allTasks.update { list -> list.filter { it.id != id } }
                 repository.deleteReminder(id)
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = "Failed to delete task") }
                 fetchTasks(showLoading = false)
             }
         }

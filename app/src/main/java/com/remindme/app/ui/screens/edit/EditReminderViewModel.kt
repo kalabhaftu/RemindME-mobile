@@ -37,7 +37,7 @@ class EditReminderViewModel(application: Application) : AndroidViewModel(applica
                 val reminder = reminders.find { it.id == reminderId }
                 _uiState.update { it.copy(isLoading = false, reminder = reminder, error = null) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load reminder") }
             }
         }
     }
@@ -49,7 +49,7 @@ class EditReminderViewModel(application: Application) : AndroidViewModel(applica
                 repository.updateReminder(updatedReminder)
                 _uiState.update { it.copy(isSaving = false, isSuccess = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isSaving = false, error = e.message) }
+                _uiState.update { it.copy(isSaving = false, error = "Failed to update reminder") }
             }
         }
     }
@@ -61,7 +61,7 @@ class EditReminderViewModel(application: Application) : AndroidViewModel(applica
                 repository.deleteReminder(reminderId)
                 _uiState.update { it.copy(isSaving = false, isSuccess = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isSaving = false, error = e.message) }
+                _uiState.update { it.copy(isSaving = false, error = "Failed to delete reminder") }
             }
         }
     }

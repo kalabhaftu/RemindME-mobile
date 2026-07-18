@@ -10,6 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -28,10 +31,18 @@ import com.remindme.app.ui.theme.*
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = viewModel(),
-    onNavigateHome: () -> Unit
+    onNavigateHome: () -> Unit,
+    onNavigateToMagicLink: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    remember(Unit) { viewModel.resetDialogs() }
+
+    LaunchedEffect(Unit) { viewModel.navigateHome.collect { onNavigateHome() } }
+
     AppScaffold { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             Column(
@@ -69,8 +80,17 @@ fun LoginScreen(
                 value = uiState.password,
                 onValueChange = viewModel::updatePassword,
                 label = "Password",
-                obscureText = true,
-                visualTransformation = PasswordVisualTransformation(),
+                obscureText = !passwordVisible,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                suffixIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            tint = TextTertiary
+                        )
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -133,7 +153,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             AppButton(
-                onClick = viewModel::sendMagicLink,
+                onClick = onNavigateToMagicLink,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading
             ) {

@@ -94,7 +94,7 @@ class SubscriptionsViewModel(application: Application) : AndroidViewModel(applic
                 _allSubscriptions.value = subscriptions
                 _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load subscriptions") }
             }
         }
     }
@@ -105,7 +105,7 @@ class SubscriptionsViewModel(application: Application) : AndroidViewModel(applic
                 _allSubscriptions.update { list -> list.filter { it.id != id } }
                 repository.deleteReminder(id)
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = "Failed to delete subscription") }
                 fetchSubscriptions(showLoading = false)
             }
         }

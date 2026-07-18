@@ -120,7 +120,7 @@ class PeopleViewModel(application: Application) : AndroidViewModel(application) 
                 _allPeople.value = people
                 _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load people") }
             }
         }
     }
@@ -140,7 +140,7 @@ class PeopleViewModel(application: Application) : AndroidViewModel(application) 
                 _allPeople.update { list -> list.filter { it.id != id } }
                 repository.deleteReminder(id)
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = "Failed to delete person") }
                 // Refetch on error
                 fetchPeople(showLoading = false)
             }

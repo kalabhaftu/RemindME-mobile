@@ -12,6 +12,8 @@ import kotlinx.serialization.Serializable
 @Serializable data object Templates : NavKey
 @Serializable data object Notifications : NavKey
 @Serializable data object ThemeSelector : NavKey
+@Serializable data object NotificationHelp : NavKey
+@Serializable data object MagicLink : NavKey
 
 @Serializable data object AddPerson : NavKey
 @Serializable data class EditPerson(val personId: String) : NavKey

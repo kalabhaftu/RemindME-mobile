@@ -24,9 +24,11 @@ import com.remindme.app.ui.screens.add.AddPersonScreen
 import com.remindme.app.ui.screens.add.AddSubscriptionScreen
 import com.remindme.app.ui.screens.add.AddTaskScreen
 import com.remindme.app.ui.screens.login.LoginScreen
+import com.remindme.app.ui.screens.login.MagicLinkScreen
 import com.remindme.app.ui.screens.peopledetail.PersonDetailScreen
 import com.remindme.app.ui.screens.search.SearchScreen
 import com.remindme.app.ui.screens.settings.SettingsScreen
+import com.remindme.app.ui.screens.notifications.NotificationHelpScreen
 import com.remindme.app.ui.screens.templates.TemplatesScreen
 import io.github.jan.supabase.auth.auth
 import com.remindme.app.domain.models.CategoryType
@@ -74,7 +76,7 @@ fun MainNavigation() {
                 // Stay on AuthCheck / splash
             }
             is io.github.jan.supabase.auth.status.SessionStatus.Authenticated -> {
-                if (backStack.lastOrNull() == AuthCheck || backStack.lastOrNull() == Login) {
+                if (backStack.lastOrNull() == AuthCheck) {
                     backStack.clear()
                     backStack.add(Main)
                 }
@@ -125,6 +127,9 @@ fun MainNavigation() {
                         onNavigateHome = {
                             backStack.clear()
                             backStack.add(Main)
+                        },
+                        onNavigateToMagicLink = {
+                            backStack.add(MagicLink)
                         }
                     )
                 }
@@ -179,11 +184,28 @@ fun MainNavigation() {
                     },
                     onNavigateToThemeSelector = {
                         backStack.add(ThemeSelector)
+                    },
+                    onNavigateToNotificationHelp = {
+                        backStack.add(NotificationHelp)
                     }
                 )
             }
             entry<ThemeSelector> {
                 com.remindme.app.ui.screens.settings.ThemeSelectorScreen(
+                    onBack = { backStack.removeLastOrNull() }
+                )
+            }
+            entry<MagicLink> {
+                MagicLinkScreen(
+                    onNavigateHome = {
+                        backStack.clear()
+                        backStack.add(Main)
+                    },
+                    onBack = { backStack.removeLastOrNull() }
+                )
+            }
+            entry<NotificationHelp> {
+                NotificationHelpScreen(
                     onBack = { backStack.removeLastOrNull() }
                 )
             }

@@ -21,6 +21,7 @@ import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import org.json.JSONObject
 
 data class AddSubscriptionUiState(
     val name: String = "",
@@ -98,7 +99,7 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
             }
 
             if (resolvedDomain != null) {
-                val logoUrl = "https://logo.clearbit.com/$resolvedDomain"
+                val logoUrl = resolveLogoUrl(resolvedDomain)
                 _uiState.update { it.copy(logoUrl = logoUrl, logoDomain = resolvedDomain, isResolvingLogo = false) }
             } else {
                 _uiState.update { it.copy(isResolvingLogo = false) }
@@ -106,6 +107,29 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
         } catch (e: Exception) {
             _uiState.update { it.copy(isResolvingLogo = false) }
         }
+    }
+
+    private suspend fun resolveLogoUrl(domain: String): String {
+        val urls = listOf(
+            "https://icon.horse/icon/$domain",
+            "https://www.google.com/s2/favicons?domain=$domain&sz=128"
+        )
+        for (url in urls) {
+            try {
+                val conn = withContext(Dispatchers.IO) {
+                    val u = java.net.URL(url)
+                    val c = u.openConnection() as java.net.HttpURLConnection
+                    c.connectTimeout = 3000
+                    c.readTimeout = 3000
+                    c.requestMethod = "HEAD"
+                    c
+                }
+                val contentType = conn.contentType
+                conn.disconnect()
+                if (contentType != null && contentType.startsWith("image")) return url
+            } catch (_: Exception) {}
+        }
+        return urls.last()
     }
 
     fun saveSubscription() {
@@ -175,7 +199,7 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
                 repository.addReminder(item)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to save subscription") }
             }
         }
     }

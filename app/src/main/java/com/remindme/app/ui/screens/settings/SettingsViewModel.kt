@@ -120,7 +120,7 @@ class SettingsViewModel : ViewModel() {
                 }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to load preferences") }
         } finally {
             _uiState.update { it.copy(isLoading = false) }
         }
@@ -213,7 +213,7 @@ class SettingsViewModel : ViewModel() {
             android.util.Log.d("SettingsViewModel", "Successfully synced preferences to Supabase: $payload")
         } catch (e: Exception) {
             android.util.Log.e("SettingsViewModel", "Failed to sync preferences to Supabase", e)
-            _uiState.update { it.copy(error = "Sync Failed: ${e.message}") }
+            _uiState.update { it.copy(error = "Failed to sync preferences. Please try again.") }
         }
     }
 
@@ -244,7 +244,7 @@ class SettingsViewModel : ViewModel() {
                 _uiState.update { it.copy(error = "Failed to save token") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to save Telegram token") }
         }
     }
 
@@ -269,7 +269,7 @@ class SettingsViewModel : ViewModel() {
                 }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to delete Telegram token") }
         }
     }
 
@@ -298,10 +298,10 @@ class SettingsViewModel : ViewModel() {
                     )
                 }
             } else {
-                _uiState.update { it.copy(error = json.optString("error", "Detection failed")) }
+                _uiState.update { it.copy(error = "Failed to detect chat ID") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to detect chat ID") }
         }
     }
 
@@ -329,7 +329,7 @@ class SettingsViewModel : ViewModel() {
                 _uiState.update { it.copy(error = "Failed to save") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to save chat ID") }
         }
     }
 
@@ -346,10 +346,10 @@ class SettingsViewModel : ViewModel() {
             } else {
                 val errorStr = conn.errorStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(errorStr)
-                _uiState.update { it.copy(error = json.optString("error", "Failed to send test")) }
+                _uiState.update { it.copy(error = "Failed to send test notification") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to send test notification") }
         }
     }
 
@@ -368,7 +368,7 @@ class SettingsViewModel : ViewModel() {
                 _uiState.update { it.copy(error = "Failed to delete account") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to delete account") }
         }
     }
 
@@ -377,7 +377,7 @@ class SettingsViewModel : ViewModel() {
             supabase.auth.signOut()
             withContext(Dispatchers.Main) { onComplete() }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to sign out") }
         }
     }
 
@@ -386,7 +386,7 @@ class SettingsViewModel : ViewModel() {
             supabase.auth.signOut(io.github.jan.supabase.auth.SignOutScope.GLOBAL)
             withContext(Dispatchers.Main) { onComplete() }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to sign out all devices") }
         }
     }
 
@@ -409,7 +409,7 @@ class SettingsViewModel : ViewModel() {
                 _uiState.update { it.copy(error = "Export failed: HTTP ${conn.responseCode}") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to export data") }
         }
     }
 
@@ -428,7 +428,7 @@ class SettingsViewModel : ViewModel() {
                 _uiState.update { it.copy(error = "Could not check for updates.") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to check for update") }
         }
     }
 }

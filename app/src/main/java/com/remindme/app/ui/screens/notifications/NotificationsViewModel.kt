@@ -100,7 +100,7 @@ class NotificationsViewModel(application: Application) : AndroidViewModel(applic
                 ) 
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message, isLoading = false) }
+            _uiState.update { it.copy(error = "Failed to load notifications", isLoading = false) }
         }
     }
 
@@ -115,7 +115,7 @@ class NotificationsViewModel(application: Application) : AndroidViewModel(applic
             }
             loadData()
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to mark notification as read") }
         }
     }
 
@@ -133,7 +133,7 @@ class NotificationsViewModel(application: Application) : AndroidViewModel(applic
             }
             loadData()
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to mark all as read") }
         }
     }
 

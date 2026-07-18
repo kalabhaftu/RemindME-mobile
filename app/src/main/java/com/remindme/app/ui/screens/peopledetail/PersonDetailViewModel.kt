@@ -42,7 +42,7 @@ class PersonDetailViewModel(
             val person = all.firstOrNull { it.id == personId }
             _uiState.update { it.copy(person = person, isLoading = false) }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message, isLoading = false) }
+            _uiState.update { it.copy(error = "Failed to load person details", isLoading = false) }
         }
     }
 
@@ -52,7 +52,7 @@ class PersonDetailViewModel(
             repository.deleteReminder(personId)
             _uiState.update { it.copy(isDeleted = true, isLoading = false) }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message, isLoading = false) }
+            _uiState.update { it.copy(error = "Failed to delete person", isLoading = false) }
         }
     }
 }

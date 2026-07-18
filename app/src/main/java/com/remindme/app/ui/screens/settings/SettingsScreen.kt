@@ -35,7 +35,8 @@ import com.remindme.app.ui.theme.*
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
     onNavigateHome: () -> Unit,
-    onNavigateToThemeSelector: () -> Unit
+    onNavigateToThemeSelector: () -> Unit,
+    onNavigateToNotificationHelp: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var glassStyle by remember { mutableStateOf(ThemePrefs.getStyle(context)) }
@@ -111,7 +112,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
-                        NotificationDefaultsSection(uiState, viewModel)
+                        NotificationDefaultsSection(uiState, viewModel, onNavigateToNotificationHelp)
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
@@ -344,7 +345,7 @@ fun TimezoneSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
 }
 
 @Composable
-fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
+fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsViewModel, onNavigateToNotificationHelp: () -> Unit = {}) {
     SettingsSection("Global Notification Defaults") {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -354,7 +355,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
             Text("These settings will be inherited by new reminders unless you override them per-item.", color = TextSecondary, fontSize = 13.sp, modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.width(8.dp))
             TextButton(
-                onClick = { /* NotificationHelpScreen is shown as overlay via NavKey */ },
+                onClick = onNavigateToNotificationHelp,
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 AppIcon(Icons.AutoMirrored.Rounded.HelpOutline, modifier = Modifier.size(16.dp), color = Accent500)
@@ -490,7 +491,7 @@ fun TestButton(label: String, icon: androidx.compose.ui.graphics.vector.ImageVec
     ) {
         AppIcon(icon, color = TextPrimary, size = 16.dp)
         Spacer(modifier = Modifier.width(6.dp))
-        Text(label, fontSize = 13.sp)
+        Text(label, fontSize = 13.sp, maxLines = 1)
     }
 }
 

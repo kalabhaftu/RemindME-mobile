@@ -92,7 +92,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isLoading = false, error = e.message)
+                    it.copy(isLoading = false, error = "Failed to load reminders")
                 }
             }
         }
@@ -118,7 +118,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 repository.markTaskDone(id, dateStr)
                 fetchReminders(showLoading = false)
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = "Failed to mark as done") }
             }
         }
     }
@@ -130,7 +130,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 repository.snoozeReminder(id, dateStr)
                 fetchReminders(showLoading = false)
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = "Failed to snooze reminder") }
             }
         }
     }

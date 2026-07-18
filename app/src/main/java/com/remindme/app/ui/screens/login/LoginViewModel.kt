@@ -1,16 +1,16 @@
 package com.remindme.app.ui.screens.login
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.AndroidViewModel
-import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email
-import io.github.jan.supabase.auth.providers.builtin.OTP
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -31,13 +31,23 @@ class LoginViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
+    private val _navigateHome = MutableSharedFlow<Unit>()
+    val navigateHome: SharedFlow<Unit> = _navigateHome.asSharedFlow()
+
     fun updateEmail(e: String) = _uiState.update { it.copy(email = e) }
     fun updatePassword(p: String) = _uiState.update { it.copy(password = p) }
     fun toggleMode() = _uiState.update { it.copy(isSignUpMode = !it.isSignUpMode, error = null) }
     fun clearError() = _uiState.update { it.copy(error = null) }
     fun clearToast() = _uiState.update { it.copy(toastMessage = null) }
     fun dismissConflictDialog() = _uiState.update { it.copy(showGoogleConflictDialog = false) }
-    fun dismissSetPasswordDialog() = _uiState.update { it.copy(showSetPasswordDialog = false) }
+    fun dismissSetPasswordDialog() {
+        _uiState.update { it.copy(showSetPasswordDialog = false) }
+        viewModelScope.launch { _navigateHome.emit(Unit) }
+    }
+
+    fun resetDialogs() = _uiState.update {
+        it.copy(showGoogleConflictDialog = false, showGoogleConflictSignUp = false, showSetPasswordDialog = false)
+    }
 
     fun submit() {
         val email = _uiState.value.email.trim()
@@ -61,6 +71,7 @@ class LoginViewModel : ViewModel() {
                         this.email = email
                         this.password = password
                     }
+                    _navigateHome.emit(Unit)
                 }
             } catch (e: Exception) {
                 val msg = e.message?.lowercase() ?: ""
@@ -68,9 +79,9 @@ class LoginViewModel : ViewModel() {
                 if (isSignUp && (msg.contains("user already registered") || msg.contains("already in use") || msg.contains("exists"))) {
                     _uiState.update { it.copy(showGoogleConflictDialog = true, showGoogleConflictSignUp = true) }
                 } else if (!isSignUp && (msg.contains("invalid login credentials") || msg.contains("invalid password"))) {
-                    _uiState.update { it.copy(toastMessage = "Sign-in failed. If you previously used Google, try \"Continue with Google\" below.") }
+                    _uiState.update { it.copy(toastMessage = "Incorrect email or password. If you previously used Google, try \"Continue with Google\".") }
                 } else {
-                    _uiState.update { it.copy(error = e.message) }
+                    _uiState.update { it.copy(error = "Authentication failed. Please try again.") }
                 }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
@@ -112,30 +123,7 @@ class LoginViewModel : ViewModel() {
                     _uiState.update { it.copy(error = "Unexpected credential type") }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = "Google sign-in failed: ${e.message}") }
-            } finally {
-                _uiState.update { it.copy(isLoading = false) }
-            }
-        }
-    }
-
-    fun sendMagicLink() {
-        val email = _uiState.value.email.trim()
-        if (email.isEmpty()) {
-            _uiState.update { it.copy(error = "Please enter email for magic link") }
-            return
-        }
-
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-            try {
-                SupabaseManager.client.auth.signInWith(OTP) {
-                    this.email = email
-                    createUser = true
-                }
-                _uiState.update { it.copy(toastMessage = "Magic link sent! Check your email to sign in.") }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = "Failed to send magic link: ${e.message}") }
+                _uiState.update { it.copy(error = "Google sign-in failed. Please try again.") }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }
@@ -150,8 +138,9 @@ class LoginViewModel : ViewModel() {
                     this.password = password
                 }
                 _uiState.update { it.copy(toastMessage = "Password set! You can now sign in with email too.", showSetPasswordDialog = false) }
+                _navigateHome.emit(Unit)
             } catch (e: Exception) {
-                _uiState.update { it.copy(toastMessage = "Failed to set password: ${e.message}") }
+                _uiState.update { it.copy(toastMessage = "Failed to set password. Please try again.") }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }

@@ -117,7 +117,7 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
                 repository.addReminder(item)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to save task") }
             }
         }
     }

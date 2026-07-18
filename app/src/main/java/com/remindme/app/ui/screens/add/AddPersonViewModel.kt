@@ -88,7 +88,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                     _uiState.update { it.copy(isLoading = false, error = "Person not found") }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load person") }
             }
         }
     }
@@ -162,7 +162,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                 }
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to save person") }
             }
         }
     }
@@ -185,7 +185,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                 val publicUrl = bucket.publicUrl(path)
                 updateAvatarUrl(publicUrl)
             } catch (e: Exception) {
-                setError("Failed to upload avatar: ${e.message}")
+                setError("Failed to upload avatar")
             } finally {
                 setAvatarUploading(false)
             }
