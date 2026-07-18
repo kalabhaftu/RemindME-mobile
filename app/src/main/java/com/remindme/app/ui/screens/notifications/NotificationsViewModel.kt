@@ -1,7 +1,9 @@
 package com.remindme.app.ui.screens.notifications
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import android.app.Application
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
 import com.remindme.app.utils.OccurrenceCalculator
@@ -42,12 +44,12 @@ data class NotificationsUiState(
     val error: String? = null
 )
 
-class NotificationsViewModel : ViewModel() {
+class NotificationsViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(NotificationsUiState())
     val uiState: StateFlow<NotificationsUiState> = _uiState.asStateFlow()
 
     private val supabase = SupabaseManager.client
-    private val repository = ReminderRepository(SupabaseManager.client)
+    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
 
     init {
         loadData()
@@ -84,6 +86,9 @@ class NotificationsViewModel : ViewModel() {
             val today = LocalDate.now()
             val end = today.plusDays(30)
             val occurrences = OccurrenceCalculator.generateOccurrences(reminders, today, end, today)
+
+            val notificationScheduler = com.remindme.app.services.NotificationSchedulingService(getApplication())
+            notificationScheduler.scheduleReminders(reminders)
 
             _uiState.update { 
                 it.copy(
