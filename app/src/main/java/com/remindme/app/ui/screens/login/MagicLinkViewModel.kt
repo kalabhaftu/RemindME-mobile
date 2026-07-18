@@ -3,14 +3,18 @@ package com.remindme.app.ui.screens.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
+import com.remindme.app.BuildConfig
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.builtin.OTP
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 
 enum class MagicLinkStep {
     INPUT, SENDING, SENT, NOT_FOUND, ERROR
@@ -56,20 +60,44 @@ class MagicLinkViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(step = MagicLinkStep.SENDING, error = null) }
             try {
-                SupabaseManager.client.auth.signInWith(OTP) {
-                    this.email = email
-                    createUser = true
-                    this.redirectTo = "remindme://login-callback"
+                val (success, statusCode) = sendOtpRequest(email)
+                when {
+                    success -> _uiState.update { it.copy(step = MagicLinkStep.SENT) }
+                    statusCode == 429 -> {
+                        delay(30000)
+                        _uiState.update { it.copy(step = MagicLinkStep.ERROR, error = "Too many requests. Please wait a moment and try again.") }
+                    }
+                    statusCode == 422 -> _uiState.update { it.copy(step = MagicLinkStep.NOT_FOUND) }
+                    else -> _uiState.update { it.copy(step = MagicLinkStep.ERROR, error = "Failed to send magic link. Please try again.") }
                 }
-                _uiState.update { it.copy(step = MagicLinkStep.SENT) }
             } catch (e: Exception) {
-                val msg = e.message?.lowercase() ?: ""
-                if (msg.contains("not found") || msg.contains("invalid")) {
-                    _uiState.update { it.copy(step = MagicLinkStep.NOT_FOUND) }
-                } else {
-                    _uiState.update { it.copy(step = MagicLinkStep.ERROR, error = "Failed to send magic link. Please try again.") }
-                }
+                _uiState.update { it.copy(step = MagicLinkStep.ERROR, error = "Failed to send magic link. Please try again.") }
             }
+        }
+    }
+
+    private suspend fun sendOtpRequest(email: String): Pair<Boolean, Int> {
+        val json = JSONObject().apply {
+            put("email", email)
+            put("create_user", true)
+            put("redirect_to", "remindme://login-callback")
+        }
+
+        val url = URL("${BuildConfig.SUPABASE_URL}/auth/v1/otp")
+        val conn = url.openConnection() as HttpURLConnection
+        conn.requestMethod = "POST"
+        conn.doOutput = true
+        conn.setRequestProperty("Content-Type", "application/json")
+        conn.setRequestProperty("apikey", BuildConfig.SUPABASE_ANON_KEY)
+        conn.connectTimeout = 10000
+        conn.readTimeout = 10000
+
+        return try {
+            conn.outputStream.write(json.toString().toByteArray())
+            val code = conn.responseCode
+            Pair(code == 200, code)
+        } finally {
+            conn.disconnect()
         }
     }
 
