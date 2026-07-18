@@ -12,6 +12,9 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.BookmarkAdd
+import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Search
@@ -180,12 +183,18 @@ fun MainScreen(
                             }
                         }
                 ) {
+                    val fabIcon = when (selectedTab) {
+                        1 -> Icons.Default.PersonAdd
+                        2 -> Icons.Default.BookmarkAdd
+                        3 -> Icons.Default.PlaylistAdd
+                        else -> Icons.Default.Add
+                    }
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         AppIcon(
-                            imageVector = Icons.Default.Add,
+                            imageVector = fabIcon,
                             color = Accent500,
                             size = 28.dp
                         )

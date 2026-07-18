@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.domain.models.CategoryType
+import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.Spinner
@@ -111,7 +112,14 @@ fun DashboardScreen(
                 viewModel.markDone(id, date)
             },
             onSnooze = { id, date -> viewModel.snooze(id, date) },
-            onEdit = { /* TODO */ }
+            onEdit = { item ->
+                when (item.category) {
+                    CategoryType.PERSON -> onNavigateToAddPerson()
+                    CategoryType.SUBSCRIPTION -> onNavigateToAddSubscription()
+                    CategoryType.TASK -> onNavigateToAddTask()
+                    CategoryType.CUSTOM_HOLIDAY -> {}
+                }
+            }
         )
 
         uiState.selectedDate?.let { date ->
