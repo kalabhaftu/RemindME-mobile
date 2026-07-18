@@ -161,10 +161,24 @@ fun LoginScreen(
             }
         }
         
-        if (uiState.toastMessage != null) {
-            LaunchedEffect(uiState.toastMessage) {
-                android.widget.Toast.makeText(context, uiState.toastMessage, android.widget.Toast.LENGTH_LONG).show()
-                viewModel.clearToast()
+        if (uiState.message != null) {
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = uiState.message!!,
+                        color = if (uiState.messageIsError) MaterialTheme.colorScheme.error else Color(0xFF22C55E),
+                        fontSize = 13.sp
+                    )
+                    if (uiState.unverifiedEmail != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextButton(onClick = viewModel::resendVerification) {
+                            Text("Resend verification email", color = Accent500, fontSize = 13.sp)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
 

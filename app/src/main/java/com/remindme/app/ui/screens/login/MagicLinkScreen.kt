@@ -1,8 +1,6 @@
 package com.remindme.app.ui.screens.login
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MailOutline
 import androidx.compose.material.icons.rounded.PersonSearch
@@ -13,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,7 +55,7 @@ fun MagicLinkScreen(
         ) {
             when (uiState.step) {
                 MagicLinkStep.INPUT -> InputStep(uiState, viewModel)
-                MagicLinkStep.CHECKING, MagicLinkStep.SENDING -> SendingStep(uiState)
+                MagicLinkStep.SENDING -> SendingStep()
                 MagicLinkStep.SENT -> SentStep()
                 MagicLinkStep.NOT_FOUND -> NotFoundStep(uiState, viewModel, onBack)
                 MagicLinkStep.ERROR -> ErrorStep(uiState, viewModel)
@@ -111,7 +110,7 @@ private fun InputStep(uiState: MagicLinkUiState, viewModel: MagicLinkViewModel) 
 }
 
 @Composable
-private fun SendingStep(uiState: MagicLinkUiState) {
+private fun SendingStep() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(24.dp)
@@ -119,7 +118,7 @@ private fun SendingStep(uiState: MagicLinkUiState) {
         Spinner(size = 32.dp)
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = if (uiState.step == MagicLinkStep.CHECKING) "Checking your account..." else "Sending magic link...",
+            "Sending magic link...",
             fontSize = 16.sp,
             color = TextSecondary
         )
