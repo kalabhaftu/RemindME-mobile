@@ -27,9 +27,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.R
 import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.EmptyState
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
-import com.remindme.app.ui.components.liquid.LiquidSpinner
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.theme.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -46,7 +46,7 @@ fun TasksScreen(
 
     if (uiState.isLoading && tasks.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            LiquidSpinner()
+            Spinner()
         }
         return
     }
@@ -123,7 +123,7 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
         }
     }
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         modifier = Modifier
             .fillMaxWidth()
@@ -143,7 +143,7 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
                     .background(BgSurface3)
             ) {
                 Box(modifier = Modifier.padding(10.dp)) {
-                    LiquidIcon(
+                    AppIcon(
                         imageVector = getIconForKey(item.iconKey),
                         color = Accent500,
                         size = 22.dp
@@ -163,7 +163,7 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
                 if (dueStr != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        LiquidIcon(
+                        AppIcon(
                             imageVector = Icons.Rounded.AccessTime,
                             color = TextTertiary,
                             size = 12.dp
@@ -194,7 +194,7 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
                     .clickable { onMarkDone() }
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
-                    LiquidIcon(
+                    AppIcon(
                         imageVector = Icons.Rounded.CheckCircle,
                         color = StateSuccess,
                         size = 24.dp

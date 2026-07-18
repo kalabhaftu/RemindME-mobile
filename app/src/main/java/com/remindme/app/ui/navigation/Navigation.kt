@@ -12,12 +12,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.remindme.app.data.remote.SupabaseManager
-import com.remindme.app.ui.components.liquid.LiquidGlassPrefs
-import com.remindme.app.ui.components.liquid.LocalLiquidGlassStyle
+import com.remindme.app.ui.components.ThemePrefs
+import com.remindme.app.ui.components.LocalThemeStyle
 import com.remindme.app.ui.screens.main.MainScreen
 import com.remindme.app.ui.screens.add.AddPersonScreen
 import com.remindme.app.ui.screens.add.AddSubscriptionScreen
@@ -40,18 +41,18 @@ import androidx.compose.foundation.background
 fun MainNavigation() {
     val context = LocalContext.current
     var sessionStatus by remember { mutableStateOf<io.github.jan.supabase.auth.status.SessionStatus?>(null) }
-    var glassStyle by remember { mutableStateOf(LiquidGlassPrefs.getStyle(context)) }
+    var glassStyle by remember { mutableStateOf(ThemePrefs.getStyle(context)) }
 
     val listener = remember {
         android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == "glass_style") {
-                glassStyle = LiquidGlassPrefs.getStyle(context)
+            if (key == "theme_style") {
+                glassStyle = ThemePrefs.getStyle(context)
             }
         }
     }
 
     androidx.compose.runtime.DisposableEffect(context) {
-        val prefs = context.getSharedPreferences("liquid_glass_prefs", android.content.Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("remindme_prefs", android.content.Context.MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose {
             prefs.unregisterOnSharedPreferenceChangeListener(listener)
@@ -88,7 +89,7 @@ fun MainNavigation() {
     }
 
     CompositionLocalProvider(
-        LocalLiquidGlassStyle provides glassStyle
+        LocalThemeStyle provides glassStyle
     ) {
         NavDisplay(
             backStack = backStack,
@@ -96,14 +97,26 @@ fun MainNavigation() {
             entryProvider =
             entryProvider {
                 entry<AuthCheck> {
+                    val bgBrush = androidx.compose.ui.graphics.Brush.linearGradient(
+                        colors = listOf(
+                            androidx.compose.ui.graphics.Color(0xFF1A1A2E),
+                            androidx.compose.ui.graphics.Color(0xFF16213E),
+                            androidx.compose.ui.graphics.Color(0xFF0F3460)
+                        ),
+                        start = androidx.compose.ui.geometry.Offset.Zero,
+                        end = androidx.compose.ui.geometry.Offset(0f, Float.POSITIVE_INFINITY)
+                    )
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(com.remindme.app.ui.theme.AppColors.bgCanvas),
+                            .background(bgBrush),
                         contentAlignment = Alignment.Center
                     ) {
-                        com.remindme.app.ui.components.liquid.LiquidSpinner(
-                            modifier = Modifier.size(48.dp)
+                        androidx.compose.material3.Text(
+                            text = "RemindME",
+                            fontSize = 32.sp,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f)
                         )
                     }
                 }

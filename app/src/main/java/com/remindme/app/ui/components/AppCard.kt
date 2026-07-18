@@ -1,0 +1,51 @@
+package com.remindme.app.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.remindme.app.ui.theme.BgElevated
+
+@Composable
+fun AppCard(
+    modifier: Modifier = Modifier,
+    borderRadius: Dp = 28.dp,
+    padding: Dp = 0.dp,
+    tintColor: Color? = null,
+    content: @Composable () -> Unit
+) {
+    val isDark = isSystemInDarkTheme()
+    val glassStyle = LocalThemeStyle.current
+
+    val bgColor = if (glassStyle == ThemeStyle.Solid) {
+        if (isDark) BgElevated else Color(0xFFF2F2F7)
+    } else {
+        tintColor ?: if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.06f)
+    }
+
+    val shape = RoundedCornerShape(borderRadius)
+
+    Box(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(shape)
+                .background(bgColor)
+                .then(
+                    if (glassStyle == ThemeStyle.Glass) Modifier.blur(8.dp)
+                    else Modifier
+                )
+        )
+        Box(modifier = Modifier.padding(padding)) {
+            content()
+        }
+    }
+}

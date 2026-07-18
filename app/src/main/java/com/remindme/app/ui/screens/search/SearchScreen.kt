@@ -18,11 +18,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.domain.models.CategoryType
 import com.remindme.app.domain.models.ReminderItem
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
-import com.remindme.app.ui.components.liquid.LiquidSpinner
-import com.remindme.app.ui.components.liquid.LiquidTextField
-import com.remindme.app.ui.components.liquid.CircledBackButton
+import com.remindme.app.ui.components.AppScaffold
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.Spinner
+import com.remindme.app.ui.components.AppTextField
+import com.remindme.app.ui.components.CircledBackButton
 import com.remindme.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +35,7 @@ fun SearchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    com.remindme.app.ui.components.liquid.LiquidScaffold { paddingValues ->
+    AppScaffold { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -49,7 +50,7 @@ fun SearchScreen(
             ) {
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
-                LiquidTextField(
+                AppTextField(
                     value = uiState.query,
                     onValueChange = viewModel::updateQuery,
                     placeholder = "Search reminders, notes, people…",
@@ -59,7 +60,7 @@ fun SearchScreen(
 
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    LiquidSpinner()
+                    Spinner()
                 }
             } else if (uiState.results.isEmpty()) {
                 Box(
@@ -90,7 +91,7 @@ fun SearchScreen(
 
 @Composable
 fun SearchResultItem(item: ReminderItem, onClick: () -> Unit) {
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         modifier = Modifier
             .fillMaxWidth()
@@ -101,7 +102,7 @@ fun SearchResultItem(item: ReminderItem, onClick: () -> Unit) {
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 12.dp,
                 modifier = Modifier.wrapContentSize()
             ) {
@@ -112,7 +113,7 @@ fun SearchResultItem(item: ReminderItem, onClick: () -> Unit) {
                         CategoryType.CUSTOM_HOLIDAY -> Icons.Rounded.CardGiftcard
                         CategoryType.TASK -> Icons.Rounded.Checklist
                     }
-                    LiquidIcon(imageVector = icon, color = Accent500, size = 22.dp)
+                    AppIcon(imageVector = icon, color = Accent500, size = 22.dp)
                 }
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -141,7 +142,7 @@ fun SearchResultItem(item: ReminderItem, onClick: () -> Unit) {
                     )
                 }
             }
-            LiquidIcon(imageVector = Icons.Rounded.ChevronRight, size = 18.dp, color = TextTertiary)
+            AppIcon(imageVector = Icons.Rounded.ChevronRight, size = 18.dp, color = TextTertiary)
         }
     }
 }

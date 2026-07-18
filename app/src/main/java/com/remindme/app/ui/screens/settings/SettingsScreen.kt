@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.ui.components.BottomSheetPicker
-import com.remindme.app.ui.components.liquid.*
-import com.remindme.app.ui.components.liquid.LiquidIcon
-import com.remindme.app.ui.components.liquid.LiquidSnackbarHost
+import com.remindme.app.ui.components.*
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.SnackbarHost
 import com.remindme.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,25 +38,25 @@ fun SettingsScreen(
     onNavigateToThemeSelector: () -> Unit
 ) {
     val context = LocalContext.current
-    var glassStyle by remember { mutableStateOf(LiquidGlassPrefs.getStyle(context)) }
+    var glassStyle by remember { mutableStateOf(ThemePrefs.getStyle(context)) }
 
     val listener = remember {
         android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == "glass_style") {
-                glassStyle = LiquidGlassPrefs.getStyle(context)
+            if (key == "theme_style") {
+                glassStyle = ThemePrefs.getStyle(context)
             }
         }
     }
 
     androidx.compose.runtime.DisposableEffect(context) {
-        val prefs = context.getSharedPreferences("liquid_glass_prefs", android.content.Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("remindme_prefs", android.content.Context.MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose {
             prefs.unregisterOnSharedPreferenceChangeListener(listener)
         }
     }
 
-    CompositionLocalProvider(LocalLiquidGlassStyle provides glassStyle) {
+    CompositionLocalProvider(LocalThemeStyle provides glassStyle) {
         val uiState by viewModel.uiState.collectAsState()
 
         val snackbarHostState = remember { SnackbarHostState() }
@@ -72,8 +72,8 @@ fun SettingsScreen(
             }
         }
 
-        LiquidScaffold(
-            snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
+        AppScaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             appBar = {
                 Row(
                     modifier = Modifier
@@ -84,7 +84,7 @@ fun SettingsScreen(
                 ) {
                     CircledBackButton(onClick = onNavigateHome)
                     Spacer(modifier = Modifier.width(12.dp))
-                    LiquidAppBar(
+                    TopBar(
                         title = "Settings",
                         statusBarsPadding = false,
                         modifier = Modifier.weight(1f)
@@ -95,7 +95,7 @@ fun SettingsScreen(
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    LiquidSpinner()
+                    Spinner()
                 }
             } else {
                 LazyColumn(
@@ -143,7 +143,7 @@ fun SettingsScreen(
 
 @Composable
 fun SettingsSection(title: String, content: @Composable () -> Unit) {
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 24.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -157,14 +157,14 @@ fun SettingsSection(title: String, content: @Composable () -> Unit) {
 
 @Composable
 fun AppearanceSection(onNavigateToThemeSelector: () -> Unit) {
-    val currentStyle = LocalLiquidGlassStyle.current
+    val currentStyle = LocalThemeStyle.current
     val label = when (currentStyle) {
-        LiquidGlassStyle.Frosted -> "Colored Glass"
-        LiquidGlassStyle.Clear -> "Clear Glass"
+        ThemeStyle.Glass -> "Default Glass"
+        ThemeStyle.Solid -> "Flat Solid"
     }
 
     SettingsSection(title = "Appearance") {
-        FloatingGlassContainer(
+        AppCard(
             borderRadius = 16.dp,
             modifier = Modifier
                 .fillMaxWidth()
@@ -176,13 +176,13 @@ fun AppearanceSection(onNavigateToThemeSelector: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Liquid Glass Style", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                    Text("Choose between transparent and colored glass", color = TextSecondary, fontSize = 12.sp)
+                    Text("Theme Appearance", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text("Glass: blurred backgrounds | Solid: flat colors", color = TextSecondary, fontSize = 12.sp)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(label, color = Accent500, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                     Spacer(modifier = Modifier.width(8.dp))
-                    LiquidIcon(Icons.Rounded.ChevronRight, color = TextTertiary, size = 18.dp)
+                    AppIcon(Icons.Rounded.ChevronRight, color = TextTertiary, size = 18.dp)
                 }
             }
         }
@@ -201,10 +201,10 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
 
         if (uiState.isLoadingTelegram) {
             Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                LiquidSpinner()
+                Spinner()
             }
         } else if (uiState.hasTelegramToken) {
-            FloatingGlassContainer(borderRadius = 16.dp) {
+            AppCard(borderRadius = 16.dp) {
                 Row(
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -226,7 +226,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
             Spacer(modifier = Modifier.height(8.dp))
             Text("To update your token, delete the existing one first.", color = TextTertiary, fontSize = 12.sp)
             Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = GlassBorder)
+            HorizontalDivider(color = BorderSubtle)
             Spacer(modifier = Modifier.height(16.dp))
             Text("Chat ID", style = MaterialTheme.typography.titleSmall, color = TextPrimary)
             Spacer(modifier = Modifier.height(8.dp))
@@ -238,7 +238,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
             Spacer(modifier = Modifier.height(12.dp))
 
             if (uiState.hasChatId) {
-                FloatingGlassContainer(borderRadius = 16.dp) {
+                AppCard(borderRadius = 16.dp) {
                     Row(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -253,7 +253,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                 }
             } else {
                 var chatId by remember { mutableStateOf("") }
-                LiquidTextField(
+                AppTextField(
                     value = chatId,
                     onValueChange = { chatId = it },
                     placeholder = "e.g. 123456789",
@@ -261,49 +261,43 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Row {
-                    Button(
+                    AppButton(
                         onClick = { viewModel.detectChatId() },
-                        modifier = Modifier.weight(1f).height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = BgSurface3, contentColor = TextPrimary),
-                        shape = RoundedCornerShape(16.dp)
+                        modifier = Modifier.weight(1f).height(48.dp)
                     ) {
-                        Icon(Icons.Rounded.WifiTethering, contentDescription = null, modifier = Modifier.size(18.dp))
+                        AppIcon(Icons.Rounded.WifiTethering, color = TextPrimary, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Detect Chat ID")
+                        Text("Detect Chat ID", fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
-                    Button(
+                    AppButton(
                         onClick = { viewModel.saveChatId(chatId) },
-                        enabled = chatId.isNotEmpty(),
                         modifier = Modifier.weight(1f).height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Accent500, contentColor = Color.White),
-                        shape = RoundedCornerShape(16.dp)
+                        tint = Accent500
                     ) {
-                        Icon(Icons.Rounded.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                        AppIcon(Icons.Rounded.Save, color = Accent500, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Save")
+                        Text("Save", fontSize = 14.sp)
                     }
                 }
             }
         } else {
             var token by remember { mutableStateOf("") }
-            LiquidTextField(
+            AppTextField(
                 value = token,
                 onValueChange = { token = it },
                 placeholder = "123456789:ABCdefGHIjklmNOPqrstUVwxyZ",
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
-            Button(
+            AppButton(
                 onClick = { viewModel.saveTelegramToken(token) },
-                enabled = token.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth().height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Accent500, contentColor = Color.White),
-                shape = RoundedCornerShape(16.dp)
+                tint = Accent500
             ) {
-                Icon(Icons.Rounded.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                AppIcon(Icons.Rounded.Save, color = Accent500, size = 18.dp)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Save Token")
+                Text("Save Token", fontSize = 14.sp)
             }
         }
     }
@@ -323,7 +317,7 @@ fun TimezoneSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
             "Australia/Sydney", "Pacific/Auckland"
         )
         
-        FloatingGlassContainer(
+        AppCard(
             borderRadius = 16.dp,
             modifier = Modifier.fillMaxWidth().clickable { showPicker = true }
         ) {
@@ -363,7 +357,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
                 onClick = { /* NotificationHelpScreen is shown as overlay via NavKey */ },
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
             ) {
-                LiquidIcon(Icons.AutoMirrored.Rounded.HelpOutline, modifier = Modifier.size(16.dp), color = Accent500)
+                AppIcon(Icons.AutoMirrored.Rounded.HelpOutline, modifier = Modifier.size(16.dp), color = Accent500)
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Help", color = Accent500, fontSize = 13.sp)
             }
@@ -386,7 +380,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
         var showTimingPicker by remember { mutableStateOf(false) }
         val timings = listOf("at_time" to "At time of event", "morning_of" to "Morning of", "noon_of" to "Noon of", "evening_of" to "Evening of", "custom" to "Custom Time")
         
-        FloatingGlassContainer(
+        AppCard(
             borderRadius = 16.dp,
             modifier = Modifier.fillMaxWidth().clickable { showTimingPicker = true }
         ) {
@@ -414,7 +408,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
         Text("Escalation Nudge Delay (Hours)", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
         Spacer(modifier = Modifier.height(8.dp))
         var nudgeVal by remember(uiState.nudgeDelayHours) { mutableStateOf(uiState.nudgeDelayHours.toString()) }
-        LiquidTextField(
+        AppTextField(
             value = nudgeVal,
             onValueChange = { 
                 nudgeVal = it
@@ -432,14 +426,14 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
 
 @Composable
 fun GlassSwitch(title: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    FloatingGlassContainer(borderRadius = 16.dp, modifier = Modifier.fillMaxWidth()) {
+    AppCard(borderRadius = 16.dp, modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(title, fontWeight = FontWeight.Medium, color = TextPrimary)
-            LiquidToggle(
+            Toggle(
                 selected = { checked },
                 onSelect = onCheckedChange
             )
@@ -449,7 +443,7 @@ fun GlassSwitch(title: String, checked: Boolean, onCheckedChange: (Boolean) -> U
 
 @Composable
 fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
-    FloatingGlassContainer(borderRadius = 16.dp, modifier = Modifier.fillMaxWidth()) {
+    AppCard(borderRadius = 16.dp, modifier = Modifier.fillMaxWidth()) {
         Column {
             rows.forEachIndexed { index, (title, checked, onCheckedChange) ->
                 Row(
@@ -460,7 +454,7 @@ fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(title, fontWeight = FontWeight.Medium, color = TextPrimary)
-                    LiquidToggle(
+                    Toggle(
                         selected = { checked },
                         onSelect = onCheckedChange
                     )
@@ -469,7 +463,7 @@ fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
                     androidx.compose.material3.HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         thickness = 1.dp,
-                        color = GlassBorder
+                        color = BorderSubtle
                     )
                 }
             }
@@ -490,18 +484,13 @@ fun TestNotificationsSection(viewModel: SettingsViewModel) {
 
 @Composable
 fun TestButton(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Button(
+    AppButton(
         onClick = onClick,
-        modifier = modifier.height(48.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = BgSurface3, contentColor = TextPrimary),
-        shape = RoundedCornerShape(16.dp),
-        contentPadding = PaddingValues(0.dp)
+        modifier = modifier.height(48.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(label, fontSize = 13.sp)
-        }
+        AppIcon(icon, color = TextPrimary, size = 16.dp)
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(label, fontSize = 13.sp)
     }
 }
 
@@ -542,41 +531,41 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
         Text("Export your data or sign out on all devices.", color = TextSecondary, fontSize = 13.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
-        LiquidButton(
+        AppButton(
             onClick = { viewModel.checkForUpdate(context) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            LiquidIcon(Icons.Rounded.Update, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(Icons.Rounded.Update, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Check for Updates", color = TextPrimary)
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        LiquidButton(
+        AppButton(
             onClick = { viewModel.exportData(context) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            LiquidIcon(Icons.Rounded.Download, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(Icons.Rounded.Download, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Export Data (JSON)", color = TextPrimary)
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        LiquidButton(
+        AppButton(
             onClick = { viewModel.signOut(onNavigateHome) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            LiquidIcon(Icons.AutoMirrored.Rounded.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(Icons.AutoMirrored.Rounded.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sign Out (This Device)", color = TextPrimary)
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        LiquidButton(
+        AppButton(
             onClick = { viewModel.signOutAllDevices(onNavigateHome) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            LiquidIcon(Icons.Rounded.PhonelinkErase, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(Icons.Rounded.PhonelinkErase, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sign Out All Devices", color = TextPrimary)
         }
@@ -606,12 +595,12 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
                 fontSize = 13.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
-            LiquidButton(
+            AppButton(
                 onClick = { viewModel.deleteAccount(onNavigateHome) },
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 surfaceColor = Color.Red.copy(alpha = 0.2f)
             ) {
-                LiquidIcon(Icons.Rounded.Delete, modifier = Modifier.size(18.dp), color = Color.Red)
+                AppIcon(Icons.Rounded.Delete, modifier = Modifier.size(18.dp), color = Color.Red)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Delete Account", color = Color.Red)
             }
@@ -624,26 +613,26 @@ fun ThemeSelectorScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    var currentStyle by remember { mutableStateOf(LiquidGlassPrefs.getStyle(context)) }
+    var currentStyle by remember { mutableStateOf(ThemePrefs.getStyle(context)) }
 
     val listener = remember {
         android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == "glass_style") {
-                currentStyle = LiquidGlassPrefs.getStyle(context)
+            if (key == "theme_style") {
+                currentStyle = ThemePrefs.getStyle(context)
             }
         }
     }
 
     androidx.compose.runtime.DisposableEffect(context) {
-        val prefs = context.getSharedPreferences("liquid_glass_prefs", android.content.Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("remindme_prefs", android.content.Context.MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose {
             prefs.unregisterOnSharedPreferenceChangeListener(listener)
         }
     }
 
-    CompositionLocalProvider(LocalLiquidGlassStyle provides currentStyle) {
-        LiquidScaffold(
+    CompositionLocalProvider(LocalThemeStyle provides currentStyle) {
+        AppScaffold(
             appBar = {
                 Row(
                     modifier = Modifier
@@ -654,7 +643,7 @@ fun ThemeSelectorScreen(
                 ) {
                     CircledBackButton(onClick = onBack)
                     Spacer(modifier = Modifier.width(12.dp))
-                    LiquidAppBar(
+                    TopBar(
                         title = "Theme Selector",
                         statusBarsPadding = false,
                         modifier = Modifier.weight(1f)
@@ -671,7 +660,7 @@ fun ThemeSelectorScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Choose your Liquid Glass style. The entire app's backdrop and card elements will update instantly to reflect your choice.",
+                text = "Switch between Glass and Solid theme appearance.",
                 color = TextSecondary,
                 fontSize = 14.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -679,24 +668,24 @@ fun ThemeSelectorScreen(
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            LiquidGlassStyle.entries.forEach { style ->
+            ThemeStyle.entries.forEach { style ->
                 val isSelected = currentStyle == style
                 val title = when (style) {
-                    LiquidGlassStyle.Clear -> "Clear Glass (Reference Style)"
-                    LiquidGlassStyle.Frosted -> "Colored Glass (Frosted Style)"
+                    ThemeStyle.Glass -> "Default Glass"
+                    ThemeStyle.Solid -> "Flat Solid"
                 }
                 val desc = when (style) {
-                    LiquidGlassStyle.Clear -> "Perfect transparency. Blends directly into the background using a glassmorphic shader overlay."
-                    LiquidGlassStyle.Frosted -> "A beautiful frosted effect with solid color tints, enhancing text readability and UI depth."
+                    ThemeStyle.Glass -> "Semi-transparent panels and subtle glass depth. The default RemindME look."
+                    ThemeStyle.Solid -> "Solid opaque surfaces. Cleaner contrast with flat backgrounds."
                 }
 
-                FloatingGlassContainer(
+                AppCard(
                     borderRadius = 24.dp,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 20.dp)
                         .clickable {
-                            LiquidGlassPrefs.setStyle(context, style)
+                            ThemePrefs.setStyle(context, style)
                         }
                         .border(
                             width = 2.dp,
@@ -719,9 +708,9 @@ fun ThemeSelectorScreen(
                                 fontSize = 16.sp
                             )
                             if (isSelected) {
-                                LiquidIcon(Icons.Rounded.CheckCircle, color = Accent500, size = 20.dp)
+                                AppIcon(Icons.Rounded.CheckCircle, color = Accent500, size = 20.dp)
                             } else {
-                                LiquidIcon(Icons.Rounded.Circle, color = TextTertiary, size = 20.dp)
+                                AppIcon(Icons.Rounded.Circle, color = TextTertiary, size = 20.dp)
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
@@ -733,8 +722,8 @@ fun ThemeSelectorScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // Render the mockup using the specific theme style override
-                        CompositionLocalProvider(LocalLiquidGlassStyle provides style) {
-                            FloatingGlassContainer(
+                        CompositionLocalProvider(LocalThemeStyle provides style) {
+                            AppCard(
                                 borderRadius = 16.dp,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -749,7 +738,7 @@ fun ThemeSelectorScreen(
                                             .background(Accent500.copy(alpha = 0.2f)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        LiquidIcon(Icons.Rounded.Notifications, color = Accent500, size = 20.dp)
+                                        AppIcon(Icons.Rounded.Notifications, color = Accent500, size = 20.dp)
                                     }
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Column {

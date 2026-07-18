@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.remindme.app.ui.components.liquid.*
+import com.remindme.app.ui.components.*
 import com.remindme.app.ui.theme.*
 import java.time.LocalDateTime
 
@@ -50,7 +50,7 @@ fun AddTaskScreen(
         }
     }
 
-    LiquidScaffold(
+    AppScaffold(
         appBar = {
             Row(
                 modifier = Modifier
@@ -61,7 +61,7 @@ fun AddTaskScreen(
             ) {
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
+                TopBar(
                     title = "Add Task",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f)
@@ -69,7 +69,7 @@ fun AddTaskScreen(
             }
         },
         snackbarHost = {
-            LiquidSnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) { paddingValues ->
         Column(
@@ -79,7 +79,7 @@ fun AddTaskScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
-            LiquidTextField(
+            AppTextField(
                 value = uiState.name,
                 onValueChange = { viewModel.updateName(it) },
                 placeholder = "Task name *"
@@ -102,14 +102,14 @@ fun AddTaskScreen(
                 TASK_ICONS.forEach { icon ->
                     val selected = uiState.iconKey == icon.first
                     Box(modifier = Modifier.padding(end = 8.dp)) {
-                        FloatingGlassContainer(
+                        AppCard(
                             borderRadius = 12.dp,
                             padding = 12.dp
                         ) {
                             Box(
                                 modifier = Modifier.clickable { viewModel.updateIconKey(icon.first) }
                             ) {
-                                LiquidIcon(
+                                AppIcon(
                                     imageVector = icon.second,
                                     size = 22.dp,
                                     color = if (selected) Accent500 else TextTertiary
@@ -122,7 +122,7 @@ fun AddTaskScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            LiquidDateTile(
+            DateTile(
                 label = "Due Date & Time *",
                 value = uiState.dueAt,
                 placeholder = "Select date and time",
@@ -131,7 +131,7 @@ fun AddTaskScreen(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            LiquidTextField(
+            AppTextField(
                 value = uiState.notes,
                 onValueChange = { viewModel.updateNotes(it) },
                 placeholder = "Notes"
@@ -153,12 +153,12 @@ fun AddTaskScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            LiquidButton(
+            AppButton(
                 onClick = { viewModel.saveTask() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (uiState.isLoading) {
-                    LiquidSpinner(size = 20.dp)
+                    Spinner(size = 20.dp)
                 } else {
                     Text("Add Task", color = TextPrimary)
                 }
@@ -166,7 +166,7 @@ fun AddTaskScreen(
         }
         
         if (showDatePicker) {
-            LiquidDateTimePickerDialog(
+            DateTimePickerDialog(
                 initialDate = uiState.dueAt,
                 onDismissRequest = { showDatePicker = false },
                 onDateTimeSelected = {

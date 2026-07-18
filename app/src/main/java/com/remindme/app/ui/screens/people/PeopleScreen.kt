@@ -33,7 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.R
 import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.EmptyState
-import com.remindme.app.ui.components.liquid.*
+import com.remindme.app.ui.components.*
 import com.remindme.app.ui.theme.*
 import com.remindme.app.ui.screens.people.PeopleSort
 import com.remindme.app.ui.screens.people.PeopleViewModel
@@ -57,7 +57,7 @@ fun PeopleScreen(
 
     if (uiState.isLoading && people.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            LiquidSpinner()
+            Spinner()
         }
         return
     }
@@ -68,11 +68,11 @@ fun PeopleScreen(
     ) {
         item {
             Spacer(modifier = Modifier.height(4.dp))
-            LiquidTextField(
+            AppTextField(
                 value = uiState.searchQuery,
                 onValueChange = viewModel::updateSearchQuery,
                 placeholder = "Search people...",
-                prefixIcon = { LiquidIcon(imageVector = Icons.Default.Search) },
+                prefixIcon = { AppIcon(imageVector = Icons.Default.Search) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -83,22 +83,22 @@ fun PeopleScreen(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                LiquidFilterChip(
+                FilterChip(
                     label = "Closest",
                     selected = uiState.sort == PeopleSort.DAYS_ASC,
                     onSelected = { viewModel.updateSort(PeopleSort.DAYS_ASC) }
                 )
-                LiquidFilterChip(
+                FilterChip(
                     label = "A–Z",
                     selected = uiState.sort == PeopleSort.NAME_ASC,
                     onSelected = { viewModel.updateSort(PeopleSort.NAME_ASC) }
                 )
-                LiquidFilterChip(
+                FilterChip(
                     label = "Age",
                     selected = uiState.sort == PeopleSort.AGE_DESC,
                     onSelected = { viewModel.updateSort(PeopleSort.AGE_DESC) }
                 )
-                LiquidFilterChip(
+                FilterChip(
                     label = "Recent",
                     selected = uiState.sort == PeopleSort.RECENT,
                     onSelected = { viewModel.updateSort(PeopleSort.RECENT) }
@@ -118,7 +118,7 @@ fun PeopleScreen(
             }
         } else {
             item {
-                FloatingGlassContainer(
+                AppCard(
                     borderRadius = 12.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -187,7 +187,7 @@ fun PersonRow(person: ReminderItem, onClick: () -> Unit) {
     val relPair = AppConstants.RELATIONSHIP_LABELS[relationship]
     val glyph = AppConstants.ZODIAC_GLYPHS[zodiac] ?: "★"
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         modifier = Modifier
             .fillMaxWidth()
@@ -201,7 +201,7 @@ fun PersonRow(person: ReminderItem, onClick: () -> Unit) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Row(modifier = Modifier.weight(3f), verticalAlignment = Alignment.CenterVertically) {
-                    LiquidIcon(imageVector = Icons.Default.Person, size = 18.dp)
+                    AppIcon(imageVector = Icons.Default.Person, size = 18.dp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = person.name,

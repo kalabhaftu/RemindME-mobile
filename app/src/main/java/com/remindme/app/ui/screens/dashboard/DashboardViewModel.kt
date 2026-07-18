@@ -1,4 +1,5 @@
 package com.remindme.app.ui.screens.dashboard
+import com.remindme.app.domain.models.ReminderItem
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
@@ -6,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import android.app.Application
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
-import com.remindme.app.domain.models.ReminderItem
+import com.remindme.app.data.repository.OfflineReminderRepository
 import com.remindme.app.domain.models.ReminderOccurrence
 import com.remindme.app.utils.OccurrenceCalculator
 import io.github.jan.supabase.realtime.PostgresAction
@@ -30,7 +31,7 @@ data class DashboardUiState(
 )
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
+    private val repository = OfflineReminderRepository(ReminderRepository(SupabaseManager.client, application.applicationContext), application.applicationContext)
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 

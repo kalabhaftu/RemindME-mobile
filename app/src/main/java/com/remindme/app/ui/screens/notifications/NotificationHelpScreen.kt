@@ -17,21 +17,21 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidAppBar
-import com.remindme.app.ui.components.liquid.LiquidScaffold
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.TopBar
+import com.remindme.app.ui.components.AppScaffold
 import com.remindme.app.ui.theme.*
 
 @Composable
 fun NotificationHelpScreen(onBack: () -> Unit) {
-    LiquidScaffold(
+    AppScaffold(
         snackbarHost = {},
         appBar = {
-            LiquidAppBar(
+            TopBar(
                 title = "Notification Help",
                 leading = {
                     androidx.compose.material3.IconButton(onClick = onBack) {
-                        com.remindme.app.ui.components.liquid.LiquidIcon(
+                        com.remindme.app.ui.components.AppIcon(
                             imageVector = Icons.Rounded.ArrowBack,
                             color = TextPrimary
                         )
@@ -108,7 +108,7 @@ fun NotificationHelpScreen(onBack: () -> Unit) {
 
 @Composable
 fun HelpCard(title: String, description: String, icon: ImageVector) {
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         modifier = Modifier.fillMaxWidth()
     ) {

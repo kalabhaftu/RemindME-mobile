@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.sp
 import com.remindme.app.domain.models.CategoryType
 import com.remindme.app.domain.models.OccurrenceStatus
 import com.remindme.app.domain.models.ReminderOccurrence
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidFilterChip
-import com.remindme.app.ui.components.liquid.LiquidIcon
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.FilterChip
+import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.theme.AppColors
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -52,7 +52,7 @@ fun UpcomingPanel(
         }.sortedBy { it.date }
     }
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 24.dp,
         padding = 16.dp,
         modifier = Modifier.fillMaxWidth()
@@ -71,17 +71,17 @@ fun UpcomingPanel(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                LiquidFilterChip("Next 3 Days", filter == UpcomingFilter.ThreeDays, onSelected = { filter = UpcomingFilter.ThreeDays })
-                LiquidFilterChip("Next 7 Days", filter == UpcomingFilter.SevenDays, onSelected = { filter = UpcomingFilter.SevenDays })
-                LiquidFilterChip("This Month", filter == UpcomingFilter.Month, onSelected = { filter = UpcomingFilter.Month })
-                LiquidFilterChip("All Upcoming", filter == UpcomingFilter.All, onSelected = { filter = UpcomingFilter.All })
+                FilterChip("Next 3 Days", filter == UpcomingFilter.ThreeDays, onSelected = { filter = UpcomingFilter.ThreeDays })
+                FilterChip("Next 7 Days", filter == UpcomingFilter.SevenDays, onSelected = { filter = UpcomingFilter.SevenDays })
+                FilterChip("This Month", filter == UpcomingFilter.Month, onSelected = { filter = UpcomingFilter.Month })
+                FilterChip("All Upcoming", filter == UpcomingFilter.All, onSelected = { filter = UpcomingFilter.All })
             }
             Spacer(modifier = Modifier.height(16.dp))
 
             if (filtered.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        LiquidIcon(Icons.Rounded.Notifications, size = 32.dp, color = AppColors.textTertiary)
+                        AppIcon(Icons.Rounded.Notifications, size = 32.dp, color = AppColors.textTertiary)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("All caught up", color = AppColors.textSecondary, fontSize = 14.sp)
                     }
@@ -119,7 +119,7 @@ fun UpcomingItem(
         CategoryType.CUSTOM_HOLIDAY -> Icons.Rounded.Cake
     }
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         padding = 0.dp
     ) {
@@ -131,11 +131,11 @@ fun UpcomingItem(
                 .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 10.dp,
                 padding = 9.dp
             ) {
-                LiquidIcon(
+                AppIcon(
                     imageVector = iconRes,
                     size = 18.dp,
                     tint = if (isDone) AppColors.textTertiary else AppColors.accent500
@@ -168,30 +168,30 @@ fun UpcomingItem(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (item.category == CategoryType.TASK && !isDone) {
-                    FloatingGlassContainer(
+                    AppCard(
                         borderRadius = 20.dp,
                         padding = 8.dp,
                         modifier = Modifier.clickable { onSnooze() }
                     ) {
-                        LiquidIcon(imageVector = Icons.Rounded.Snooze, size = 18.dp, color = AppColors.stateWarning)
+                        AppIcon(imageVector = Icons.Rounded.Snooze, size = 18.dp, color = AppColors.stateWarning)
                     }
                     Spacer(modifier = Modifier.width(6.dp))
-                    FloatingGlassContainer(
+                    AppCard(
                         borderRadius = 20.dp,
                         padding = 8.dp,
                         modifier = Modifier.clickable { onMarkDone() }
                     ) {
-                        LiquidIcon(imageVector = Icons.Rounded.CheckCircle, size = 18.dp, color = AppColors.stateSuccess)
+                        AppIcon(imageVector = Icons.Rounded.CheckCircle, size = 18.dp, color = AppColors.stateSuccess)
                     }
                     Spacer(modifier = Modifier.width(6.dp))
                 }
                 if (item.category != CategoryType.CUSTOM_HOLIDAY) {
-                    FloatingGlassContainer(
+                    AppCard(
                         borderRadius = 20.dp,
                         padding = 8.dp,
                         modifier = Modifier.clickable { onEdit() }
                     ) {
-                        LiquidIcon(imageVector = Icons.Rounded.Edit, size = 18.dp, color = AppColors.textTertiary)
+                        AppIcon(imageVector = Icons.Rounded.Edit, size = 18.dp, color = AppColors.textTertiary)
                     }
                 }
             }

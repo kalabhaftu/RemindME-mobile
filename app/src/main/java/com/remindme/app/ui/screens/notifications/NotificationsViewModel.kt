@@ -1,4 +1,6 @@
 package com.remindme.app.ui.screens.notifications
+import com.remindme.app.domain.models.ReminderItem
+import com.remindme.app.utils.OccurrenceCalculator
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
@@ -6,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import android.app.Application
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
-import com.remindme.app.utils.OccurrenceCalculator
+import com.remindme.app.data.repository.OfflineReminderRepository
 import com.remindme.app.domain.models.OccurrenceStatus
 import com.remindme.app.domain.models.ReminderOccurrence
 import io.github.jan.supabase.auth.auth
@@ -49,7 +51,7 @@ class NotificationsViewModel(application: Application) : AndroidViewModel(applic
     val uiState: StateFlow<NotificationsUiState> = _uiState.asStateFlow()
 
     private val supabase = SupabaseManager.client
-    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
+    private val repository = OfflineReminderRepository(ReminderRepository(SupabaseManager.client, application.applicationContext), application.applicationContext)
 
     init {
         loadData()

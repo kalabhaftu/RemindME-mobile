@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.remindme.app.domain.models.OccurrenceStatus
 import com.remindme.app.domain.models.ReminderOccurrence
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
+import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.theme.AppColors
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -73,7 +73,7 @@ fun CalendarGrid(
         }
     }
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 24.dp,
         padding = 16.dp,
         modifier = Modifier.fillMaxWidth()
@@ -299,7 +299,7 @@ private fun DayCell(
 ) {
     val isToday = day == LocalDate.now()
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 12.dp,
         padding = 0.dp
     ) {

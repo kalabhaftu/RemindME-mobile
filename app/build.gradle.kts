@@ -3,6 +3,7 @@ plugins {
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.kotlin.serialization)
   id("com.google.gms.google-services") version "4.4.1"
+
 }
 
 import java.io.FileInputStream
@@ -119,8 +120,12 @@ dependencies {
   
   // Local modules
   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-  implementation(project(":backdrop"))
-  implementation(libs.kyant.shapes)
+
+  // WorkManager (background sync)
+  implementation("androidx.work:work-runtime-ktx:2.9.1")
+  
+  // DataStore
+  implementation("androidx.datastore:datastore-preferences:1.0.0")
 
   // Firebase
   implementation(platform(libs.firebase.bom))

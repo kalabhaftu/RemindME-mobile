@@ -23,7 +23,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
-import com.remindme.app.ui.components.liquid.*
+import com.remindme.app.ui.components.BottomSheetPickerItem
+import com.remindme.app.ui.components.PickerField
+import com.remindme.app.ui.components.*
 import com.remindme.app.ui.theme.*
 import com.remindme.app.utils.AppConstants
 import java.time.LocalDateTime
@@ -76,7 +78,7 @@ fun AddPersonScreen(
         }
     }
 
-    LiquidScaffold(
+    AppScaffold(
         appBar = {
             Row(
                 modifier = Modifier
@@ -87,7 +89,7 @@ fun AddPersonScreen(
             ) {
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
+                TopBar(
                     title = if (personId != null) "Edit Person" else "Add Person",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f)
@@ -95,7 +97,7 @@ fun AddPersonScreen(
             }
         },
         snackbarHost = {
-            LiquidSnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) { paddingValues ->
         Column(
@@ -107,7 +109,7 @@ fun AddPersonScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Avatar Placeholder
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 40.dp,
                 padding = 4.dp
             ) {
@@ -123,7 +125,7 @@ fun AddPersonScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (uiState.isUploadingAvatar) {
-                        LiquidSpinner(size = 28.dp)
+                        Spinner(size = 28.dp)
                     } else if (uiState.avatarUrl != null) {
                         AsyncImage(
                             model = uiState.avatarUrl,
@@ -132,7 +134,7 @@ fun AddPersonScreen(
                             contentScale = androidx.compose.ui.layout.ContentScale.Crop
                         )
                     } else {
-                        LiquidIcon(
+                        AppIcon(
                             imageVector = Icons.Default.CameraAlt,
                             color = TextTertiary,
                             size = 28.dp
@@ -143,7 +145,7 @@ fun AddPersonScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            LiquidTextField(
+            AppTextField(
                 value = uiState.name,
                 onValueChange = { viewModel.updateName(it) },
                 placeholder = "Full name *"
@@ -151,7 +153,7 @@ fun AddPersonScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            LiquidDateTile(
+            DateTile(
                 label = "Birthdate & Time *",
                 value = uiState.birthdate,
                 placeholder = "Select date and time",
@@ -186,7 +188,7 @@ fun AddPersonScreen(
             )
             
             if (uiState.relationship == "other") {
-                LiquidTextField(
+                AppTextField(
                     value = uiState.customRelationship,
                     onValueChange = { viewModel.updateCustomRelationship(it) },
                     placeholder = "Custom relationship (e.g. Mentor)"
@@ -194,11 +196,11 @@ fun AddPersonScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            LiquidTextField(
+            AppTextField(
                 value = uiState.notes,
                 onValueChange = { viewModel.updateNotes(it) },
                 placeholder = "Notes"
-                // maxLines = 3 // To be supported by LiquidTextField
+                // maxLines = 3 // To be supported by AppTextField
             )
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -218,7 +220,7 @@ fun AddPersonScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            LiquidButton(
+            AppButton(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     viewModel.savePerson()
@@ -226,7 +228,7 @@ fun AddPersonScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (uiState.isLoading) {
-                    LiquidSpinner(size = 20.dp)
+                    Spinner(size = 20.dp)
                 } else {
                     Text("Add Person", color = TextPrimary)
                 }
@@ -234,7 +236,7 @@ fun AddPersonScreen(
         }
         
         if (showDatePicker) {
-            LiquidDateTimePickerDialog(
+            DateTimePickerDialog(
                 initialDate = uiState.birthdate,
                 onDismissRequest = { showDatePicker = false },
                 onDateTimeSelected = {
