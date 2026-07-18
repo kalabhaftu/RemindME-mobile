@@ -1,6 +1,8 @@
 package com.remindme.app.data.repository
 
 import com.remindme.app.domain.models.ReminderItem
+import com.remindme.app.services.NotificationSchedulingService
+import android.content.Context
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
@@ -21,7 +23,8 @@ data class EscalationStateUpsert(
     val marked_done_at: String
 )
 
-class ReminderRepository(private val supabase: SupabaseClient) {
+class ReminderRepository(private val supabase: SupabaseClient, private val context: Context? = null) {
+    private val notificationScheduler = context?.let { NotificationSchedulingService(it) }
 
     private val selectQuery = """
         *,
@@ -70,6 +73,7 @@ class ReminderRepository(private val supabase: SupabaseClient) {
     }
 
     suspend fun deleteReminder(id: String) = withContext(Dispatchers.IO) {
+        notificationScheduler?.cancelReminder(id)
         supabase.postgrest["reminder_items"]
             .delete {
                 filter { eq("id", id) }
@@ -101,6 +105,7 @@ class ReminderRepository(private val supabase: SupabaseClient) {
         val taskTable = supabase.postgrest["task_details"]
         val holidayTable = supabase.postgrest["holiday_details"]
         val recurrenceTable = supabase.postgrest["recurrence_rules"]
+        val notificationPrefsTable = supabase.postgrest["notification_preferences"]
 
         item.person?.let {
             val payload = buildJsonObject {
@@ -158,11 +163,24 @@ class ReminderRepository(private val supabase: SupabaseClient) {
             }
             if (isUpdate) recurrenceTable.upsert(payload) else recurrenceTable.insert(payload)
         }
+
+        item.notificationPreferences?.forEach { pref ->
+            val payload = buildJsonObject {
+                put("reminder_item_id", item.id)
+                put("channel", pref.channel)
+                put("enabled", pref.enabled)
+                put("lead_time", pref.leadTime)
+                put("custom_time", pref.customTime)
+                put("offset_days", pref.offsetDays)
+            }
+            if (isUpdate) notificationPrefsTable.upsert(payload) else notificationPrefsTable.insert(payload)
+        }
     }
 
     suspend fun addReminder(item: ReminderItem) = withContext(Dispatchers.IO) {
         supabase.postgrest["reminder_items"].insert(item)
         insertOrUpsertDetails(item, isUpdate = false)
+        notificationScheduler?.scheduleReminder(item)
     }
 
     suspend fun updateReminder(item: ReminderItem) = withContext(Dispatchers.IO) {
@@ -170,5 +188,7 @@ class ReminderRepository(private val supabase: SupabaseClient) {
             filter { eq("id", item.id) }
         }
         insertOrUpsertDetails(item, isUpdate = true)
+        notificationScheduler?.cancelReminder(item.id)
+        notificationScheduler?.scheduleReminder(item)
     }
 }

@@ -152,25 +152,28 @@ fun NotificationPrefsForm(
                                     items = LEAD_TIME_OPTIONS.map { BottomSheetPickerItem(it.key, it.value) },
                                     onChanged = {
                                         val next = matrix.toMutableMap()
-                                        next[channel] = pref.copy(leadTime = it)
+                                        val offsetDays = if (it == "at_time") 0 else pref.offsetDays
+                                        next[channel] = pref.copy(leadTime = it, offsetDays = offsetDays)
                                         onChanged(next)
                                     }
                                 )
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             Box(modifier = Modifier.weight(1f)) {
-                                PickerField(
-                                    label = "Advance notice",
-                                    value = pref.offsetDays,
-                                    displayValue = { OFFSET_DAY_OPTIONS[it] ?: "$it days" },
-                                    title = "Select advance notice",
-                                    items = OFFSET_DAY_OPTIONS.map { BottomSheetPickerItem(it.key, it.value) },
-                                    onChanged = {
-                                        val next = matrix.toMutableMap()
-                                        next[channel] = pref.copy(offsetDays = it)
-                                        onChanged(next)
-                                    }
-                                )
+                                if (pref.leadTime != "at_time" && pref.leadTime != "custom") {
+                                    PickerField(
+                                        label = "Advance notice",
+                                        value = pref.offsetDays,
+                                        displayValue = { OFFSET_DAY_OPTIONS[it] ?: "$it days" },
+                                        title = "Select advance notice",
+                                        items = OFFSET_DAY_OPTIONS.map { BottomSheetPickerItem(it.key, it.value) },
+                                        onChanged = {
+                                            val next = matrix.toMutableMap()
+                                            next[channel] = pref.copy(offsetDays = it)
+                                            onChanged(next)
+                                        }
+                                    )
+                                }
                             }
                         }
                         

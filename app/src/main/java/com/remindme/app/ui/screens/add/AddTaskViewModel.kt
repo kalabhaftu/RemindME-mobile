@@ -1,7 +1,10 @@
 package com.remindme.app.ui.screens.add
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
 import com.remindme.app.ui.components.liquid.ChannelPref
@@ -25,8 +28,8 @@ data class AddTaskUiState(
     val isSuccess: Boolean = false
 )
 
-class AddTaskViewModel : ViewModel() {
-    private val repository = ReminderRepository(SupabaseManager.client)
+class AddTaskViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(AddTaskUiState())
     val uiState: StateFlow<AddTaskUiState> = _uiState.asStateFlow()
 
@@ -85,6 +88,16 @@ class AddTaskViewModel : ViewModel() {
                     nextOccurrenceAt = nextOccurrence
                 )
 
+                val notificationPrefs = _uiState.value.notificationPrefs.map { (channel, pref) ->
+                    com.remindme.app.domain.models.NotificationPreference(
+                        channel = channel,
+                        enabled = pref.enabled,
+                        leadTime = pref.leadTime,
+                        customTime = pref.customTime,
+                        offsetDays = pref.offsetDays
+                    )
+                }
+
                 val item = com.remindme.app.domain.models.ReminderItem(
                     id = id,
                     userId = userId,
@@ -95,7 +108,8 @@ class AddTaskViewModel : ViewModel() {
                     createdAt = now,
                     updatedAt = now,
                     taskDetails = listOf(taskDetails),
-                    recurrenceRules = listOf(recurrenceRules)
+                    recurrenceRules = listOf(recurrenceRules),
+                    notificationPreferences = notificationPrefs
                 )
 
                 repository.addReminder(item)
