@@ -17,7 +17,7 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.foundation.clickable
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
+import com.remindme.app.ui.components.AppCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -31,10 +31,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.navigation3.runtime.NavKey
-import com.remindme.app.ui.components.liquid.LiquidBottomTab
-import com.remindme.app.ui.components.liquid.LiquidBottomTabs
-import com.remindme.app.ui.components.liquid.LiquidIcon
-import com.remindme.app.ui.components.liquid.LiquidScaffold
+import com.remindme.app.ui.components.NavTab
+import com.remindme.app.ui.components.NavTabs
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.AppScaffold
 import com.remindme.app.ui.navigation.AddPerson
 import com.remindme.app.ui.navigation.AddSubscription
 import com.remindme.app.ui.navigation.AddTask
@@ -54,36 +54,36 @@ fun MainScreen(
     var showQuickAdd by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
 
-    LiquidScaffold(
+    AppScaffold(
         appBar = {
-            com.remindme.app.ui.components.liquid.LiquidAppBar(
+            com.remindme.app.ui.components.TopBar(
                 title = "RemindME",
                 actions = {
                     androidx.compose.foundation.layout.Box {
                         androidx.compose.material3.IconButton(onClick = { showMenu = true }) {
-                            LiquidIcon(Icons.Default.MoreVert, color = AppColors.textPrimary)
+                            AppIcon(Icons.Default.MoreVert, color = AppColors.textPrimary)
                         }
-                        com.remindme.app.ui.components.liquid.LiquidPopupMenu(
+                        com.remindme.app.ui.components.PopupMenu(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false },
                             offset = DpOffset(0.dp, 4.dp)
                         ) {
-                            com.remindme.app.ui.components.liquid.LiquidPopupMenuItem(
+                            com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Search",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Search) },
                                 icon = Icons.Rounded.Search
                             )
-                            com.remindme.app.ui.components.liquid.LiquidPopupMenuItem(
+                            com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Templates",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Templates) },
                                 icon = Icons.Rounded.Book
                             )
-                            com.remindme.app.ui.components.liquid.LiquidPopupMenuItem(
+                            com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Notifications",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Notifications) },
                                 icon = Icons.Rounded.Notifications
                             )
-                            com.remindme.app.ui.components.liquid.LiquidPopupMenuItem(
+                            com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Settings",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Settings) },
                                 icon = Icons.Rounded.Settings
@@ -94,52 +94,52 @@ fun MainScreen(
             )
         },
         bottomBar = {
-            LiquidBottomTabs(
+            NavTabs(
                 selectedTabIndex = { selectedTab },
                 onTabSelected = { selectedTab = it },
                 tabsCount = 5
             ) {
-                LiquidBottomTab(
+                NavTab(
                     onClick = { selectedTab = 0 },
                     selected = selectedTab == 0
                 ) {
-                    LiquidIcon(
+                    AppIcon(
                         imageVector = Icons.Default.Home,
                         color = if (selectedTab == 0) Accent500 else TextPrimary
                     )
                 }
-                LiquidBottomTab(
+                NavTab(
                     onClick = { selectedTab = 1 },
                     selected = selectedTab == 1
                 ) {
-                    LiquidIcon(
+                    AppIcon(
                         imageVector = Icons.Default.People,
                         color = if (selectedTab == 1) Accent500 else TextPrimary
                     )
                 }
-                LiquidBottomTab(
+                NavTab(
                     onClick = { selectedTab = 2 },
                     selected = selectedTab == 2
                 ) {
-                    LiquidIcon(
+                    AppIcon(
                         imageVector = Icons.Default.CreditCard,
                         color = if (selectedTab == 2) Accent500 else TextPrimary
                     )
                 }
-                LiquidBottomTab(
+                NavTab(
                     onClick = { selectedTab = 3 },
                     selected = selectedTab == 3
                 ) {
-                    LiquidIcon(
+                    AppIcon(
                         imageVector = Icons.Default.CheckCircle,
                         color = if (selectedTab == 3) Accent500 else TextPrimary
                     )
                 }
-                LiquidBottomTab(
+                NavTab(
                     onClick = { selectedTab = 4 },
                     selected = selectedTab == 4
                 ) {
-                    LiquidIcon(
+                    AppIcon(
                         imageVector = Icons.Default.Event,
                         color = if (selectedTab == 4) Accent500 else TextPrimary
                     )
@@ -166,7 +166,7 @@ fun MainScreen(
                     .align(Alignment.BottomEnd)
                     .padding(bottom = 110.dp, end = 24.dp)
             ) {
-                FloatingGlassContainer(
+                AppCard(
                     borderRadius = 50.dp,
                     modifier = Modifier
                         .size(56.dp)
@@ -184,7 +184,7 @@ fun MainScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        LiquidIcon(
+                        AppIcon(
                             imageVector = Icons.Default.Add,
                             color = Accent500,
                             size = 28.dp

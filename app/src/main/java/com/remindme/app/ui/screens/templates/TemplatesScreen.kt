@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.ui.components.BottomSheetPicker
-import com.remindme.app.ui.components.liquid.*
-import com.remindme.app.ui.components.liquid.LiquidSnackbarHost
+import com.remindme.app.ui.components.*
+import com.remindme.app.ui.components.SnackbarHost
 import com.remindme.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,8 +41,8 @@ fun TemplatesScreen(
         }
     }
 
-    LiquidScaffold(
-        snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
+    AppScaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         appBar = {
             Row(
                 modifier = Modifier
@@ -53,13 +53,13 @@ fun TemplatesScreen(
             ) {
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
+                TopBar(
                     title = "Templates",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f),
                     actions = {
                         IconButton(onClick = { showCreate = true }) {
-                            LiquidIcon(imageVector = Icons.Rounded.Add, color = TextPrimary)
+                            AppIcon(imageVector = Icons.Rounded.Add, color = TextPrimary)
                         }
                     }
                 )
@@ -69,7 +69,7 @@ fun TemplatesScreen(
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    LiquidSpinner()
+                    Spinner()
                 }
             } else if (uiState.templates.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
@@ -122,7 +122,7 @@ fun TemplatesScreen(
 
 @Composable
 fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -> Unit) {
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).clickable(onClick = onApply)
     ) {
@@ -130,7 +130,7 @@ fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 12.dp,
                 modifier = Modifier.wrapContentSize()
             ) {
@@ -141,7 +141,7 @@ fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -
                         "custom_holiday" -> Icons.Rounded.CardGiftcard
                         else -> Icons.Rounded.Checklist
                     }
-                    LiquidIcon(imageVector = icon, color = Accent500, size = 22.dp)
+                    AppIcon(imageVector = icon, color = Accent500, size = 22.dp)
                 }
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -161,7 +161,7 @@ fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -
                 )
             }
             IconButton(onClick = onDelete) {
-                LiquidIcon(imageVector = Icons.Rounded.Delete, color = StateDanger, size = 20.dp)
+                AppIcon(imageVector = Icons.Rounded.Delete, color = StateDanger, size = 20.dp)
             }
         }
     }
@@ -176,7 +176,7 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
 
     val catLabels = mapOf("task" to "Task", "person" to "Person", "subscription" to "Subscription", "custom_holiday" to "Event")
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 24.dp,
         modifier = Modifier.fillMaxWidth().padding(bottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding() + 20.dp)
     ) {
@@ -184,7 +184,7 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
             Text("New Template", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
             Spacer(modifier = Modifier.height(16.dp))
             
-            LiquidTextField(
+            AppTextField(
                 value = name,
                 onValueChange = { name = it },
                 placeholder = "e.g. Monthly Bills",
@@ -193,7 +193,7 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
             Spacer(modifier = Modifier.height(12.dp))
             
             Text("Category", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 16.dp,
                 modifier = Modifier.fillMaxWidth().clickable { showCategoryPicker = true }
             ) {
@@ -208,7 +208,7 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
             }
             Spacer(modifier = Modifier.height(12.dp))
             
-            LiquidTextField(
+            AppTextField(
                 value = notes,
                 onValueChange = { notes = it },
                 placeholder = "Add a note...",
@@ -217,19 +217,19 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
             Spacer(modifier = Modifier.height(20.dp))
             
             Row {
-                LiquidButton(
+                AppButton(
                     onClick = onClose,
                     modifier = Modifier.weight(1f).height(48.dp)
                 ) {
                     Text("Cancel", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(modifier = Modifier.width(12.dp))
-                LiquidButton(
+                AppButton(
                     onClick = { onCreate(name, category, notes.takeIf { it.isNotBlank() }) },
                     modifier = Modifier.weight(1f).height(48.dp),
                     tint = Accent500
                 ) {
-                    LiquidIcon(Icons.Rounded.Add, color = Accent500, size = 18.dp)
+                    AppIcon(Icons.Rounded.Add, color = Accent500, size = 18.dp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Create", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }

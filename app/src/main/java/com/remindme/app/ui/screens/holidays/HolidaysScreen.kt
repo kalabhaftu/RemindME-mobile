@@ -26,9 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
-import com.remindme.app.ui.components.liquid.LiquidSpinner
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.theme.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -44,7 +44,7 @@ fun HolidaysScreen(
 
     if (uiState.isLoadingCountries) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            LiquidSpinner()
+            Spinner()
         }
         return
     }
@@ -112,7 +112,7 @@ fun HolidaysScreen(
                         }
                     },
                     content = {
-                        FloatingGlassContainer(
+                        AppCard(
                             borderRadius = 12.dp,
                             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                         ) {
@@ -120,7 +120,7 @@ fun HolidaysScreen(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                LiquidIcon(imageVector = Icons.Rounded.CardGiftcard, size = 16.dp, color = TextPrimary)
+                                AppIcon(imageVector = Icons.Rounded.CardGiftcard, size = 16.dp, color = TextPrimary)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = name,
@@ -128,7 +128,7 @@ fun HolidaysScreen(
                                     fontSize = 13.sp,
                                     modifier = Modifier.weight(1f)
                                 )
-                                LiquidIcon(imageVector = Icons.Rounded.ArrowBack, size = 14.dp, color = TextPrimary)
+                                AppIcon(imageVector = Icons.Rounded.ArrowBack, size = 14.dp, color = TextPrimary)
                             }
                         }
                     }
@@ -142,7 +142,7 @@ fun HolidaysScreen(
 
         item {
             val selectedName = uiState.countries.find { it.countryCode == uiState.selectedCountry }?.name ?: uiState.selectedCountry
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 16.dp,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -152,12 +152,12 @@ fun HolidaysScreen(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    FloatingGlassContainer(
+                    AppCard(
                         borderRadius = 10.dp,
                         modifier = Modifier.wrapContentSize()
                     ) {
                         Box(modifier = Modifier.padding(8.dp)) {
-                            LiquidIcon(imageVector = Icons.Rounded.Public, size = 18.dp, color = Accent500)
+                            AppIcon(imageVector = Icons.Rounded.Public, size = 18.dp, color = Accent500)
                         }
                     }
                     Spacer(modifier = Modifier.width(12.dp))
@@ -166,7 +166,7 @@ fun HolidaysScreen(
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(text = selectedName, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
                     }
-                    LiquidIcon(imageVector = Icons.Rounded.KeyboardArrowDown, size = 20.dp, color = TextTertiary)
+                    AppIcon(imageVector = Icons.Rounded.KeyboardArrowDown, size = 20.dp, color = TextTertiary)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -175,13 +175,13 @@ fun HolidaysScreen(
         if (uiState.isLoadingHolidays) {
             item {
                 Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                    LiquidSpinner()
+                    Spinner()
                 }
             }
         } else {
             items(uiState.holidays, key = { it.holidayKey }) { holiday ->
                 val active = uiState.subscribedKeys.contains(holiday.holidayKey)
-                FloatingGlassContainer(
+                AppCard(
                     borderRadius = 16.dp,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -192,12 +192,12 @@ fun HolidaysScreen(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        FloatingGlassContainer(
+                        AppCard(
                             borderRadius = 10.dp,
                             modifier = Modifier.wrapContentSize()
                         ) {
                             Box(modifier = Modifier.padding(8.dp)) {
-                                LiquidIcon(
+                                AppIcon(
                                     imageVector = Icons.Rounded.CardGiftcard,
                                     size = 18.dp,
                                     color = if (active) Accent500 else TextTertiary
@@ -222,9 +222,9 @@ fun HolidaysScreen(
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         if (uiState.togglingKey == holiday.holidayKey) {
-                            LiquidSpinner(modifier = Modifier.size(24.dp))
+                            Spinner(modifier = Modifier.size(24.dp))
                         } else {
-                            LiquidIcon(
+                            AppIcon(
                                 imageVector = if (active) Icons.Rounded.CheckCircle else Icons.Rounded.AddCircle,
                                 color = if (active) Accent500 else TextTertiary,
                                 size = 24.dp
@@ -247,7 +247,7 @@ fun HolidaysScreen(
                         .width(36.dp)
                         .height(4.dp)
                         .clip(RoundedCornerShape(2.dp))
-                        .background(GlassBorder)
+                        .background(BorderSubtle)
                 )
             }
         ) {
@@ -270,7 +270,7 @@ fun HolidaysScreen(
                 ) {
                     items(uiState.countries, key = { it.countryCode }) { c ->
                         val isSelected = c.countryCode == uiState.selectedCountry
-                        FloatingGlassContainer(
+                        AppCard(
                             borderRadius = 14.dp,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -291,7 +291,7 @@ fun HolidaysScreen(
                                     modifier = Modifier.weight(1f)
                                 )
                                 if (isSelected) {
-                                    LiquidIcon(imageVector = Icons.Rounded.Check, size = 18.dp, color = Accent500)
+                                    AppIcon(imageVector = Icons.Rounded.Check, size = 18.dp, color = Accent500)
                                 }
                             }
                         }

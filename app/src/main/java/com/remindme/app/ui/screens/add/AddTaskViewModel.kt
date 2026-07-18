@@ -7,7 +7,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
-import com.remindme.app.ui.components.liquid.ChannelPref
+import com.remindme.app.ui.components.ChannelPref
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

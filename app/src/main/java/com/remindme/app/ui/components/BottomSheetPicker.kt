@@ -11,21 +11,82 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.theme.Accent500
 import com.remindme.app.ui.theme.TextPrimary
+import com.remindme.app.ui.theme.TextSecondary
+import com.remindme.app.ui.theme.TextTertiary
+
+data class BottomSheetPickerItem(val key: String, val label: String)
+
+@Composable
+fun PickerField(
+    label: String,
+    value: String,
+    displayValue: (String) -> String,
+    title: String,
+    items: List<BottomSheetPickerItem>,
+    onChanged: (String) -> Unit
+) {
+    var showPicker by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { showPicker = true }
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                color = TextSecondary
+            )
+            Text(
+                text = displayValue(value),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = TextPrimary
+            )
+        }
+        AppIcon(
+            imageVector = Icons.Rounded.KeyboardArrowDown,
+            color = TextTertiary,
+            size = 20.dp
+        )
+    }
+
+    if (showPicker) {
+        BottomSheetPicker(
+            title = title,
+            items = items,
+            initialSelection = items.find { it.key == value.toString() } ?: items.first(),
+            onDismiss = { showPicker = false },
+            onSelect = { selected ->
+                onChanged(selected.key)
+                showPicker = false
+            },
+            itemLabel = { it.label }
+        )
+    }
+}
 
 @Composable
 fun <T> BottomSheetPicker(
@@ -65,7 +126,7 @@ fun <T> BottomSheetPicker(
             ),
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 28.dp,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -106,7 +167,7 @@ fun <T> BottomSheetPicker(
                                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                                 )
                                 if (isSelected) {
-                                    LiquidIcon(
+                                    AppIcon(
                                         imageVector = Icons.Rounded.Check,
                                         color = Accent500,
                                         size = 20.dp

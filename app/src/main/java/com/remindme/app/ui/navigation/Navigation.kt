@@ -17,8 +17,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.remindme.app.data.remote.SupabaseManager
-import com.remindme.app.ui.components.liquid.LiquidGlassPrefs
-import com.remindme.app.ui.components.liquid.LocalLiquidGlassStyle
+import com.remindme.app.ui.components.ThemePrefs
+import com.remindme.app.ui.components.LocalThemeStyle
 import com.remindme.app.ui.screens.main.MainScreen
 import com.remindme.app.ui.screens.add.AddPersonScreen
 import com.remindme.app.ui.screens.add.AddSubscriptionScreen
@@ -41,18 +41,18 @@ import androidx.compose.foundation.background
 fun MainNavigation() {
     val context = LocalContext.current
     var sessionStatus by remember { mutableStateOf<io.github.jan.supabase.auth.status.SessionStatus?>(null) }
-    var glassStyle by remember { mutableStateOf(LiquidGlassPrefs.getStyle(context)) }
+    var glassStyle by remember { mutableStateOf(ThemePrefs.getStyle(context)) }
 
     val listener = remember {
         android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == "glass_style") {
-                glassStyle = LiquidGlassPrefs.getStyle(context)
+            if (key == "theme_style") {
+                glassStyle = ThemePrefs.getStyle(context)
             }
         }
     }
 
     androidx.compose.runtime.DisposableEffect(context) {
-        val prefs = context.getSharedPreferences("liquid_glass_prefs", android.content.Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("remindme_prefs", android.content.Context.MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose {
             prefs.unregisterOnSharedPreferenceChangeListener(listener)
@@ -89,7 +89,7 @@ fun MainNavigation() {
     }
 
     CompositionLocalProvider(
-        LocalLiquidGlassStyle provides glassStyle
+        LocalThemeStyle provides glassStyle
     ) {
         NavDisplay(
             backStack = backStack,

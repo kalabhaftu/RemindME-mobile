@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.domain.models.CategoryType
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
-import com.remindme.app.ui.components.liquid.LiquidSpinner
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.theme.Accent500
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
@@ -49,7 +49,7 @@ fun DashboardScreen(
 
     if (uiState.isLoading && uiState.reminders.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-            LiquidSpinner()
+            Spinner()
         }
         return
     }
@@ -134,7 +134,7 @@ fun DashboardScreen(
 
 @Composable
 fun StatCard(modifier: Modifier = Modifier, label: String, count: Int) {
-    FloatingGlassContainer(
+    AppCard(
         modifier = modifier,
         borderRadius = 16.dp,
     ) {
@@ -161,7 +161,7 @@ fun StatCard(modifier: Modifier = Modifier, label: String, count: Int) {
 
 @Composable
 fun QuickAddTile(modifier: Modifier = Modifier, label: String, icon: ImageVector, onTap: () -> Unit) {
-    FloatingGlassContainer(
+    AppCard(
         modifier = modifier.clickable { onTap() },
         borderRadius = 16.dp
     ) {
@@ -171,7 +171,7 @@ fun QuickAddTile(modifier: Modifier = Modifier, label: String, icon: ImageVector
                 .fillMaxWidth(),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
-            LiquidIcon(imageVector = icon, size = 20.dp, color = TextPrimary)
+            AppIcon(imageVector = icon, size = 20.dp, color = TextPrimary)
             Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = label,

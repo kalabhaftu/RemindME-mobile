@@ -12,7 +12,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.remindme.app.ui.components.liquid.*
+import com.remindme.app.ui.components.BottomSheetPickerItem
+import com.remindme.app.ui.components.PickerField
+import com.remindme.app.ui.components.*
 import com.remindme.app.ui.theme.*
 import java.time.LocalDateTime
 
@@ -40,7 +42,7 @@ fun AddSubscriptionScreen(
         }
     }
 
-    LiquidScaffold(
+    AppScaffold(
         appBar = {
             Row(
                 modifier = Modifier
@@ -51,7 +53,7 @@ fun AddSubscriptionScreen(
             ) {
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
+                TopBar(
                     title = "Add Subscription",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f)
@@ -59,7 +61,7 @@ fun AddSubscriptionScreen(
             }
         },
         snackbarHost = {
-            LiquidSnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) { paddingValues ->
         Column(
@@ -69,7 +71,7 @@ fun AddSubscriptionScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
-            LiquidTextField(
+            AppTextField(
                 value = uiState.name,
                 onValueChange = { viewModel.updateName(it) },
                 placeholder = "Service name *"
@@ -103,7 +105,7 @@ fun AddSubscriptionScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            LiquidDateTile(
+            DateTile(
                 label = "Renewal Date & Time *",
                 value = uiState.renewalDate,
                 placeholder = "Select date and time",
@@ -114,7 +116,7 @@ fun AddSubscriptionScreen(
             
             Row {
                 Box(modifier = Modifier.weight(2f)) {
-                    LiquidTextField(
+                    AppTextField(
                         value = uiState.amount,
                         onValueChange = { viewModel.updateAmount(it) },
                         placeholder = "Amount",
@@ -151,7 +153,7 @@ fun AddSubscriptionScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            LiquidTextField(
+            AppTextField(
                 value = uiState.notes,
                 onValueChange = { viewModel.updateNotes(it) },
                 placeholder = "Notes"
@@ -173,12 +175,12 @@ fun AddSubscriptionScreen(
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            LiquidButton(
+            AppButton(
                 onClick = { viewModel.saveSubscription() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (uiState.isLoading) {
-                    LiquidSpinner(size = 20.dp)
+                    Spinner(size = 20.dp)
                 } else {
                     Text("Save", color = TextPrimary)
                 }
@@ -186,7 +188,7 @@ fun AddSubscriptionScreen(
         }
         
         if (showDatePicker) {
-            LiquidDateTimePickerDialog(
+            DateTimePickerDialog(
                 initialDate = uiState.renewalDate,
                 onDismissRequest = { showDatePicker = false },
                 onDateTimeSelected = {

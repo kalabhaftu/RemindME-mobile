@@ -21,8 +21,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
-import com.remindme.app.ui.components.liquid.*
-import com.remindme.app.ui.components.liquid.LiquidSnackbarHost
+import com.remindme.app.ui.components.*
+import com.remindme.app.ui.components.SnackbarHost
 import com.remindme.app.ui.theme.*
 import com.remindme.app.utils.AppConstants
 import com.remindme.app.utils.ComputedFields
@@ -63,8 +63,8 @@ fun PersonDetailScreen(
         }
     }
 
-    LiquidScaffold(
-        snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
+    AppScaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         appBar = {
             Row(
                 modifier = Modifier
@@ -75,16 +75,16 @@ fun PersonDetailScreen(
             ) {
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
+                TopBar(
                     title = uiState.person?.name ?: "",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f),
                     actions = {
                         IconButton(onClick = { onEdit(personId) }) {
-                            LiquidIcon(imageVector = Icons.Rounded.Edit, color = TextSecondary)
+                            AppIcon(imageVector = Icons.Rounded.Edit, color = TextSecondary)
                         }
                         IconButton(onClick = { showDeleteConfirm = true }) {
-                            LiquidIcon(imageVector = Icons.Rounded.Delete, color = StateDanger)
+                            AppIcon(imageVector = Icons.Rounded.Delete, color = StateDanger)
                         }
                     }
                 )
@@ -95,7 +95,7 @@ fun PersonDetailScreen(
             val person = uiState.person
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    LiquidSpinner()
+                    Spinner()
                 }
             } else if (person != null) {
                     val bdStr = person.person?.birthdate
@@ -120,12 +120,12 @@ fun PersonDetailScreen(
                     ) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            FloatingGlassContainer(
+                            AppCard(
                                 borderRadius = 32.dp,
                                 modifier = Modifier.wrapContentSize()
                             ) {
                                 Box(modifier = Modifier.padding(16.dp)) {
-                                    LiquidIcon(imageVector = Icons.Rounded.Person, size = 32.dp, color = Accent500)
+                                    AppIcon(imageVector = Icons.Rounded.Person, size = 32.dp, color = Accent500)
                                 }
                             }
                             Spacer(modifier = Modifier.width(16.dp))
@@ -167,7 +167,7 @@ fun PersonDetailScreen(
 
                         if (gender != null && gender != "—") {
                             Spacer(modifier = Modifier.height(24.dp))
-                            FloatingGlassContainer(
+                            AppCard(
                                 borderRadius = 16.dp,
                                 modifier = Modifier.wrapContentSize()
                             ) {
@@ -216,7 +216,7 @@ fun PersonDetailScreen(
 
 @Composable
 fun StatCard(label: String, value: String, valueColor: Color = TextPrimary) {
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         modifier = Modifier.fillMaxWidth().aspectRatio(2.5f)
     ) {

@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun glassmorphismModifier(
+fun themedBackground(
     blurRadius: Float = 8f,
     backgroundColor: Color = Color.White.copy(alpha = 0.1f)
 ): Modifier {
@@ -19,11 +19,11 @@ fun glassmorphismModifier(
         .background(backgroundColor)
 }
 
-fun Modifier.glassEffect(
+fun Modifier.surfaceTint(
     alpha: Float = 0.1f
 ) = this.background(Color.White.copy(alpha = alpha))
 
-fun Modifier.blurredGlassBackground(
+fun Modifier.blurredBackground(
     blurRadius: Float = 8f,
     backgroundColor: Color = Color.White.copy(alpha = 0.05f)
 ) = this

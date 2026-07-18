@@ -11,8 +11,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import com.remindme.app.domain.models.CategoryType
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.domain.models.OccurrenceStatus
 import com.remindme.app.domain.models.ReminderOccurrence
 import com.remindme.app.ui.theme.AppColors
@@ -79,7 +79,7 @@ fun SelectedDaySheet(
                         val item = occ.item
                         val isDone = occ.status == OccurrenceStatus.COMPLETED_PAST
                         
-                        FloatingGlassContainer(
+                        AppCard(
                             borderRadius = 16.dp,
                         ) {
                             Row(
@@ -88,11 +88,11 @@ fun SelectedDaySheet(
                                     .padding(horizontal = 14.dp, vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                FloatingGlassContainer(
+                                AppCard(
                                     borderRadius = 10.dp,
                                     modifier = Modifier.padding(9.dp)
                                 ) {
-                                    LiquidIcon(
+                                    AppIcon(
                                         imageVector = when (item.category) {
                                             CategoryType.TASK -> Icons.Default.FormatListBulleted
                                             CategoryType.PERSON -> Icons.Default.Person
@@ -129,7 +129,7 @@ fun SelectedDaySheet(
                                 
                                 if (item.category == CategoryType.TASK && !isDone) {
                                     IconButton(onClick = { onMarkDone(item.id, occ.date) }) {
-                                        LiquidIcon(imageVector = Icons.Default.CheckCircle, tint = AppColors.stateSuccess, modifier = Modifier.size(24.dp))
+                                        AppIcon(imageVector = Icons.Default.CheckCircle, tint = AppColors.stateSuccess, modifier = Modifier.size(24.dp))
                                     }
                                 }
                             }

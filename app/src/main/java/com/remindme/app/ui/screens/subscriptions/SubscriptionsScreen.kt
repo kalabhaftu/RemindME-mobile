@@ -29,9 +29,9 @@ import coil.compose.AsyncImage
 import com.remindme.app.R
 import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.EmptyState
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
-import com.remindme.app.ui.components.liquid.LiquidSpinner
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.theme.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -50,7 +50,7 @@ fun SubscriptionsScreen(
 
     if (uiState.isLoading && subscriptions.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            LiquidSpinner()
+            Spinner()
         }
         return
     }
@@ -133,7 +133,7 @@ fun SubscriptionRow(item: ReminderItem, onClick: () -> Unit) {
 
     val days = daysUntil(renewalStr)
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         modifier = Modifier
             .fillMaxWidth()

@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.remindme.app.ui.components.liquid.*
+import com.remindme.app.ui.components.*
 import com.remindme.app.ui.theme.*
 import com.remindme.app.domain.models.OccurrenceStatus
 import com.remindme.app.domain.models.ReminderOccurrence
@@ -46,7 +46,7 @@ fun NotificationsScreen(
         "Missed (${missed.size})"
     )
 
-    LiquidScaffold(
+    AppScaffold(
         snackbarHost = {},
         appBar = {
             Row(
@@ -58,7 +58,7 @@ fun NotificationsScreen(
             ) {
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
+                TopBar(
                     title = "Notifications",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f),
@@ -104,7 +104,7 @@ fun NotificationsScreen(
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             if (uiState.isLoading && uiState.inAppNotifications.isEmpty() && uiState.allOccurrences.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    LiquidSpinner()
+                    Spinner()
                 }
             } else {
                 when (selectedTab) {
@@ -185,7 +185,7 @@ fun InAppTab(notifications: List<InAppNotification>, onMarkRead: (String) -> Uni
                 val created = try { Instant.parse(n.created_at) } catch (e: Exception) { Instant.now() }
                 val formatter = DateTimeFormatter.ofPattern("MMM d, HH:mm").withZone(ZoneId.systemDefault())
 
-                FloatingGlassContainer(
+                AppCard(
                     borderRadius = 16.dp,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                         .clickable(enabled = isUnread) { onMarkRead(n.id) }
@@ -248,7 +248,7 @@ fun MissedTab(occurrences: List<ReminderOccurrence>, onOpenReminder: (String) ->
 
 @Composable
 fun OccurrenceTile(occ: ReminderOccurrence, isMissed: Boolean = false, onOpenReminder: (String) -> Unit) {
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).clickable { onOpenReminder(occ.item.id) }
     ) {
@@ -256,12 +256,12 @@ fun OccurrenceTile(occ: ReminderOccurrence, isMissed: Boolean = false, onOpenRem
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 10.dp,
                 modifier = Modifier.wrapContentSize()
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
-                    LiquidIcon(
+                    AppIcon(
                         imageVector = if (isMissed) Icons.Rounded.Warning else Icons.Rounded.Notifications,
                         size = 18.dp,
                         color = if (isMissed) StateWarning else Accent500
@@ -276,7 +276,7 @@ fun OccurrenceTile(occ: ReminderOccurrence, isMissed: Boolean = false, onOpenRem
                 Text("${occ.item.category} · ${occ.date.format(formatter)}", fontSize = 12.sp, color = TextSecondary)
             }
             if (!isMissed && occ.status == OccurrenceStatus.TODAY) {
-                FloatingGlassContainer(
+                AppCard(
                     borderRadius = 20.dp,
                     modifier = Modifier.wrapContentSize()
                 ) {

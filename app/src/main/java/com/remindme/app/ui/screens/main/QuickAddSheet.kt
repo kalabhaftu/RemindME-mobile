@@ -16,8 +16,8 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.FormatListBulleted
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +39,7 @@ fun QuickAddSheet(
         scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.4f),
         dragHandle = null
     ) {
-        FloatingGlassContainer(
+        AppCard(
             borderRadius = 32.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -137,7 +137,7 @@ fun QuickAddOption(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     onClick: () -> Unit
 ) {
-    FloatingGlassContainer(
+    AppCard(
         modifier = modifier.clickable { onClick() },
         borderRadius = 16.dp
     ) {
@@ -147,7 +147,7 @@ fun QuickAddOption(
                 .padding(vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LiquidIcon(imageVector = icon, tint = AppColors.accent500, modifier = Modifier.size(28.dp))
+            AppIcon(imageVector = icon, tint = AppColors.accent500, modifier = Modifier.size(28.dp))
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = label,
