@@ -1,11 +1,12 @@
 package com.remindme.app.ui.screens.edit
+import com.remindme.app.domain.models.ReminderItem
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
-import com.remindme.app.domain.models.ReminderItem
+import com.remindme.app.data.repository.OfflineReminderRepository
 import com.remindme.app.ui.components.ChannelPref
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,7 @@ data class EditReminderUiState(
 )
 
 class EditReminderViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
+    private val repository = OfflineReminderRepository(ReminderRepository(SupabaseManager.client, application.applicationContext), application.applicationContext)
     
     private val _uiState = MutableStateFlow(EditReminderUiState())
     val uiState: StateFlow<EditReminderUiState> = _uiState.asStateFlow()

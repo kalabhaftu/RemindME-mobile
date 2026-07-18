@@ -2,28 +2,36 @@ package com.remindme.app.data.repository
 
 import android.content.Context
 import android.net.ConnectivityManager
-import java.time.ZoneOffset
 import android.net.NetworkCapabilities
-import com.remindme.app.data.local.RemindMeDatabase
-import com.remindme.app.data.local.entities.NotificationPreferenceEntity
-import com.remindme.app.data.local.entities.PersonDetailsEntity
-import com.remindme.app.data.local.entities.RecurrenceRulesEntity
-import com.remindme.app.data.local.entities.ReminderEntity
-import com.remindme.app.data.local.entities.SubscriptionDetailsEntity
-import com.remindme.app.data.local.entities.TaskDetailsEntity
 import com.remindme.app.domain.models.ReminderItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.File
+import java.time.Instant
+
+private data class PendingOp(
+    val type: String,
+    val reminderId: String,
+    val timestamp: Long = System.currentTimeMillis()
+)
 
 class OfflineReminderRepository(
     private val remoteRepository: ReminderRepository,
-    private val context: Context,
-    private val database: RemindMeDatabase
+    private val context: Context
 ) {
-    private val localDao = database.reminderDao()
+    private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private val cacheDir = File(context.filesDir, "cache").also { it.mkdirs() }
+    private val remindersFile = File(cacheDir, "reminders.json")
+    private val pendingFile = File(cacheDir, "pending_ops.json")
+
+    private val _cachedReminders = MutableStateFlow<List<ReminderItem>>(emptyList())
+    val cachedReminders: Flow<List<ReminderItem>> = _cachedReminders.asStateFlow()
 
     private fun isOnline(): Boolean {
         val network = connectivityManager.activeNetwork ?: return false
@@ -31,144 +39,169 @@ class OfflineReminderRepository(
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
+    private fun readCache(): List<ReminderItem> {
+        if (!remindersFile.exists()) return emptyList()
+        return try {
+            json.decodeFromString<List<ReminderItem>>(remindersFile.readText())
+        } catch (_: Exception) { emptyList() }
+    }
+
+    private fun writeCache(items: List<ReminderItem>) {
+        remindersFile.writeText(json.encodeToString(items))
+    }
+
+    private fun readPendingOps(): MutableList<PendingOp> {
+        if (!pendingFile.exists()) return mutableListOf()
+        return try {
+            json.decodeFromString<List<PendingOp>>(pendingFile.readText()).toMutableList()
+        } catch (_: Exception) { mutableListOf() }
+    }
+
+    private fun writePendingOps(ops: List<PendingOp>) {
+        pendingFile.writeText(json.encodeToString(ops))
+    }
+
+    private fun addPendingOp(op: PendingOp) {
+        val ops = readPendingOps()
+        ops.removeAll { it.reminderId == op.reminderId && it.type == op.type }
+        ops.add(op)
+        writePendingOps(ops)
+    }
+
+    private fun removePendingOp(reminderId: String, type: String) {
+        val ops = readPendingOps()
+        ops.removeAll { it.reminderId == reminderId && it.type == type }
+        writePendingOps(ops)
+    }
+
     suspend fun getReminders(): List<ReminderItem> = withContext(Dispatchers.IO) {
-        return@withContext try {
+        try {
             if (isOnline()) {
-                val remoteReminders = remoteRepository.getReminders()
-                
-                // Clear local and sync from remote (server-wins strategy)
-                localDao.deleteReminder(ReminderEntity(
-                    id = "", userId = "", category = "", name = "", notes = null,
-                    iconKey = null, createdAt = 0, updatedAt = 0, syncedAt = null
-                ))
-                
-                remoteReminders.forEach { item ->
-                    saveReminderLocally(item)
-                }
-                
-                remoteReminders
-            } else {
-                getRemindersFromCache()
+                val remote = remoteRepository.getReminders()
+                writeCache(remote)
+                _cachedReminders.value = remote
+                return@withContext remote
             }
-        } catch (e: Exception) {
-            getRemindersFromCache()
-        }
+        } catch (_: Exception) {}
+        val cached = readCache()
+        _cachedReminders.value = cached
+        cached
     }
 
     suspend fun addReminder(item: ReminderItem) = withContext(Dispatchers.IO) {
-        saveReminderLocally(item)
+        val cached = readCache().toMutableList()
+        cached.removeAll { it.id == item.id }
+        cached.add(0, item)
+        writeCache(cached)
+        _cachedReminders.value = cached
+
         if (isOnline()) {
             try {
                 remoteRepository.addReminder(item)
-                localDao.markAsSynced(item.id, System.currentTimeMillis())
-            } catch (e: Exception) {
-                // Keep local, mark for retry
-                val entity = ReminderEntity(
-                    id = item.id,
-                    userId = item.userId,
-                    category = item.category.name,
-                    name = item.name,
-                    notes = item.notes,
-                    iconKey = item.iconKey,
-                    createdAt = item.createdAt.toEpochSecond(ZoneOffset.UTC),
-                    updatedAt = item.updatedAt.toEpochSecond(ZoneOffset.UTC),
-                    syncedAt = null,
-                    requiresSync = true
-                )
-                localDao.updateReminder(entity)
+                removePendingOp(item.id, "add")
+            } catch (_: Exception) {
+                addPendingOp(PendingOp("add", item.id))
             }
         } else {
-            val entity = ReminderEntity(
-                id = item.id,
-                userId = item.userId,
-                category = item.category.name,
-                name = item.name,
-                notes = item.notes,
-                iconKey = item.iconKey,
-                createdAt = item.createdAt.toEpochSecond(ZoneOffset.UTC),
-                updatedAt = item.updatedAt.toEpochSecond(ZoneOffset.UTC),
-                syncedAt = null,
-                requiresSync = true
-            )
-            localDao.updateReminder(entity)
+            addPendingOp(PendingOp("add", item.id))
         }
     }
 
     suspend fun updateReminder(item: ReminderItem) = withContext(Dispatchers.IO) {
-        saveReminderLocally(item)
+        val cached = readCache().toMutableList()
+        cached.removeAll { it.id == item.id }
+        cached.add(0, item)
+        writeCache(cached)
+        _cachedReminders.value = cached
+
         if (isOnline()) {
             try {
                 remoteRepository.updateReminder(item)
-                localDao.markAsSynced(item.id, System.currentTimeMillis())
-            } catch (e: Exception) {
-                // Keep local change, mark for retry
-                val entity = ReminderEntity(
-                    id = item.id,
-                    userId = item.userId,
-                    category = item.category.name,
-                    name = item.name,
-                    notes = item.notes,
-                    iconKey = item.iconKey,
-                    createdAt = item.createdAt.toEpochSecond(ZoneOffset.UTC),
-                    updatedAt = item.updatedAt.toEpochSecond(ZoneOffset.UTC),
-                    syncedAt = null,
-                    requiresSync = true
-                )
-                localDao.updateReminder(entity)
+                removePendingOp(item.id, "update")
+            } catch (_: Exception) {
+                addPendingOp(PendingOp("update", item.id))
             }
+        } else {
+            addPendingOp(PendingOp("update", item.id))
         }
     }
 
     suspend fun deleteReminder(id: String) = withContext(Dispatchers.IO) {
-        localDao.softDeleteReminder(id)
+        val cached = readCache().toMutableList()
+        cached.removeAll { it.id == id }
+        writeCache(cached)
+        _cachedReminders.value = cached
+
         if (isOnline()) {
             try {
                 remoteRepository.deleteReminder(id)
-            } catch (e: Exception) {
-                // Keep soft delete locally
+            } catch (_: Exception) {
+                addPendingOp(PendingOp("delete", id))
             }
+        } else {
+            addPendingOp(PendingOp("delete", id))
         }
     }
 
-    private suspend fun saveReminderLocally(item: ReminderItem) {
-        val entity = ReminderEntity(
-            id = item.id,
-            userId = item.userId,
-            category = item.category.name,
-            name = item.name,
-            notes = item.notes,
-            iconKey = item.iconKey,
-            createdAt = item.createdAt.toEpochSecond(ZoneOffset.UTC),
-            updatedAt = item.updatedAt.toEpochSecond(ZoneOffset.UTC),
-            syncedAt = System.currentTimeMillis(),
-            requiresSync = false
-        )
-        localDao.insertReminder(entity)
+    suspend fun getReminder(id: String): ReminderItem? = withContext(Dispatchers.IO) {
+        try {
+            if (isOnline()) {
+                val remote = remoteRepository.getReminder(id)
+                if (remote != null) {
+                    val cached = readCache().toMutableList()
+                    cached.removeAll { it.id == id }
+                    cached.add(0, remote)
+                    writeCache(cached)
+                }
+                return@withContext remote
+            }
+        } catch (_: Exception) {}
+        readCache().find { it.id == id }
     }
 
-    private suspend fun getRemindersFromCache(): List<ReminderItem> {
-        // For now, return empty list. In production, reconstruct from Room entities
-        return emptyList()
+    suspend fun searchReminders(query: String): List<ReminderItem> = withContext(Dispatchers.IO) {
+        try {
+            if (isOnline()) {
+                return@withContext remoteRepository.searchReminders(query)
+            }
+        } catch (_: Exception) {}
+        readCache().filter {
+            it.name.contains(query, ignoreCase = true) ||
+            (it.notes?.contains(query, ignoreCase = true) == true)
+        }
     }
 
-    fun getRemindersFlow(): Flow<List<ReminderItem>> {
-        return localDao.getRemindersByUserFlow("").map { entities ->
-            // Reconstruct ReminderItem from entities
-            emptyList()
+    suspend fun markTaskDone(id: String, occurrenceDate: String) = withContext(Dispatchers.IO) {
+        if (isOnline()) {
+            try { remoteRepository.markTaskDone(id, occurrenceDate) } catch (_: Exception) {}
+        }
+    }
+
+    suspend fun snoozeReminder(id: String, occurrenceDate: String, hours: Int = 1) = withContext(Dispatchers.IO) {
+        if (isOnline()) {
+            try { remoteRepository.snoozeReminder(id, occurrenceDate, hours) } catch (_: Exception) {}
         }
     }
 
     suspend fun syncPending() = withContext(Dispatchers.IO) {
         if (!isOnline()) return@withContext
-        
-        val pending = localDao.getPendingSyncs()
-        pending.forEach { entity ->
+        val ops = readPendingOps()
+        if (ops.isEmpty()) return@withContext
+
+        val cache = readCache().associateBy { it.id }
+        val remaining = mutableListOf<PendingOp>()
+
+        for (op in ops) {
             try {
-                // Sync to remote
-                localDao.markAsSynced(entity.id, System.currentTimeMillis())
-            } catch (e: Exception) {
-                // Retry next time
+                when (op.type) {
+                    "add" -> cache[op.reminderId]?.let { remoteRepository.addReminder(it) }
+                    "update" -> cache[op.reminderId]?.let { remoteRepository.updateReminder(it) }
+                    "delete" -> remoteRepository.deleteReminder(op.reminderId)
+                }
+            } catch (_: Exception) {
+                remaining.add(op)
             }
         }
+        writePendingOps(remaining)
     }
 }

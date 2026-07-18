@@ -1,4 +1,5 @@
 package com.remindme.app.ui.screens.add
+import com.remindme.app.domain.models.CategoryType
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
@@ -6,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import android.app.Application
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
+import com.remindme.app.data.repository.OfflineReminderRepository
 import com.remindme.app.ui.components.ChannelPref
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -37,7 +39,7 @@ data class AddSubscriptionUiState(
 )
 
 class AddSubscriptionViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
+    private val repository = OfflineReminderRepository(ReminderRepository(SupabaseManager.client, application.applicationContext), application.applicationContext)
     private val _uiState = MutableStateFlow(AddSubscriptionUiState())
     val uiState: StateFlow<AddSubscriptionUiState> = _uiState.asStateFlow()
     

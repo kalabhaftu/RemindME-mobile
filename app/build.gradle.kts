@@ -3,6 +3,7 @@ plugins {
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.kotlin.serialization)
   id("com.google.gms.google-services") version "4.4.1"
+
 }
 
 import java.io.FileInputStream
@@ -120,10 +121,8 @@ dependencies {
   // Local modules
   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
-  // Room Database
-  implementation("androidx.room:room-runtime:2.6.1")
-  implementation("androidx.room:room-ktx:2.6.1")
-  annotationProcessor("androidx.room:room-compiler:2.6.1")
+  // WorkManager (background sync)
+  implementation("androidx.work:work-runtime-ktx:2.9.1")
   
   // DataStore
   implementation("androidx.datastore:datastore-preferences:1.0.0")
