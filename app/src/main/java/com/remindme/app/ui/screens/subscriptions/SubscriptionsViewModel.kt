@@ -1,6 +1,8 @@
 package com.remindme.app.ui.screens.subscriptions
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
@@ -28,8 +30,8 @@ data class SubscriptionsUiState(
     val error: String? = null
 )
 
-class SubscriptionsViewModel : ViewModel() {
-    private val repository = ReminderRepository(SupabaseManager.client)
+class SubscriptionsViewModel : AndroidViewModel(application) {
+    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(SubscriptionsUiState())
     val uiState: StateFlow<SubscriptionsUiState> = _uiState.asStateFlow()
 

@@ -1,7 +1,9 @@
 package com.remindme.app.ui.screens.add
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import android.app.Application
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
 import com.remindme.app.ui.components.liquid.ChannelPref
@@ -31,8 +33,8 @@ data class AddPersonUiState(
     val existingPersonId: String? = null
 )
 
-class AddPersonViewModel : ViewModel() {
-    private val repository = ReminderRepository(SupabaseManager.client)
+class AddPersonViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(AddPersonUiState())
     val uiState: StateFlow<AddPersonUiState> = _uiState.asStateFlow()
 
@@ -127,6 +129,16 @@ class AddPersonViewModel : ViewModel() {
                     nextOccurrenceAt = nextOccurrence
                 )
 
+                val notificationPrefs = _uiState.value.notificationPrefs.map { (channel, pref) ->
+                    com.remindme.app.domain.models.NotificationPreference(
+                        channel = channel,
+                        enabled = pref.enabled,
+                        leadTime = pref.leadTime,
+                        customTime = pref.customTime,
+                        offsetDays = pref.offsetDays
+                    )
+                }
+
                 val item = com.remindme.app.domain.models.ReminderItem(
                     id = id,
                     userId = userId,
@@ -137,7 +149,8 @@ class AddPersonViewModel : ViewModel() {
                     createdAt = now,
                     updatedAt = now,
                     personDetails = listOf(personDetails),
-                    recurrenceRules = listOf(recurrenceRules)
+                    recurrenceRules = listOf(recurrenceRules),
+                    notificationPreferences = notificationPrefs
                 )
 
                 if (_uiState.value.existingPersonId != null) {

@@ -1,6 +1,8 @@
 package com.remindme.app.ui.screens.templates
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import io.github.jan.supabase.auth.auth
@@ -36,7 +38,7 @@ data class TemplatesUiState(
     val error: String? = null
 )
 
-class TemplatesViewModel : ViewModel() {
+class TemplatesViewModel : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(TemplatesUiState())
     val uiState: StateFlow<TemplatesUiState> = _uiState.asStateFlow()
 

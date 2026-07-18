@@ -113,6 +113,20 @@ data class EscalationState(
 )
 
 @Serializable
+data class NotificationPreference(
+    @SerialName("reminder_item_id")
+    val reminderItemId: String? = null,
+    val channel: String,
+    val enabled: Boolean = true,
+    @SerialName("lead_time")
+    val leadTime: String = "morning_of",
+    @SerialName("custom_time")
+    val customTime: String = "09:00",
+    @SerialName("offset_days")
+    val offsetDays: Int = 0
+)
+
+@Serializable
 data class ReminderItem(
     val id: String,
     @SerialName("user_id")
@@ -143,7 +157,9 @@ data class ReminderItem(
     @SerialName("recurrence_rules")
     val recurrenceRules: List<RecurrenceRules>? = null,
     @SerialName("escalation_state")
-    val escalationState: List<EscalationState>? = null
+    val escalationState: List<EscalationState>? = null,
+    @SerialName("notification_preferences")
+    val notificationPreferences: List<NotificationPreference>? = null
 ) {
     val person: PersonDetails? get() = personDetails?.firstOrNull()
     val subscription: SubscriptionDetails? get() = subscriptionDetails?.firstOrNull()

@@ -1,6 +1,8 @@
 package com.remindme.app.ui.screens.login
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import io.github.jan.supabase.auth.auth
@@ -25,7 +27,7 @@ data class LoginUiState(
     val toastMessage: String? = null
 )
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 

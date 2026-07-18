@@ -1,7 +1,9 @@
 package com.remindme.app.ui.screens.dashboard
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import android.app.Application
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
 import com.remindme.app.domain.models.ReminderItem
@@ -27,8 +29,8 @@ data class DashboardUiState(
     val error: String? = null
 )
 
-class DashboardViewModel : ViewModel() {
-    private val repository = ReminderRepository(SupabaseManager.client)
+class DashboardViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
@@ -76,6 +78,9 @@ class DashboardViewModel : ViewModel() {
                 val startPeriod = _uiState.value.currentMonth
                 val endPeriod = _uiState.value.currentMonth.plusMonths(1).minusDays(1)
                 val occurrences = OccurrenceCalculator.generateOccurrences(parsed, startPeriod, endPeriod, today)
+
+                val notificationScheduler = com.remindme.app.services.NotificationSchedulingService(getApplication())
+                notificationScheduler.scheduleReminders(parsed)
 
                 _uiState.update {
                     it.copy(
