@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.remindme.app.ui.theme.AppColors
 import com.remindme.app.ui.theme.StateDanger
-import com.kyant.backdrop.Backdrop
 
 @Composable
 fun LiquidSnackbar(
@@ -23,7 +22,7 @@ fun LiquidSnackbar(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     isError: Boolean = false,
-    backdrop: Backdrop = LocalBackdrop.current
+    
 ) {
     FloatingGlassContainer(
         borderRadius = 20.dp,

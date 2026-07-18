@@ -11,14 +11,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.kyant.backdrop.backdrops.LayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 @Composable
 fun LiquidScaffold(
     modifier: Modifier = Modifier,
-    backdrop: LayerBackdrop = rememberLayerBackdrop(),
+    backdrop: LayerBackdrop = Unit,
     appBar: @Composable (() -> Unit)? = null,
     bottomBar: @Composable (() -> Unit)? = null,
     snackbarHost: @Composable () -> Unit = {},
@@ -40,7 +37,7 @@ fun LiquidScaffold(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .layerBackdrop(backdrop)
+                    
                     .background(
                         brush = Brush.linearGradient(
                             colors = gradientColors,

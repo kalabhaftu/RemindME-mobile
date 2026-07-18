@@ -14,9 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.kyant.shapes.Capsule
 
-import com.kyant.backdrop.Backdrop
 
 internal val LocalLiquidBottomTabScale =
     staticCompositionLocalOf { { 1f } }
@@ -25,7 +23,7 @@ internal val LocalLiquidBottomTabScale =
 fun RowScope.LiquidBottomTab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    backdrop: Backdrop = LocalBackdrop.current,
+    ,
     selected: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
 ) {

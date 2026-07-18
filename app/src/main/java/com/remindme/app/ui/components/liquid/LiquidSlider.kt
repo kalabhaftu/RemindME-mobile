@@ -30,20 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
-import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberBackdrop
-import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.remindme.app.ui.utils.DampedDragAnimation
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.highlight.Highlight
-import com.kyant.backdrop.shadow.InnerShadow
-import com.kyant.backdrop.shadow.Shadow
 import com.remindme.app.ui.theme.Accent500
-import com.kyant.shapes.Capsule
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -52,7 +40,7 @@ fun LiquidSlider(
     onValueChange: (Float) -> Unit,
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     visibilityThreshold: Float = 0.01f,
-    backdrop: Backdrop = LocalBackdrop.current,
+    ,
     modifier: Modifier = Modifier
 ) {
     val isLightTheme = !isSystemInDarkTheme()
@@ -64,7 +52,7 @@ fun LiquidSlider(
         if (isLightTheme) Color(0xFF787878).copy(0.2f)
         else Color(0xFF787880).copy(0.36f)
 
-    val trackBackdrop = rememberLayerBackdrop()
+    val trackBackdrop = Unit
 
     BoxWithConstraints(
         modifier.fillMaxWidth(),
@@ -110,7 +98,7 @@ fun LiquidSlider(
                 }
         }
 
-        Box(Modifier.layerBackdrop(trackBackdrop)) {
+        Box(Modifier) {
             Box(
                 Modifier
                     .clip(Capsule())

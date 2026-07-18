@@ -29,20 +29,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.lerp
-import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberBackdrop
-import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.remindme.app.ui.utils.DampedDragAnimation
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.highlight.Highlight
-import com.kyant.backdrop.shadow.InnerShadow
-import com.kyant.backdrop.shadow.Shadow
 import com.remindme.app.ui.theme.Accent500
-import com.kyant.shapes.Capsule
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -50,7 +38,7 @@ fun LiquidToggle(
     selected: () -> Boolean,
     onSelect: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    backdrop: Backdrop = LocalBackdrop.current
+    
 ) {
     val isLightTheme = !isSystemInDarkTheme()
     val glassStyle = LocalLiquidGlassStyle.current
@@ -114,7 +102,7 @@ fun LiquidToggle(
             }
     }
 
-    val trackBackdrop = rememberLayerBackdrop()
+    val trackBackdrop = Unit
 
     Box(
         modifier,
@@ -122,7 +110,7 @@ fun LiquidToggle(
     ) {
         Box(
             Modifier
-                .layerBackdrop(trackBackdrop)
+                
                 .clip(Capsule())
                 .drawBehind {
                     val fraction = dampedDragAnimation.value

@@ -1,21 +1,29 @@
 package com.remindme.app.ui.components.liquid
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.remindme.app.ui.theme.AppColors
-import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.effects.vibrancy
-import androidx.compose.foundation.shape.CircleShape
 
 @Composable
 fun LiquidAppBar(
@@ -25,24 +33,24 @@ fun LiquidAppBar(
     leading: @Composable (() -> Unit)? = null,
     actions: @Composable (RowScope.() -> Unit)? = null,
     bottom: @Composable (() -> Unit)? = null,
-    statusBarsPadding: Boolean = true,
-    backdrop: Backdrop = LocalBackdrop.current
+    statusBarsPadding: Boolean = true
 ) {
+    val isLight = !isSystemInDarkTheme()
+    val bgColor = if (isLight) {
+        Color.White.copy(alpha = 0.08f)
+    } else {
+        Color.Black.copy(alpha = 0.12f)
+    }
+
     Column(
         modifier = modifier
             .run { if (statusBarsPadding) statusBarsPadding() else this }
-            .padding(top = 8f.dp, start = 16f.dp, end = 16f.dp, bottom = 8f.dp)
+            .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
             .fillMaxWidth()
-            .drawBackdrop(
-                backdrop = backdrop,
-                shape = { CircleShape }, // Fully rounded
-                effects = {
-                    vibrancy()
-                    blur(2f.dp.toPx())
-                    lens(12f.dp.toPx(), 24f.dp.toPx())
-                }
-            )
-            .padding(horizontal = 16f.dp, vertical = 12f.dp),
+            .clip(RoundedCornerShape(16.dp))
+            .blur(6.dp)
+            .background(bgColor)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -52,7 +60,7 @@ fun LiquidAppBar(
         ) {
             if (leading != null) {
                 leading()
-                Spacer(modifier = Modifier.width(12f.dp))
+                Spacer(modifier = Modifier.width(12.dp))
             }
 
             Box(
@@ -64,7 +72,7 @@ fun LiquidAppBar(
                 } else if (title != null) {
                     Text(
                         text = title,
-                        fontSize = 20f.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = AppColors.textPrimary
                     )
@@ -72,13 +80,13 @@ fun LiquidAppBar(
             }
 
             if (actions != null) {
-                Spacer(modifier = Modifier.width(8f.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 actions()
             }
         }
 
         if (bottom != null) {
-            Spacer(modifier = Modifier.height(8f.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             bottom()
         }
     }

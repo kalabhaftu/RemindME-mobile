@@ -24,11 +24,6 @@ import androidx.compose.ui.unit.sp
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
 import com.remindme.app.ui.theme.TextTertiary
-import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.effects.vibrancy
 import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +32,7 @@ fun LiquidTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    backdrop: Backdrop = LocalBackdrop.current,
+    ,
     label: String? = null,
     placeholder: String? = null,
     prefixIcon: @Composable (() -> Unit)? = null,

@@ -36,21 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
-import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.remindme.app.ui.utils.DampedDragAnimation
 import com.remindme.app.ui.utils.InteractiveHighlight
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.effects.vibrancy
-import com.kyant.backdrop.highlight.Highlight
-import com.kyant.backdrop.shadow.InnerShadow
-import com.kyant.backdrop.shadow.Shadow
 import com.remindme.app.ui.theme.Accent500
-import com.kyant.shapes.Capsule
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
@@ -63,7 +51,7 @@ fun LiquidBottomTabs(
     onTabSelected: (index: Int) -> Unit,
     tabsCount: Int,
     modifier: Modifier = Modifier,
-    backdrop: Backdrop = LocalBackdrop.current,
+    ,
     content: @Composable RowScope.() -> Unit
 ) {
     val isLightTheme = !isSystemInDarkTheme()
@@ -75,7 +63,7 @@ fun LiquidBottomTabs(
         if (isLightTheme) Color(0xFFFAFAFA).copy(0.4f)
         else Color(0xFF121212).copy(0.4f)
 
-    val tabsBackdrop = rememberLayerBackdrop()
+    val tabsBackdrop = Unit
 
     BoxWithConstraints(
         modifier,
@@ -203,7 +191,7 @@ fun LiquidBottomTabs(
                 Modifier
                     .clearAndSetSemantics {}
                     .alpha(0f)
-                    .layerBackdrop(tabsBackdrop)
+                    
                     .graphicsLayer {
                         translationX = panelOffset
                     }
@@ -251,7 +239,7 @@ fun LiquidBottomTabs(
                 .then(interactiveHighlight.gestureModifier)
                 .then(dampedDragAnimation.modifier)
                 .drawBackdrop(
-                    backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
+                    backdrop = Unit,
                     shape = { Capsule() },
                     effects = {
                         val progress = dampedDragAnimation.pressProgress

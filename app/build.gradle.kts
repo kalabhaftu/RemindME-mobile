@@ -119,8 +119,15 @@ dependencies {
   
   // Local modules
   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-  implementation(project(":backdrop"))
   implementation(libs.kyant.shapes)
+
+  // Room Database
+  implementation("androidx.room:room-runtime:2.6.1")
+  implementation("androidx.room:room-ktx:2.6.1")
+  annotationProcessor("androidx.room:room-compiler:2.6.1")
+  
+  // DataStore
+  implementation("androidx.datastore:datastore-preferences:1.0.0")
 
   // Firebase
   implementation(platform(libs.firebase.bom))

@@ -17,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.remindme.app.ui.theme.AppColors
-import com.kyant.backdrop.Backdrop
 
 @Composable
 fun LiquidFilterChip(
@@ -25,7 +24,7 @@ fun LiquidFilterChip(
     selected: Boolean,
     onSelected: () -> Unit,
     modifier: Modifier = Modifier,
-    backdrop: Backdrop = LocalBackdrop.current
+    
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = if (selected) AppColors.accent500.copy(alpha = 0.15f) else Color.Transparent,

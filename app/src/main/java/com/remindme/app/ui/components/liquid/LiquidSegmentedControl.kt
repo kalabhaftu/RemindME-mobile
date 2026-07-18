@@ -19,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.remindme.app.ui.theme.AppColors
-import com.kyant.backdrop.Backdrop
 
 @Composable
 fun <T> LiquidSegmentedControl(
@@ -27,7 +26,7 @@ fun <T> LiquidSegmentedControl(
     selectedOption: T,
     onOptionSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
-    backdrop: Backdrop = LocalBackdrop.current,
+    ,
     labelProvider: (T) -> String = { it.toString() }
 ) {
     val selectedIndex = options.indexOf(selectedOption).coerceAtLeast(0)
