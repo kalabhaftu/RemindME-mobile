@@ -170,7 +170,15 @@ fun MainScreen(
                     borderRadius = 50.dp,
                     modifier = Modifier
                         .size(56.dp)
-                        .clickable { showQuickAdd = true }
+                        .clickable {
+                            when (selectedTab) {
+                                0 -> showQuickAdd = true
+                                1 -> onItemClick(AddPerson)
+                                2 -> onItemClick(AddSubscription)
+                                3 -> onItemClick(AddTask)
+                                4 -> { /* holidays - no direct add */ }
+                            }
+                        }
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),

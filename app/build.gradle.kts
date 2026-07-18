@@ -119,7 +119,6 @@ dependencies {
   
   // Local modules
   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-  implementation(libs.kyant.shapes)
 
   // Room Database
   implementation("androidx.room:room-runtime:2.6.1")

@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LiquidScaffold(
     modifier: Modifier = Modifier,
-    backdrop: LayerBackdrop = Unit,
     appBar: @Composable (() -> Unit)? = null,
     bottomBar: @Composable (() -> Unit)? = null,
     snackbarHost: @Composable () -> Unit = {},
@@ -30,7 +29,6 @@ fun LiquidScaffold(
     }
 
     CompositionLocalProvider(
-        LocalBackdrop provides backdrop,
         LocalLiquidGlassStyle provides glassStyle
     ) {
         Box(modifier = modifier.fillMaxSize()) {

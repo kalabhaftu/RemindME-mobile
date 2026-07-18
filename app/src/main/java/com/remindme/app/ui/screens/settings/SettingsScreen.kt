@@ -159,8 +159,8 @@ fun SettingsSection(title: String, content: @Composable () -> Unit) {
 fun AppearanceSection(onNavigateToThemeSelector: () -> Unit) {
     val currentStyle = LocalLiquidGlassStyle.current
     val label = when (currentStyle) {
-        LiquidGlassStyle.Frosted -> "Colored Glass"
-        LiquidGlassStyle.Clear -> "Clear Glass"
+        LiquidGlassStyle.Glass -> "Glass"
+        LiquidGlassStyle.Solid -> "Solid"
     }
 
     SettingsSection(title = "Appearance") {
@@ -177,7 +177,7 @@ fun AppearanceSection(onNavigateToThemeSelector: () -> Unit) {
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Liquid Glass Style", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                    Text("Choose between transparent and colored glass", color = TextSecondary, fontSize = 12.sp)
+                    Text("Glass: blurred backgrounds | Solid: flat colors", color = TextSecondary, fontSize = 12.sp)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(label, color = Accent500, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
@@ -261,27 +261,23 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Row {
-                    Button(
+                    LiquidButton(
                         onClick = { viewModel.detectChatId() },
-                        modifier = Modifier.weight(1f).height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = BgSurface3, contentColor = TextPrimary),
-                        shape = RoundedCornerShape(16.dp)
+                        modifier = Modifier.weight(1f).height(48.dp)
                     ) {
-                        Icon(Icons.Rounded.WifiTethering, contentDescription = null, modifier = Modifier.size(18.dp))
+                        LiquidIcon(Icons.Rounded.WifiTethering, color = TextPrimary, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Detect Chat ID")
+                        Text("Detect Chat ID", fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
-                    Button(
+                    LiquidButton(
                         onClick = { viewModel.saveChatId(chatId) },
-                        enabled = chatId.isNotEmpty(),
                         modifier = Modifier.weight(1f).height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Accent500, contentColor = Color.White),
-                        shape = RoundedCornerShape(16.dp)
+                        tint = Accent500
                     ) {
-                        Icon(Icons.Rounded.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                        LiquidIcon(Icons.Rounded.Save, color = Accent500, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Save")
+                        Text("Save", fontSize = 14.sp)
                     }
                 }
             }
@@ -294,16 +290,14 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
-            Button(
+            LiquidButton(
                 onClick = { viewModel.saveTelegramToken(token) },
-                enabled = token.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth().height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Accent500, contentColor = Color.White),
-                shape = RoundedCornerShape(16.dp)
+                tint = Accent500
             ) {
-                Icon(Icons.Rounded.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                LiquidIcon(Icons.Rounded.Save, color = Accent500, size = 18.dp)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Save Token")
+                Text("Save Token", fontSize = 14.sp)
             }
         }
     }
@@ -490,18 +484,13 @@ fun TestNotificationsSection(viewModel: SettingsViewModel) {
 
 @Composable
 fun TestButton(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Button(
+    LiquidButton(
         onClick = onClick,
-        modifier = modifier.height(48.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = BgSurface3, contentColor = TextPrimary),
-        shape = RoundedCornerShape(16.dp),
-        contentPadding = PaddingValues(0.dp)
+        modifier = modifier.height(48.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(label, fontSize = 13.sp)
-        }
+        LiquidIcon(icon, color = TextPrimary, size = 16.dp)
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(label, fontSize = 13.sp)
     }
 }
 
@@ -682,12 +671,12 @@ fun ThemeSelectorScreen(
             LiquidGlassStyle.entries.forEach { style ->
                 val isSelected = currentStyle == style
                 val title = when (style) {
-                    LiquidGlassStyle.Clear -> "Clear Glass (Reference Style)"
-                    LiquidGlassStyle.Frosted -> "Colored Glass (Frosted Style)"
+                    LiquidGlassStyle.Glass -> "Glass Theme"
+                    LiquidGlassStyle.Solid -> "Solid Theme"
                 }
                 val desc = when (style) {
-                    LiquidGlassStyle.Clear -> "Perfect transparency. Blends directly into the background using a glassmorphic shader overlay."
-                    LiquidGlassStyle.Frosted -> "A beautiful frosted effect with solid color tints, enhancing text readability and UI depth."
+                    LiquidGlassStyle.Glass -> "Semi-transparent backgrounds with subtle blur. The default RemindME look."
+                    LiquidGlassStyle.Solid -> "Opaque, flat colors. No glass effects for a cleaner, more traditional look."
                 }
 
                 FloatingGlassContainer(

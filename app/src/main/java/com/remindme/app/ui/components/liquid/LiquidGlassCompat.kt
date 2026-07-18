@@ -6,25 +6,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 
+@Composable
 fun Modifier.liquidGlassEffect(
     blurRadius: Float = 6f,
     cornerRadius: Float = 12f
 ): Modifier {
     val isLight = !isSystemInDarkTheme()
     val backgroundColor = if (isLight) {
-        Color.White.copy(alpha = 0.08f)
+        Color.White.copy(alpha = 0.15f)
     } else {
-        Color.Black.copy(alpha = 0.12f)
+        Color.Black.copy(alpha = 0.25f)
     }
     
     return this
-        .blur(blurRadius.dp)
         .background(backgroundColor)
 }
 
+@Composable
 fun Modifier.liquidButtonEffect(): Modifier {
+    val isLight = !isSystemInDarkTheme()
+    val backgroundColor = if (isLight) {
+        Color.White.copy(alpha = 0.2f)
+    } else {
+        Color.Black.copy(alpha = 0.3f)
+    }
+    
+    return this
+        .background(backgroundColor)
+}
+
+@Composable
+fun Modifier.liquidSurfaceEffect(): Modifier {
     val isLight = !isSystemInDarkTheme()
     val backgroundColor = if (isLight) {
         Color.White.copy(alpha = 0.1f)
@@ -33,19 +48,5 @@ fun Modifier.liquidButtonEffect(): Modifier {
     }
     
     return this
-        .blur(2.dp)
-        .background(backgroundColor)
-}
-
-fun Modifier.liquidSurfaceEffect(): Modifier {
-    val isLight = !isSystemInDarkTheme()
-    val backgroundColor = if (isLight) {
-        Color.White.copy(alpha = 0.05f)
-    } else {
-        Color.Black.copy(alpha = 0.08f)
-    }
-    
-    return this
-        .blur(8.dp)
         .background(backgroundColor)
 }

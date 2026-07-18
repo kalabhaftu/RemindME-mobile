@@ -6,6 +6,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +25,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -59,13 +62,17 @@ fun LiquidBottomTabs(
         if (isLightTheme) Color(0xFF0088FF)
         else Color(0xFF0091FF)
     val containerColor =
-        if (isLightTheme) Color(0xFFFAFAFA).copy(0.4f)
+        if (glassStyle == LiquidGlassStyle.Solid) {
+            if (isLightTheme) Color(0xFFF2F2F7) else Color(0xFF1C1C2E)
+        } else if (isLightTheme) Color(0xFFFAFAFA).copy(0.4f)
         else Color(0xFF121212).copy(0.4f)
 
     val tabsBackdrop = Unit
 
     BoxWithConstraints(
-        modifier,
+        modifier
+            .clip(RoundedCornerShape(24.dp))
+            .background(containerColor),
         contentAlignment = Alignment.CenterStart
     ) {
         val density = LocalDensity.current
@@ -169,22 +176,7 @@ fun LiquidBottomTabs(
                 Modifier
                     .clearAndSetSemantics {}
                     .alpha(0f)
-                    
-                    .graphicsLayer {
-                        translationX = panelOffset
-                    }
-                        },
-                        highlight = {
-                            val progress = dampedDragAnimation.pressProgress
-                            Highlight.Default.copy(alpha = progress)
-                        },
-                        onDrawSurface = {
-                            drawRect(containerColor)
-                            if (glassStyle == LiquidGlassStyle.Frosted) {
-                                drawRect(Accent500.copy(alpha = 0.08f))
-                            }
-                        }
-                    )
+                    .graphicsLayer { translationX = panelOffset }
                     .then(interactiveHighlight.modifier)
                     .height(56f.dp)
                     .fillMaxWidth()
@@ -205,42 +197,6 @@ fun LiquidBottomTabs(
                 }
                 .then(interactiveHighlight.gestureModifier)
                 .then(dampedDragAnimation.modifier)
-                    },
-                    highlight = {
-                        val progress = dampedDragAnimation.pressProgress
-                        Highlight.Default.copy(alpha = progress)
-                    },
-                    shadow = {
-                        val progress = dampedDragAnimation.pressProgress
-                        Shadow(alpha = progress)
-                    },
-                    innerShadow = {
-                        val progress = dampedDragAnimation.pressProgress
-                        InnerShadow(
-                            radius = 8f.dp * progress,
-                            alpha = progress
-                        )
-                    },
-                    layerBlock = {
-                        scaleX = dampedDragAnimation.scaleX
-                        scaleY = dampedDragAnimation.scaleY
-                        val velocity = dampedDragAnimation.velocity / 10f
-                        scaleX /= 1f - (velocity * 0.75f).fastCoerceIn(-0.2f, 0.2f)
-                        scaleY *= 1f - (velocity * 0.25f).fastCoerceIn(-0.2f, 0.2f)
-                    },
-                    onDrawSurface = {
-                        val progress = dampedDragAnimation.pressProgress
-                        drawRect(
-                            if (isLightTheme) Color.Black.copy(0.1f)
-                            else Color.White.copy(0.1f),
-                            alpha = 1f - progress
-                        )
-                        drawRect(Color.Black.copy(alpha = 0.03f * progress))
-                        if (glassStyle == LiquidGlassStyle.Frosted) {
-                            drawRect(Accent500.copy(alpha = 0.08f))
-                        }
-                    }
-                )
                 .height(56f.dp)
                 .fillMaxWidth(1f / tabsCount)
         )

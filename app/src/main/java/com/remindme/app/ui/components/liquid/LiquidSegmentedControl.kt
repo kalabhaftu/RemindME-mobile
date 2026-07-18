@@ -26,7 +26,6 @@ fun <T> LiquidSegmentedControl(
     selectedOption: T,
     onOptionSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
-    ,
     labelProvider: (T) -> String = { it.toString() }
 ) {
     val selectedIndex = options.indexOf(selectedOption).coerceAtLeast(0)

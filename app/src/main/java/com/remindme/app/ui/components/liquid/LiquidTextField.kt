@@ -17,7 +17,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -48,17 +47,19 @@ fun LiquidTextField(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isLight = !isSystemInDarkTheme()
-    val bgColor = if (isLight) {
-        Color.White.copy(alpha = 0.08f)
+    val glassStyle = LocalLiquidGlassStyle.current
+    val bgColor = if (glassStyle == LiquidGlassStyle.Solid) {
+        if (isLight) Color(0xFFE5E5EA) else Color(0xFF2C2C3E)
+    } else if (isLight) {
+        Color.White.copy(alpha = 0.2f)
     } else {
-        Color.Black.copy(alpha = 0.12f)
+        Color.Black.copy(alpha = 0.3f)
     }
-    
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .blur(4.dp)
             .background(bgColor)
     ) {
         BasicTextField(

@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -96,14 +97,26 @@ fun MainNavigation() {
             entryProvider =
             entryProvider {
                 entry<AuthCheck> {
+                    val bgBrush = androidx.compose.ui.graphics.Brush.linearGradient(
+                        colors = listOf(
+                            androidx.compose.ui.graphics.Color(0xFF1A1A2E),
+                            androidx.compose.ui.graphics.Color(0xFF16213E),
+                            androidx.compose.ui.graphics.Color(0xFF0F3460)
+                        ),
+                        start = androidx.compose.ui.geometry.Offset.Zero,
+                        end = androidx.compose.ui.geometry.Offset(0f, Float.POSITIVE_INFINITY)
+                    )
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(com.remindme.app.ui.theme.AppColors.bgCanvas),
+                            .background(bgBrush),
                         contentAlignment = Alignment.Center
                     ) {
-                        com.remindme.app.ui.components.liquid.LiquidSpinner(
-                            modifier = Modifier.size(48.dp)
+                        androidx.compose.material3.Text(
+                            text = "RemindME",
+                            fontSize = 32.sp,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f)
                         )
                     }
                 }

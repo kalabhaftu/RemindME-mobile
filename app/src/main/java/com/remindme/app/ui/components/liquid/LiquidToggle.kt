@@ -3,6 +3,7 @@ package com.remindme.app.ui.components.liquid
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,7 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
@@ -33,6 +37,11 @@ import com.remindme.app.ui.utils.DampedDragAnimation
 import com.remindme.app.ui.theme.Accent500
 import kotlinx.coroutines.flow.collectLatest
 
+private fun Capsule(): Shape = GenericShape { size, _ ->
+    val r = size.minDimension / 2f
+    addRoundRect(RoundRect(0f, 0f, size.width, size.height, r, r))
+}
+
 @Composable
 fun LiquidToggle(
     selected: () -> Boolean,
@@ -41,7 +50,6 @@ fun LiquidToggle(
     
 ) {
     val isLightTheme = !isSystemInDarkTheme()
-    val glassStyle = LocalLiquidGlassStyle.current
     val accentColor =
         if (isLightTheme) Color(0xFF34C759)
         else Color(0xFF30D158)
@@ -132,53 +140,8 @@ fun LiquidToggle(
                     role = Role.Switch
                 }
                 .then(dampedDragAnimation.modifier)
-                    shape = { Capsule() },
-                    effects = {
-                        val progress = dampedDragAnimation.pressProgress
-                        blur(8f.dp.toPx() * (1f - progress))
-                        lens(
-                            5f.dp.toPx() * progress,
-                            10f.dp.toPx() * progress,
-                            chromaticAberration = true
-                        )
-                    },
-                    highlight = {
-                        val progress = dampedDragAnimation.pressProgress
-                        Highlight.Ambient.copy(
-                            width = Highlight.Ambient.width / 1.5f,
-                            blurRadius = Highlight.Ambient.blurRadius / 1.5f,
-                            alpha = progress
-                        )
-                    },
-                    shadow = {
-                        Shadow(
-                            radius = 4f.dp,
-                            color = Color.Black.copy(alpha = 0.05f)
-                        )
-                    },
-                    innerShadow = {
-                        val progress = dampedDragAnimation.pressProgress
-                        InnerShadow(
-                            radius = 4f.dp * progress,
-                            alpha = progress
-                        )
-                    },
-                    layerBlock = {
-                        scaleX = dampedDragAnimation.scaleX
-                        scaleY = dampedDragAnimation.scaleY
-                        val velocity = dampedDragAnimation.velocity / 50f
-                        scaleX /= 1f - (velocity * 0.75f).fastCoerceIn(-0.2f, 0.2f)
-                        scaleY *= 1f - (velocity * 0.25f).fastCoerceIn(-0.2f, 0.2f)
-                    },
-                    onDrawSurface = {
-                        val progress = dampedDragAnimation.pressProgress
-                        drawRect(Color.White.copy(alpha = 1f - progress))
-                        if (glassStyle == LiquidGlassStyle.Frosted) {
-                            drawRect(Accent500.copy(alpha = 0.08f))
-                        }
-                    }
-                )
-                .size(40f.dp, 24f.dp)
+                .clip(Capsule())
+                .size(24f.dp, 24f.dp)
         )
     }
 }

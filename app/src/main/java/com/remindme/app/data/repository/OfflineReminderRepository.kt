@@ -2,6 +2,7 @@ package com.remindme.app.data.repository
 
 import android.content.Context
 import android.net.ConnectivityManager
+import java.time.ZoneOffset
 import android.net.NetworkCapabilities
 import com.remindme.app.data.local.RemindMeDatabase
 import com.remindme.app.data.local.entities.NotificationPreferenceEntity
@@ -69,8 +70,8 @@ class OfflineReminderRepository(
                     name = item.name,
                     notes = item.notes,
                     iconKey = item.iconKey,
-                    createdAt = item.createdAt.toEpochSecond(java.time.LocalTime.MIDNIGHT),
-                    updatedAt = item.updatedAt.toEpochSecond(java.time.LocalTime.MIDNIGHT),
+                    createdAt = item.createdAt.toEpochSecond(ZoneOffset.UTC),
+                    updatedAt = item.updatedAt.toEpochSecond(ZoneOffset.UTC),
                     syncedAt = null,
                     requiresSync = true
                 )
@@ -84,8 +85,8 @@ class OfflineReminderRepository(
                 name = item.name,
                 notes = item.notes,
                 iconKey = item.iconKey,
-                createdAt = item.createdAt.toEpochSecond(java.time.LocalTime.MIDNIGHT),
-                updatedAt = item.updatedAt.toEpochSecond(java.time.LocalTime.MIDNIGHT),
+                createdAt = item.createdAt.toEpochSecond(ZoneOffset.UTC),
+                updatedAt = item.updatedAt.toEpochSecond(ZoneOffset.UTC),
                 syncedAt = null,
                 requiresSync = true
             )
@@ -108,8 +109,8 @@ class OfflineReminderRepository(
                     name = item.name,
                     notes = item.notes,
                     iconKey = item.iconKey,
-                    createdAt = item.createdAt.toEpochSecond(java.time.LocalTime.MIDNIGHT),
-                    updatedAt = item.updatedAt.toEpochSecond(java.time.LocalTime.MIDNIGHT),
+                    createdAt = item.createdAt.toEpochSecond(ZoneOffset.UTC),
+                    updatedAt = item.updatedAt.toEpochSecond(ZoneOffset.UTC),
                     syncedAt = null,
                     requiresSync = true
                 )
@@ -137,8 +138,8 @@ class OfflineReminderRepository(
             name = item.name,
             notes = item.notes,
             iconKey = item.iconKey,
-            createdAt = item.createdAt.toEpochSecond(java.time.LocalTime.MIDNIGHT),
-            updatedAt = item.updatedAt.toEpochSecond(java.time.LocalTime.MIDNIGHT),
+            createdAt = item.createdAt.toEpochSecond(ZoneOffset.UTC),
+            updatedAt = item.updatedAt.toEpochSecond(ZoneOffset.UTC),
             syncedAt = System.currentTimeMillis(),
             requiresSync = false
         )

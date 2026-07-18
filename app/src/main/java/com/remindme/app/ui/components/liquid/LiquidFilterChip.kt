@@ -23,8 +23,7 @@ fun LiquidFilterChip(
     label: String,
     selected: Boolean,
     onSelected: () -> Unit,
-    modifier: Modifier = Modifier,
-    
+    modifier: Modifier = Modifier
 ) {
     val backgroundColor by animateColorAsState(
         targetValue = if (selected) AppColors.accent500.copy(alpha = 0.15f) else Color.Transparent,

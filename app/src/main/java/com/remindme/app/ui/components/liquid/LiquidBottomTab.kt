@@ -14,7 +14,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.GenericShape
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Shape
 
+private fun Capsule(): Shape = GenericShape { size, _ ->
+    val r = size.minDimension / 2f
+    addRoundRect(RoundRect(0f, 0f, size.width, size.height, r, r))
+}
 
 internal val LocalLiquidBottomTabScale =
     staticCompositionLocalOf { { 1f } }
@@ -23,7 +30,6 @@ internal val LocalLiquidBottomTabScale =
 fun RowScope.LiquidBottomTab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    ,
     selected: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
 ) {

@@ -217,24 +217,21 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
             Spacer(modifier = Modifier.height(20.dp))
             
             Row {
-                OutlinedButton(
+                LiquidButton(
                     onClick = onClose,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary),
-                    shape = RoundedCornerShape(16.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder)
+                    modifier = Modifier.weight(1f).height(48.dp)
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(modifier = Modifier.width(12.dp))
-                Button(
+                LiquidButton(
                     onClick = { onCreate(name, category, notes.takeIf { it.isNotBlank() }) },
-                    enabled = name.isNotBlank(),
                     modifier = Modifier.weight(1f).height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Accent500, contentColor = Color.White),
-                    shape = RoundedCornerShape(16.dp)
+                    tint = Accent500
                 ) {
-                    Text("Create", fontWeight = FontWeight.SemiBold)
+                    LiquidIcon(Icons.Rounded.Add, color = Accent500, size = 18.dp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Create", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

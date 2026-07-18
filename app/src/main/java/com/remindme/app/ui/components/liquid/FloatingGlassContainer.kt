@@ -1,6 +1,5 @@
 package com.remindme.app.ui.components.liquid
 
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -24,13 +23,14 @@ fun FloatingGlassContainer(
 ) {
     val isDark = isSystemInDarkTheme()
     val glassStyle = LocalLiquidGlassStyle.current
-    val bgColor = tintColor ?: when {
-        glassStyle == LiquidGlassStyle.Clear -> Color.White.copy(alpha = if (isDark) 0.04f else 0.08f)
-        isDark -> Color.Black.copy(alpha = 0.18f)
-        else -> Color.White.copy(alpha = 0.2f)
+
+    val bgColor = if (glassStyle == LiquidGlassStyle.Solid) {
+        if (isDark) Color(0xFF1E1E2E) else Color(0xFFF2F2F7)
+    } else {
+        tintColor ?: if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.06f)
     }
+
     val shape = RoundedCornerShape(borderRadius)
-    val blurRadius = if (Build.VERSION.SDK_INT >= 31 && bgColor.alpha > 0f) 16.dp else 0.dp
 
     Box(modifier = modifier) {
         Box(
@@ -38,7 +38,10 @@ fun FloatingGlassContainer(
                 .matchParentSize()
                 .clip(shape)
                 .background(bgColor)
-                .then(if (blurRadius > 0.dp) Modifier.blur(blurRadius) else Modifier)
+                .then(
+                    if (glassStyle == LiquidGlassStyle.Glass) Modifier.blur(8.dp)
+                    else Modifier
+                )
         )
         Box(modifier = Modifier.padding(padding)) {
             content()
