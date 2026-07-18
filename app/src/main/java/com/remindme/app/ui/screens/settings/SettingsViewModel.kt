@@ -60,7 +60,7 @@ data class DeliveryLog(
     val scheduled_for: String? = null
 )
 
-class SettingsViewModel : AndroidViewModel(application) {
+class SettingsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 

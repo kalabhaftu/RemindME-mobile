@@ -52,7 +52,7 @@ data class HolidaysUiState(
     val subscribedItems: List<ReminderItem> = emptyList()
 )
 
-class HolidaysViewModel : AndroidViewModel(application) {
+class HolidaysViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(HolidaysUiState())
     val uiState: StateFlow<HolidaysUiState> = _uiState.asStateFlow()

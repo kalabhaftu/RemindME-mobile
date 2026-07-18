@@ -30,7 +30,7 @@ data class TasksUiState(
     val error: String? = null
 )
 
-class TasksViewModel : AndroidViewModel(application) {
+class TasksViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(TasksUiState())
     val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()

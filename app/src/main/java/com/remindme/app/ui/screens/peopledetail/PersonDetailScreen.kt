@@ -10,6 +10,7 @@ import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import android.app.Application
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
 import com.remindme.app.ui.components.liquid.*
 import com.remindme.app.ui.components.liquid.LiquidSnackbarHost
 import com.remindme.app.ui.theme.*
@@ -35,11 +37,12 @@ fun PersonDetailScreen(
     onBack: () -> Unit,
     onEdit: (String) -> Unit
 ) {
+    val context = LocalContext.current
     val viewModel: PersonDetailViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return PersonDetailViewModel(personId) as T
+                return PersonDetailViewModel(personId, context.applicationContext as Application) as T
             }
         }
     )

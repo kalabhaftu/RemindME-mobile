@@ -22,7 +22,7 @@ data class SearchUiState(
     val error: String? = null
 )
 
-class SearchViewModel : AndroidViewModel(application) {
+class SearchViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()

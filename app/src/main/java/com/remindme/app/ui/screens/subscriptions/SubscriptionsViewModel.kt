@@ -30,7 +30,7 @@ data class SubscriptionsUiState(
     val error: String? = null
 )
 
-class SubscriptionsViewModel : AndroidViewModel(application) {
+class SubscriptionsViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(SubscriptionsUiState())
     val uiState: StateFlow<SubscriptionsUiState> = _uiState.asStateFlow()

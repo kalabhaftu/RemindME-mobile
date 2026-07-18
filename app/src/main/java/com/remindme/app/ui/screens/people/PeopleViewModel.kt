@@ -36,7 +36,7 @@ data class PeopleUiState(
     val searchQuery: String = ""
 )
 
-class PeopleViewModel : AndroidViewModel(application) {
+class PeopleViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(PeopleUiState())
     val uiState: StateFlow<PeopleUiState> = _uiState.asStateFlow()

@@ -38,7 +38,7 @@ data class TemplatesUiState(
     val error: String? = null
 )
 
-class TemplatesViewModel : AndroidViewModel(application) {
+class TemplatesViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(TemplatesUiState())
     val uiState: StateFlow<TemplatesUiState> = _uiState.asStateFlow()
 
