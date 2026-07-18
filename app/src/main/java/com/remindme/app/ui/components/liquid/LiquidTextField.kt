@@ -1,10 +1,13 @@
 package com.remindme.app.ui.components.liquid
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,7 +17,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
@@ -24,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
 import com.remindme.app.ui.theme.TextTertiary
-import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +35,6 @@ fun LiquidTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    ,
     label: String? = null,
     placeholder: String? = null,
     prefixIcon: @Composable (() -> Unit)? = null,
@@ -45,22 +47,19 @@ fun LiquidTextField(
     maxLines: Int = 1
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val isLight = !isSystemInDarkTheme()
+    val bgColor = if (isLight) {
+        Color.White.copy(alpha = 0.08f)
+    } else {
+        Color.Black.copy(alpha = 0.12f)
+    }
     
     Box(
         modifier = modifier
-            .drawBackdrop(
-                backdrop = backdrop,
-                shape = { RoundedCornerShape(16.dp) },
-                effects = {
-                    vibrancy()
-                    blur(8f.dp.toPx())
-                    lens(8f.dp.toPx(), 16f.dp.toPx())
-                },
-                onDrawSurface = {
-                    drawRect(Color.White.copy(alpha = 0.05f), blendMode = BlendMode.Plus)
-                    drawRect(Color.Black.copy(alpha = 0.15f))
-                }
-            )
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .blur(4.dp)
+            .background(bgColor)
     ) {
         BasicTextField(
             value = value,
