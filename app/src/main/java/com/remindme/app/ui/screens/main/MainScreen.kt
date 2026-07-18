@@ -57,10 +57,12 @@ fun MainScreen(
     var showQuickAdd by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
 
+    val tabTitles = listOf("RemindME", "People", "Subscriptions", "Tasks", "Holidays")
+
     AppScaffold(
         appBar = {
             com.remindme.app.ui.components.TopBar(
-                title = "RemindME",
+                title = tabTitles[selectedTab],
                 actions = {
                     androidx.compose.foundation.layout.Box {
                         androidx.compose.material3.IconButton(onClick = { showMenu = true }) {

@@ -660,7 +660,7 @@ fun ThemeSelectorScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Choose your preferred look. The entire app updates instantly.",
+                text = "Switch between Glass and Solid theme appearance.",
                 color = TextSecondary,
                 fontSize = 14.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
