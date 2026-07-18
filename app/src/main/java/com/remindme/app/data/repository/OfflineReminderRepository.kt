@@ -3,6 +3,7 @@ package com.remindme.app.data.repository
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
 import com.remindme.app.domain.models.ReminderItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -82,7 +83,9 @@ class OfflineReminderRepository(
                 _cachedReminders.value = remote
                 return@withContext remote
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            Log.e("OfflineRepo", "getReminders remote failed", e)
+        }
         val cached = readCache()
         _cachedReminders.value = cached
         cached
@@ -99,7 +102,8 @@ class OfflineReminderRepository(
             try {
                 remoteRepository.addReminder(item)
                 removePendingOp(item.id, "add")
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.e("OfflineRepo", "addReminder remote failed", e)
                 addPendingOp(PendingOp("add", item.id))
             }
         } else {
@@ -118,7 +122,8 @@ class OfflineReminderRepository(
             try {
                 remoteRepository.updateReminder(item)
                 removePendingOp(item.id, "update")
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.e("OfflineRepo", "updateReminder remote failed", e)
                 addPendingOp(PendingOp("update", item.id))
             }
         } else {
@@ -135,7 +140,8 @@ class OfflineReminderRepository(
         if (isOnline()) {
             try {
                 remoteRepository.deleteReminder(id)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.e("OfflineRepo", "deleteReminder remote failed", e)
                 addPendingOp(PendingOp("delete", id))
             }
         } else {

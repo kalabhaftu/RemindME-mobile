@@ -194,21 +194,17 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
                             name = holiday.localName,
                             createdAt = java.time.LocalDateTime.now(),
                             updatedAt = java.time.LocalDateTime.now(),
-                            holidayDetails = listOf(
-                                HolidayDetails(
-                                    countryCode = holiday.countryCode,
-                                    holidayKey = key,
-                                    holidayDate = holiday.date,
-                                    isCustom = false
-                                )
+                            holidayDetails = HolidayDetails(
+                                countryCode = holiday.countryCode,
+                                holidayKey = key,
+                                holidayDate = holiday.date,
+                                isCustom = false
                             ),
-                            recurrenceRules = listOf(
-                                RecurrenceRules(
-                                    frequency = "yearly",
-                                    intervalCount = 1,
-                                    ends = "never",
-                                    nextOccurrenceAt = nextOccurrence
-                                )
+                            recurrenceRules = RecurrenceRules(
+                                frequency = "yearly",
+                                intervalCount = 1,
+                                ends = "never",
+                                nextOccurrenceAt = nextOccurrence
                             )
                         )
                         // Save through repository

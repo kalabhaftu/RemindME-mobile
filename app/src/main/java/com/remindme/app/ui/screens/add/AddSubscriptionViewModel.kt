@@ -167,8 +167,8 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
                     iconKey = null,
                     createdAt = now,
                     updatedAt = now,
-                    subscriptionDetails = listOf(subscriptionDetails),
-                    recurrenceRules = listOf(recurrenceRules),
+                    subscriptionDetails = subscriptionDetails,
+                    recurrenceRules = recurrenceRules,
                     notificationPreferences = notificationPrefs
                 )
 

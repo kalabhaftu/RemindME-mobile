@@ -109,8 +109,8 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
                     iconKey = _uiState.value.iconKey,
                     createdAt = now,
                     updatedAt = now,
-                    taskDetails = listOf(taskDetails),
-                    recurrenceRules = listOf(recurrenceRules),
+                    taskDetails = taskDetails,
+                    recurrenceRules = recurrenceRules,
                     notificationPreferences = notificationPrefs
                 )
 

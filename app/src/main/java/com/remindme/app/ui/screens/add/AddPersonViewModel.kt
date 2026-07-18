@@ -150,8 +150,8 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                     iconKey = _uiState.value.avatarUrl,
                     createdAt = now,
                     updatedAt = now,
-                    personDetails = listOf(personDetails),
-                    recurrenceRules = listOf(recurrenceRules),
+                    personDetails = personDetails,
+                    recurrenceRules = recurrenceRules,
                     notificationPreferences = notificationPrefs
                 )
 

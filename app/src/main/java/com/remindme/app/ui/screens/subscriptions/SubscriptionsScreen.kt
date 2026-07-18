@@ -55,6 +55,14 @@ fun SubscriptionsScreen(
         return
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
+        uiState.error?.let { error ->
+            Snackbar(
+                modifier = Modifier.padding(16.dp).align(Alignment.TopCenter),
+                action = { TextButton(onClick = { viewModel.fetchSubscriptions() }) { Text("Retry") } }
+            ) { Text(error) }
+        }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
@@ -104,6 +112,7 @@ fun SubscriptionsScreen(
                 )
             }
         }
+    }
     }
 }
 
