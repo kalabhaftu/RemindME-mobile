@@ -12,6 +12,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.remindme.app.ui.theme.BgElevated
 
 @Composable
 fun AppCard(
@@ -25,7 +26,7 @@ fun AppCard(
     val glassStyle = LocalThemeStyle.current
 
     val bgColor = if (glassStyle == ThemeStyle.Solid) {
-        if (isDark) Color(0xFF1E1E2E) else Color(0xFFF2F2F7)
+        if (isDark) BgElevated else Color(0xFFF2F2F7)
     } else {
         tintColor ?: if (isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.06f)
     }

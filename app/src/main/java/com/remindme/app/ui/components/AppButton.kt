@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.remindme.app.ui.theme.BgElevated
 
 @Composable
 fun AppButton(
@@ -31,7 +32,7 @@ fun AppButton(
     val glassStyle = LocalThemeStyle.current
 
     val bgColor = if (glassStyle == ThemeStyle.Solid) {
-        if (isLight) Color(0xFFE5E5EA) else Color(0xFF2C2C3E)
+        if (isLight) Color(0xFFE5E5EA) else BgElevated
     } else if (isLight) {
         Color.White.copy(alpha = 0.2f)
     } else {

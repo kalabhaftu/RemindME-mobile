@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.remindme.app.ui.theme.BgElevated
 import androidx.compose.ui.unit.sp
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
@@ -49,7 +50,7 @@ fun AppTextField(
     val isLight = !isSystemInDarkTheme()
     val glassStyle = LocalThemeStyle.current
     val bgColor = if (glassStyle == ThemeStyle.Solid) {
-        if (isLight) Color(0xFFE5E5EA) else Color(0xFF2C2C3E)
+        if (isLight) Color(0xFFE5E5EA) else BgElevated
     } else if (isLight) {
         Color.White.copy(alpha = 0.2f)
     } else {
