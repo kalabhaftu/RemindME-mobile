@@ -2,6 +2,8 @@ package com.remindme.app.ui.screens.settings
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.BuildConfig
 import com.remindme.app.data.remote.SupabaseManager
@@ -58,7 +60,7 @@ data class DeliveryLog(
     val scheduled_for: String? = null
 )
 
-class SettingsViewModel : ViewModel() {
+class SettingsViewModel : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 

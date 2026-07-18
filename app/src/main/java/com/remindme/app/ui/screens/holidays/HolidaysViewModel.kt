@@ -1,6 +1,8 @@
 package com.remindme.app.ui.screens.holidays
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
@@ -50,8 +52,8 @@ data class HolidaysUiState(
     val subscribedItems: List<ReminderItem> = emptyList()
 )
 
-class HolidaysViewModel : ViewModel() {
-    private val repository = ReminderRepository(SupabaseManager.client)
+class HolidaysViewModel : AndroidViewModel(application) {
+    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(HolidaysUiState())
     val uiState: StateFlow<HolidaysUiState> = _uiState.asStateFlow()
 

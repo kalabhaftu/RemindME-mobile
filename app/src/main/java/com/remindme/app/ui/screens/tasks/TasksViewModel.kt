@@ -1,6 +1,8 @@
 package com.remindme.app.ui.screens.tasks
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
@@ -28,8 +30,8 @@ data class TasksUiState(
     val error: String? = null
 )
 
-class TasksViewModel : ViewModel() {
-    private val repository = ReminderRepository(SupabaseManager.client)
+class TasksViewModel : AndroidViewModel(application) {
+    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(TasksUiState())
     val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()
 

@@ -1,6 +1,8 @@
 package com.remindme.app.ui.screens.search
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
@@ -20,8 +22,8 @@ data class SearchUiState(
     val error: String? = null
 )
 
-class SearchViewModel : ViewModel() {
-    private val repository = ReminderRepository(SupabaseManager.client)
+class SearchViewModel : AndroidViewModel(application) {
+    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 

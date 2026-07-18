@@ -1,6 +1,8 @@
 package com.remindme.app.ui.screens.people
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
@@ -34,8 +36,8 @@ data class PeopleUiState(
     val searchQuery: String = ""
 )
 
-class PeopleViewModel : ViewModel() {
-    private val repository = ReminderRepository(SupabaseManager.client)
+class PeopleViewModel : AndroidViewModel(application) {
+    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
     private val _uiState = MutableStateFlow(PeopleUiState())
     val uiState: StateFlow<PeopleUiState> = _uiState.asStateFlow()
 
