@@ -63,13 +63,6 @@ fun PeopleScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        uiState.error?.let { error ->
-            Snackbar(
-                modifier = Modifier.padding(16.dp).align(Alignment.TopCenter),
-                action = { TextButton(onClick = { viewModel.fetchPeople() }) { Text("Retry") } }
-            ) { Text(error) }
-        }
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
@@ -179,7 +172,13 @@ fun PeopleScreen(
             }
         }
     }
+    uiState.error?.let { error ->
+        Snackbar(
+            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
+            action = { TextButton(onClick = { viewModel.fetchPeople() }) { Text("Retry") } }
+        ) { Text(error) }
     }
+}
 }
 
 @Composable

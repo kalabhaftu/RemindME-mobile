@@ -44,7 +44,11 @@ class OfflineReminderRepository(
         if (!remindersFile.exists()) return emptyList()
         return try {
             json.decodeFromString<List<ReminderItem>>(remindersFile.readText())
-        } catch (_: Exception) { emptyList() }
+        } catch (e: Exception) {
+            Log.e("OfflineRepo", "readCache: failed to decode cache", e)
+            remindersFile.delete()
+            emptyList()
+        }
     }
 
     private fun writeCache(items: List<ReminderItem>) {
@@ -76,6 +80,7 @@ class OfflineReminderRepository(
     }
 
     suspend fun getReminders(): List<ReminderItem> = withContext(Dispatchers.IO) {
+        var remoteError: Exception? = null
         try {
             if (isOnline()) {
                 val remote = remoteRepository.getReminders()
@@ -85,8 +90,12 @@ class OfflineReminderRepository(
             }
         } catch (e: Exception) {
             Log.e("OfflineRepo", "getReminders remote failed", e)
+            remoteError = e
         }
         val cached = readCache()
+        if (cached.isEmpty() && remoteError != null) {
+            throw remoteError
+        }
         _cachedReminders.value = cached
         cached
     }
@@ -161,7 +170,9 @@ class OfflineReminderRepository(
                 }
                 return@withContext remote
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            Log.e("OfflineRepo", "getReminder remote failed", e)
+        }
         readCache().find { it.id == id }
     }
 
@@ -170,7 +181,9 @@ class OfflineReminderRepository(
             if (isOnline()) {
                 return@withContext remoteRepository.searchReminders(query)
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            Log.e("OfflineRepo", "searchReminders remote failed", e)
+        }
         readCache().filter {
             it.name.contains(query, ignoreCase = true) ||
             (it.notes?.contains(query, ignoreCase = true) == true)
@@ -179,13 +192,13 @@ class OfflineReminderRepository(
 
     suspend fun markTaskDone(id: String, occurrenceDate: String) = withContext(Dispatchers.IO) {
         if (isOnline()) {
-            try { remoteRepository.markTaskDone(id, occurrenceDate) } catch (_: Exception) {}
+            try { remoteRepository.markTaskDone(id, occurrenceDate) } catch (e: Exception) { Log.e("OfflineRepo", "markTaskDone remote failed", e) }
         }
     }
 
     suspend fun snoozeReminder(id: String, occurrenceDate: String, hours: Int = 1) = withContext(Dispatchers.IO) {
         if (isOnline()) {
-            try { remoteRepository.snoozeReminder(id, occurrenceDate, hours) } catch (_: Exception) {}
+            try { remoteRepository.snoozeReminder(id, occurrenceDate, hours) } catch (e: Exception) { Log.e("OfflineRepo", "snoozeReminder remote failed", e) }
         }
     }
 
@@ -204,7 +217,8 @@ class OfflineReminderRepository(
                     "update" -> cache[op.reminderId]?.let { remoteRepository.updateReminder(it) }
                     "delete" -> remoteRepository.deleteReminder(op.reminderId)
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.e("OfflineRepo", "syncPending: ${op.type} ${op.reminderId} failed", e)
                 remaining.add(op)
             }
         }
