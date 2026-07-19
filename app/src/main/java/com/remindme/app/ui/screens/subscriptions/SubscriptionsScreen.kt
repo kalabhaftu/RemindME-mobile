@@ -1,23 +1,20 @@
 package com.remindme.app.ui.screens.subscriptions
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -32,6 +29,7 @@ import com.remindme.app.ui.components.EmptyState
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.Spinner
+import com.remindme.app.ui.components.SwipeDeleteBackground
 import com.remindme.app.ui.theme.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -89,22 +87,19 @@ fun SubscriptionsScreen(
                         }
                     }
                 )
+                val isSwiping = dismissState.currentValue != SwipeToDismissBoxValue.Settled ||
+                    dismissState.targetValue != SwipeToDismissBoxValue.Settled
 
                 SwipeToDismissBox(
                     state = dismissState,
                     enableDismissFromStartToEnd = false,
                     backgroundContent = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(bottom = 10.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(StateDanger)
-                                .padding(end = 20.dp),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
-                        }
+                        SwipeDeleteBackground(
+                            visible = isSwiping,
+                            cornerRadius = 16.dp,
+                            bottomPadding = 10.dp,
+                            endPadding = 20.dp
+                        )
                     },
                     content = {
                         SubscriptionRow(item = sub, onClick = { onNavigateToEdit(sub.id) })
