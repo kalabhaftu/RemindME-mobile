@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -148,22 +147,19 @@ fun PeopleScreen(
                         }
                     }
                 )
+                val isSwiping = dismissState.currentValue != SwipeToDismissBoxValue.Settled ||
+                    dismissState.targetValue != SwipeToDismissBoxValue.Settled
 
                 SwipeToDismissBox(
                     state = dismissState,
                     enableDismissFromStartToEnd = false,
                     backgroundContent = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(bottom = 8.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(StateDanger)
-                                .padding(end = 20.dp),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
-                        }
+                        SwipeDeleteBackground(
+                            visible = isSwiping,
+                            cornerRadius = 16.dp,
+                            bottomPadding = 8.dp,
+                            endPadding = 20.dp
+                        )
                     },
                     content = {
                         PersonRow(person = person, onClick = { onNavigateToDetail(person.id) })
