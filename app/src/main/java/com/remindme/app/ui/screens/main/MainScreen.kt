@@ -13,8 +13,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.BookmarkAdd
-import androidx.compose.material.icons.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.AddCard
+import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Search
@@ -31,8 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.Color
 import androidx.navigation3.runtime.NavKey
 import com.remindme.app.ui.components.NavTab
 import com.remindme.app.ui.components.NavTabs
@@ -166,40 +165,44 @@ fun MainScreen(
                 4 -> HolidaysScreen()
             }
             
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = 110.dp, end = 24.dp)
-            ) {
-                AppCard(
-                    borderRadius = 50.dp,
+            // FAB — hidden on Holidays tab (tab 4, nothing to add)
+            if (selectedTab != 4) {
+                Box(
                     modifier = Modifier
-                        .size(56.dp)
-                        .clickable {
-                            when (selectedTab) {
-                                0 -> showQuickAdd = true
-                                1 -> onItemClick(AddPerson)
-                                2 -> onItemClick(AddSubscription)
-                                3 -> onItemClick(AddTask)
-                                4 -> { /* holidays - no direct add */ }
-                            }
-                        }
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 110.dp, end = 24.dp)
                 ) {
-                    val fabIcon = when (selectedTab) {
-                        1 -> Icons.Default.PersonAdd
-                        2 -> Icons.Default.BookmarkAdd
-                        3 -> Icons.Default.PlaylistAdd
-                        else -> Icons.Default.Add
-                    }
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                    AppCard(
+                        borderRadius = 50.dp,
+                        elevated = true,
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clickable {
+                                when (selectedTab) {
+                                    0 -> showQuickAdd = true
+                                    1 -> onItemClick(AddPerson)
+                                    2 -> onItemClick(AddSubscription)
+                                    3 -> onItemClick(AddTask)
+                                }
+                            }
                     ) {
-                        AppIcon(
-                            imageVector = fabIcon,
-                            color = Accent500,
-                            size = 28.dp
-                        )
+                        // Contextually correct icon per tab
+                        val fabIcon = when (selectedTab) {
+                            1 -> Icons.Default.PersonAdd      // People → add person
+                            2 -> Icons.Default.AddCard        // Subscriptions → add card/subscription
+                            3 -> Icons.Default.NoteAdd        // Tasks → add note/task
+                            else -> Icons.Default.Add          // Home → QuickAdd
+                        }
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AppIcon(
+                                imageVector = fabIcon,
+                                color = Color.White,
+                                size = 26.dp
+                            )
+                        }
                     }
                 }
             }

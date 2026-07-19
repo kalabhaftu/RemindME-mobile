@@ -97,10 +97,16 @@ fun TemplatesScreen(
     }
 
         if (showCreate) {
+            val templateGlassStyle = LocalThemeStyle.current
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.1f))
+                    .background(
+                        if (templateGlassStyle == ThemeStyle.Glass)
+                            Color.Black.copy(alpha = 0.05f)
+                        else
+                            Color.Black.copy(alpha = 0.2f)
+                    )
                     .clickable { showCreate = false }
             ) {
                 Box(

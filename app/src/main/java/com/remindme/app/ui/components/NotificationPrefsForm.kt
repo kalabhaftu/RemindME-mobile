@@ -234,9 +234,12 @@ fun NotificationPrefsForm(
                             }
 
                             if (showTimePicker) {
+                                val timeDialogStyle = LocalThemeStyle.current
                                 AlertDialog(
                                     onDismissRequest = { showTimePicker = false },
-                                    containerColor = com.remindme.app.ui.theme.BgSurface2,
+                                    containerColor = if (timeDialogStyle == ThemeStyle.Glass)
+                                        Color(0xFF1E2340)
+                                    else com.remindme.app.ui.theme.BgSurface2,
                                     titleContentColor = com.remindme.app.ui.theme.TextPrimary,
                                     textContentColor = com.remindme.app.ui.theme.TextSecondary,
                                     title = { Text("Select custom time", color = com.remindme.app.ui.theme.TextPrimary) },

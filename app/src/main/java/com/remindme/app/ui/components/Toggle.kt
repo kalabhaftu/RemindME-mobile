@@ -51,11 +51,21 @@ fun Toggle(
 ) {
     val isLightTheme = !isSystemInDarkTheme()
     val glassStyle = LocalThemeStyle.current
-    val accentColor = Color(0xFF34C759)
-    val trackColor = if (glassStyle == ThemeStyle.Solid) {
+
+    // Use brand Accent500 (not iOS green)
+    val accentColor = Accent500
+
+    // Track background when OFF
+    val trackOffColor = if (glassStyle == ThemeStyle.Solid) {
         if (isLightTheme) Color(0xFFD1D1D6) else Color(0xFF3A3A3C)
-    } else if (isLightTheme) Color(0xFF787878).copy(0.2f)
-    else Color(0xFF787880).copy(0.36f)
+    } else if (isLightTheme) {
+        Color.White.copy(alpha = 0.28f)
+    } else {
+        Color.White.copy(alpha = 0.20f)
+    }
+
+    // Thumb color
+    val thumbColor = if (isLightTheme) Color.White else Color.White
 
     val density = LocalDensity.current
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
@@ -110,37 +120,37 @@ fun Toggle(
             }
     }
 
-    val trackBackdrop = Unit
-
     Box(
         modifier,
         contentAlignment = Alignment.CenterStart
     ) {
+        // Track
         Box(
             Modifier
-                
                 .clip(Capsule())
                 .drawBehind {
-                    val fraction = dampedDragAnimation.value
-                    drawRect(lerp(trackColor, accentColor, fraction))
+                    val f = dampedDragAnimation.value
+                    drawRect(lerp(trackOffColor, accentColor, f))
                 }
                 .size(64f.dp, 28f.dp)
         )
 
+        // Thumb (white circle knob)
         Box(
             Modifier
                 .graphicsLayer {
-                    val fraction = dampedDragAnimation.value
+                    val f = dampedDragAnimation.value
                     val padding = 2f.dp.toPx()
                     translationX =
-                        if (isLtr) lerp(padding, padding + dragWidth, fraction)
-                        else lerp(-padding, -(padding + dragWidth), fraction)
+                        if (isLtr) lerp(padding, padding + dragWidth, f)
+                        else lerp(-padding, -(padding + dragWidth), f)
                 }
                 .semantics {
                     role = Role.Switch
                 }
                 .then(dampedDragAnimation.modifier)
                 .clip(Capsule())
+                .drawBehind { drawRect(thumbColor) }
                 .size(24f.dp, 24f.dp)
         )
     }

@@ -5,6 +5,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.remindme.app.ui.theme.AppColors
+import com.remindme.app.ui.theme.Accent500
 
 @Composable
 fun AppSwitch(
@@ -16,10 +17,11 @@ fun AppSwitch(
         onCheckedChange = onCheckedChange,
         colors = SwitchDefaults.colors(
             checkedThumbColor = Color.White,
-            checkedTrackColor = AppColors.accent500,
+            checkedTrackColor = Accent500,
             uncheckedThumbColor = AppColors.textSecondary,
             uncheckedTrackColor = AppColors.bgSurface1,
-            uncheckedBorderColor = Color.Transparent
+            uncheckedBorderColor = Color.Transparent,
+            checkedBorderColor = Color.Transparent
         )
     )
 }

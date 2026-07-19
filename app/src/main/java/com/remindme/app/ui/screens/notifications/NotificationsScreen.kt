@@ -49,56 +49,57 @@ fun NotificationsScreen(
     AppScaffold(
         snackbarHost = {},
         appBar = {
-            Row(
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CircledBackButton(onClick = onBack)
-                Spacer(modifier = Modifier.width(12.dp))
-                TopBar(
-                    title = "Notifications",
-                    statusBarsPadding = false,
-                    modifier = Modifier.weight(1f),
-                    actions = {
-                        if (selectedTab == 1 && inAppUnreadCount > 0) {
-                            TextButton(onClick = { viewModel.markAllRead() }) {
-                                Text("Mark all read", color = Accent500)
+            Column {
+                Row(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 4.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircledBackButton(onClick = onBack)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    TopBar(
+                        title = "Notifications",
+                        statusBarsPadding = false,
+                        modifier = Modifier.weight(1f),
+                        actions = {
+                            if (selectedTab == 1 && inAppUnreadCount > 0) {
+                                TextButton(onClick = { viewModel.markAllRead() }) {
+                                    Text("Mark all read", color = Accent500)
+                                }
                             }
                         }
+                    )
+                }
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = Color.Transparent,
+                    contentColor = TextPrimary,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    indicator = { tabPositions ->
+                        TabRowDefaults.SecondaryIndicator(
+                            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                            color = Accent500
+                        )
                     },
-                    bottom = {
-                    TabRow(
-                        selectedTabIndex = selectedTab,
-                        containerColor = Color.Transparent,
-                        contentColor = TextPrimary,
-                        indicator = { tabPositions ->
-                            TabRowDefaults.SecondaryIndicator(
-                                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                                color = Accent500
-                            )
-                        },
-                        divider = { HorizontalDivider(color = Color.Transparent) }
-                    ) {
-                        tabs.forEachIndexed { index, title ->
-                            Tab(
-                                selected = selectedTab == index,
-                                onClick = { selectedTab = index },
-                                text = { 
-                                    Text(
-                                        title,
-                                        color = if (selectedTab == index) TextPrimary else TextTertiary,
-                                        fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal,
-                                        maxLines = 1
-                                    ) 
-                                }
-                            )
-                        }
+                    divider = { HorizontalDivider(color = Color.Transparent) }
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = {
+                                Text(
+                                    title,
+                                    color = if (selectedTab == index) TextPrimary else TextTertiary,
+                                    fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal,
+                                    maxLines = 1
+                                )
+                            }
+                        )
                     }
                 }
-            )
             }
         }
     ) { paddingValues ->

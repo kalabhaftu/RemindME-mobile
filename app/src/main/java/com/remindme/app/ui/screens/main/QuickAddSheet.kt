@@ -36,11 +36,12 @@ fun QuickAddSheet(
         sheetState = sheetState,
         containerColor = androidx.compose.ui.graphics.Color.Transparent,
         contentColor = AppColors.textPrimary,
-        scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.4f),
+        scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.55f),
         dragHandle = null
     ) {
         AppCard(
             borderRadius = 32.dp,
+            elevated = true,
             modifier = Modifier.fillMaxWidth()
         ) {
         Column(

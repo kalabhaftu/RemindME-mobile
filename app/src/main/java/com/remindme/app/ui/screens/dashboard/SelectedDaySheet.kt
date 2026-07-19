@@ -17,9 +17,8 @@ import com.remindme.app.domain.models.OccurrenceStatus
 import com.remindme.app.domain.models.ReminderOccurrence
 import com.remindme.app.ui.components.LocalThemeStyle
 import com.remindme.app.ui.components.ThemeStyle
+import androidx.compose.ui.graphics.Color
 import com.remindme.app.ui.theme.AppColors
-import com.remindme.app.ui.theme.BgSurface2
-import com.remindme.app.ui.theme.BgElevated
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import androidx.compose.material.icons.Icons
@@ -41,10 +40,17 @@ fun SelectedDaySheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val glassStyle = LocalThemeStyle.current
+    val isDarkSheet = androidx.compose.foundation.isSystemInDarkTheme()
+    val sheetBg = when {
+        glassStyle == ThemeStyle.Glass && isDarkSheet -> Color(0xFF1C2340).copy(alpha = 0.88f)
+        glassStyle == ThemeStyle.Glass -> Color.White.copy(alpha = 0.75f)
+        else -> AppColors.bgElevated
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = if (glassStyle == ThemeStyle.Glass) AppColors.bgSurface2 else AppColors.bgElevated,
+        containerColor = sheetBg,
+        scrimColor = Color.Black.copy(alpha = 0.55f),
         dragHandle = { BottomSheetDefaults.DragHandle(color = AppColors.textSecondary.copy(alpha = 0.5f)) }
     ) {
         Column(

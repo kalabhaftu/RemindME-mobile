@@ -114,7 +114,7 @@ fun <T> BottomSheetPicker(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(if (glassStyle == ThemeStyle.Glass) Color.Black.copy(alpha = 0.1f) else Color.Black.copy(alpha = 0.2f))
+            .background(Color.Black.copy(alpha = if (glassStyle == ThemeStyle.Glass) 0.40f else 0.55f))
             .clickable { dismiss() }
     ) {
         AnimatedVisibility(
@@ -131,6 +131,7 @@ fun <T> BottomSheetPicker(
         ) {
             AppCard(
                 borderRadius = 28.dp,
+                elevated = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp)

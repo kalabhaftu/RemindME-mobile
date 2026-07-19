@@ -34,9 +34,9 @@ fun AppButton(
     val bgColor = if (glassStyle == ThemeStyle.Solid) {
         if (isLight) Color(0xFFE5E5EA) else BgElevated
     } else if (isLight) {
-        Color.White.copy(alpha = 0.2f)
+        Color.White.copy(alpha = 0.25f)
     } else {
-        Color.Black.copy(alpha = 0.3f)
+        Color.White.copy(alpha = 0.12f)
     }
 
     Row(

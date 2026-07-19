@@ -53,21 +53,6 @@ fun HolidaysScreen(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
     ) {
-        item {
-            Text(
-                text = "Holiday Reminders",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Tap a holiday to add or remove it as a reminder.",
-                fontSize = 12.sp,
-                color = TextTertiary
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
 
         if (uiState.subscribedKeys.isNotEmpty()) {
             item {
@@ -234,9 +219,19 @@ fun HolidaysScreen(
     }
 
     if (showCountryPicker) {
+        val isPickerDark = androidx.compose.foundation.isSystemInDarkTheme()
+        val glassStyle = com.remindme.app.ui.components.LocalThemeStyle.current
+        val pickerBg = when {
+            glassStyle == com.remindme.app.ui.components.ThemeStyle.Glass && isPickerDark ->
+                androidx.compose.ui.graphics.Color(0xFF1C2340).copy(alpha = 0.92f)
+            glassStyle == com.remindme.app.ui.components.ThemeStyle.Glass ->
+                androidx.compose.ui.graphics.Color.White.copy(alpha = 0.80f)
+            else -> BgElevated
+        }
         ModalBottomSheet(
             onDismissRequest = { showCountryPicker = false },
-            containerColor = Color.Transparent,
+            containerColor = pickerBg,
+            scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.55f),
             dragHandle = {
                 Box(
                     modifier = Modifier
@@ -252,8 +247,6 @@ fun HolidaysScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.9f)
-                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-                    .background(BgElevated)
             ) {
                 Text(
                     text = "Select Country",
