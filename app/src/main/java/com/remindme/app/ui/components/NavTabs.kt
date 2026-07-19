@@ -58,14 +58,15 @@ fun NavTabs(
 ) {
     val isLightTheme = !isSystemInDarkTheme()
     val glassStyle = LocalThemeStyle.current
-    val accentColor =
-        if (isLightTheme) Color(0xFF0088FF)
-        else Color(0xFF0091FF)
+    val accentColor = Accent500
     val containerColor =
         if (glassStyle == ThemeStyle.Solid) {
             if (isLightTheme) Color(0xFFF2F2F7) else Color(0xFF1C1C2E)
-        } else if (isLightTheme) Color(0xFFFAFAFA).copy(0.4f)
-        else Color(0xFF121212).copy(0.4f)
+        } else if (isLightTheme) {
+            Color.White.copy(alpha = 0.25f)
+        } else {
+            Color.White.copy(alpha = 0.12f)
+        }
 
     val tabsBackdrop = Unit
 

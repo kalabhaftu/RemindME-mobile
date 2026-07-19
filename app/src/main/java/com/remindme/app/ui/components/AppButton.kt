@@ -31,7 +31,9 @@ fun AppButton(
     val isLight = !isSystemInDarkTheme()
     val glassStyle = LocalThemeStyle.current
 
-    val bgColor = if (glassStyle == ThemeStyle.Solid) {
+    val bgColor = if (surfaceColor != Color.Unspecified) {
+        surfaceColor
+    } else if (glassStyle == ThemeStyle.Solid) {
         if (isLight) Color(0xFFE5E5EA) else BgElevated
     } else if (isLight) {
         Color.White.copy(alpha = 0.25f)

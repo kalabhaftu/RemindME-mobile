@@ -97,7 +97,7 @@ fun SubscriptionsScreen(
                     enableDismissFromStartToEnd = false,
                     backgroundContent = {
                         SwipeDeleteBackground(
-                            visible = isSwiping,
+                            dismissState = dismissState,
                             cornerRadius = 16.dp,
                             bottomPadding = 10.dp,
                             endPadding = 20.dp

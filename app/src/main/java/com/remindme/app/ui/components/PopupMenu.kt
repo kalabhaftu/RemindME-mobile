@@ -47,6 +47,7 @@ fun PopupMenu(
         ) {
             AppCard(
                 borderRadius = 16.dp,
+                elevated = true,
                 modifier = modifier.width(180.dp)
             ) {
                 Column(

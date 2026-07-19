@@ -155,7 +155,7 @@ fun PeopleScreen(
                     enableDismissFromStartToEnd = false,
                     backgroundContent = {
                         SwipeDeleteBackground(
-                            visible = isSwiping,
+                            dismissState = dismissState,
                             cornerRadius = 16.dp,
                             bottomPadding = 8.dp,
                             endPadding = 20.dp

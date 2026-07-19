@@ -184,6 +184,7 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
 
     AppCard(
         borderRadius = 24.dp,
+        elevated = true,
         modifier = Modifier.fillMaxWidth().padding(bottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding() + 20.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp).fillMaxWidth()) {

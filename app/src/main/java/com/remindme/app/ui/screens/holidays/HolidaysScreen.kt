@@ -87,7 +87,7 @@ fun HolidaysScreen(
                     enableDismissFromStartToEnd = false,
                     backgroundContent = {
                         SwipeDeleteBackground(
-                            visible = isSwiping,
+                            dismissState = dismissState,
                             cornerRadius = 8.dp,
                             bottomPadding = 8.dp,
                             endPadding = 16.dp

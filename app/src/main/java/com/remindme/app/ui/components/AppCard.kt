@@ -16,7 +16,7 @@ import com.remindme.app.ui.theme.BgElevated
 
 /**
  * @param elevated  When true, uses a higher-opacity glass background for popup/sheet surfaces
- *                  (SelectedDaySheet, QuickAddSheet, FAB). Standard cards stay subtle.
+ *                  (SelectedDaySheet, QuickAddSheet, FAB, PopupMenu). Standard cards stay subtle.
  */
 @Composable
 fun AppCard(
@@ -36,14 +36,14 @@ fun AppCard(
             if (isDark) BgElevated else Color(0xFFF2F2F7)
         }
         elevated -> {
-            // Popup/sheet surfaces need strong enough glass to be readable
-            if (isDark) Color(0xFF1E2340).copy(alpha = 0.82f)
-            else Color.White.copy(alpha = 0.72f)
+            // Popup/sheet surfaces match the app's actual background base color with high opacity
+            if (isDark) Color(0xFF1A1A2E).copy(alpha = 0.95f)
+            else Color(0xFFE0EAFC).copy(alpha = 0.92f)
         }
         else -> {
-            // Standard card — subtle tint that lets gradient show
-            if (isDark) Color.White.copy(alpha = 0.10f)
-            else Color.Black.copy(alpha = 0.07f)
+            // Standard card — subtle tint that lets gradient show but is readable
+            if (isDark) Color.White.copy(alpha = 0.15f)
+            else Color.White.copy(alpha = 0.40f)
         }
     }
 

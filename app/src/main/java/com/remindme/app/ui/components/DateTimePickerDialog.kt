@@ -1,12 +1,15 @@
 package com.remindme.app.ui.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.remindme.app.ui.theme.AppColors
+import com.remindme.app.ui.theme.BgElevated
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -30,6 +33,18 @@ fun DateTimePickerDialog(
         initialHour = initialDate?.hour ?: 9,
         initialMinute = initialDate?.minute ?: 0
     )
+
+    val glassStyle = LocalThemeStyle.current
+    val isDark = isSystemInDarkTheme()
+    val dialogBgColor = when {
+        glassStyle == ThemeStyle.Solid -> {
+            if (isDark) BgElevated else Color(0xFFF2F2F7)
+        }
+        else -> {
+            if (isDark) Color(0xFF1A1A2E).copy(alpha = 0.95f)
+            else Color(0xFFE0EAFC).copy(alpha = 0.92f)
+        }
+    }
 
     if (!showTimePicker) {
         DatePickerDialog(
@@ -55,7 +70,7 @@ fun DateTimePickerDialog(
                     Text("Cancel", color = AppColors.textSecondary)
                 }
             },
-            colors = DatePickerDefaults.colors(containerColor = AppColors.bgSurface1)
+            colors = DatePickerDefaults.colors(containerColor = dialogBgColor)
         ) {
             DatePicker(
                 state = datePickerState,
@@ -97,7 +112,7 @@ fun DateTimePickerDialog(
                     Text("Back", color = AppColors.textSecondary)
                 }
             },
-            containerColor = AppColors.bgSurface1,
+            containerColor = dialogBgColor,
             title = { Text("Select time", color = AppColors.textPrimary) },
             text = {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
