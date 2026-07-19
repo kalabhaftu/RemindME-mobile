@@ -59,9 +59,9 @@ fun Toggle(
     val trackOffColor = if (glassStyle == ThemeStyle.Solid) {
         if (isLightTheme) Color(0xFFD1D1D6) else Color(0xFF3A3A3C)
     } else if (isLightTheme) {
-        Color.White.copy(alpha = 0.28f)
+        Color.White.copy(alpha = 0.50f)
     } else {
-        Color.White.copy(alpha = 0.20f)
+        Color.White.copy(alpha = 0.35f)
     }
 
     // Thumb color
@@ -69,7 +69,7 @@ fun Toggle(
 
     val density = LocalDensity.current
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
-    val dragWidth = with(density) { 20f.dp.toPx() }
+    val dragWidth = with(density) { (64.dp - 24.dp - 4.dp).toPx() }
     val animationScope = rememberCoroutineScope()
     var didDrag by remember { mutableStateOf(false) }
     var fraction by remember { mutableFloatStateOf(if (selected()) 1f else 0f) }

@@ -63,9 +63,9 @@ fun NavTabs(
         if (glassStyle == ThemeStyle.Solid) {
             if (isLightTheme) Color(0xFFF2F2F7) else Color(0xFF1C1C2E)
         } else if (isLightTheme) {
-            Color.White.copy(alpha = 0.25f)
+            Color.White.copy(alpha = 0.62f)
         } else {
-            Color.White.copy(alpha = 0.12f)
+            Color.White.copy(alpha = 0.28f)
         }
 
     val tabsBackdrop = Unit

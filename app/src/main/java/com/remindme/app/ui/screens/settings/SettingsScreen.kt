@@ -93,14 +93,19 @@ fun SettingsScreen(
                 }
             }
         ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Spinner()
                 }
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp, start = 16.dp, end = 16.dp),
+                    contentPadding = PaddingValues(
+                        top = paddingValues.calculateTopPadding() + 16.dp,
+                        bottom = paddingValues.calculateBottomPadding() + 32.dp,
+                        start = 16.dp,
+                        end = 16.dp
+                    ),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     item {
@@ -475,7 +480,7 @@ fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
 @Composable
 fun TestNotificationsSection(viewModel: SettingsViewModel) {
     SettingsSection("Test Notifications") {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TestButton("Email", Icons.Rounded.Email, Modifier.weight(1f)) { viewModel.testChannel("email") }
             TestButton("Push", Icons.Rounded.Notifications, Modifier.weight(1f)) { viewModel.testChannel("push") }
             TestButton("Telegram", Icons.AutoMirrored.Rounded.Send, Modifier.weight(1f)) { viewModel.testChannel("telegram") }
@@ -487,11 +492,12 @@ fun TestNotificationsSection(viewModel: SettingsViewModel) {
 fun TestButton(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier = Modifier, onClick: () -> Unit) {
     AppButton(
         onClick = onClick,
-        modifier = modifier.height(48.dp)
+        modifier = modifier.height(48.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 8.dp)
     ) {
         AppIcon(icon, color = TextPrimary, size = 16.dp)
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(label, fontSize = 13.sp, maxLines = 1)
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(label, fontSize = 12.sp, maxLines = 1)
     }
 }
 

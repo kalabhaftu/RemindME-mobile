@@ -36,29 +36,30 @@ fun AppCard(
             if (isDark) BgElevated else Color(0xFFF2F2F7)
         }
         elevated -> {
-            // Popup/sheet surfaces match the app's actual background base color with high opacity
-            if (isDark) Color(0xFF1A1A2E).copy(alpha = 0.95f)
-            else Color(0xFFE0EAFC).copy(alpha = 0.92f)
+            // Popup/sheet/FAB surfaces: use the app's background base color at near-full opacity
+            // so they look solid and match the app theme without being see-through
+            if (isDark) Color(0xFF1A1A2E).copy(alpha = 0.96f)
+            else Color(0xFFE0EAFC).copy(alpha = 0.94f)
         }
         else -> {
-            // Standard card — subtle tint that lets gradient show but is readable
-            if (isDark) Color.White.copy(alpha = 0.15f)
-            else Color.White.copy(alpha = 0.40f)
+            // Standard card: semi-transparent frosted tint over the gradient background
+            // High enough to be readable, low enough to show gradient depth
+            if (isDark) Color.White.copy(alpha = 0.22f)
+            else Color.White.copy(alpha = 0.55f)
         }
     }
 
     val shape = RoundedCornerShape(borderRadius)
 
+    // Note: Do NOT use Modifier.blur() here — it blurs the entire layer including content
+    // (text, icons), making everything unreadable. The frosted-glass look comes from the
+    // semi-transparent background color alone, which lets the gradient behind show through.
     Box(modifier = modifier) {
         Box(
             modifier = Modifier
                 .matchParentSize()
                 .clip(shape)
                 .background(bgColor)
-                .then(
-                    if (glassStyle == ThemeStyle.Glass) Modifier.blur(8.dp)
-                    else Modifier
-                )
         )
         Box(modifier = Modifier.padding(padding)) {
             content()

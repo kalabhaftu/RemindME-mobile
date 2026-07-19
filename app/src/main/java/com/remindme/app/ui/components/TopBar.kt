@@ -41,9 +41,9 @@ fun TopBar(
     val bgColor = if (glassStyle == ThemeStyle.Solid) {
         if (isLight) Color(0xFFF2F2F7) else BgElevated
     } else if (isLight) {
-        Color.White.copy(alpha = 0.25f)
+        Color.White.copy(alpha = 0.62f)
     } else {
-        Color.White.copy(alpha = 0.12f)
+        Color.White.copy(alpha = 0.28f)
     }
 
     Column(

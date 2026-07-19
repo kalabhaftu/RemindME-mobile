@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
@@ -26,6 +27,7 @@ fun AppButton(
     enabled: Boolean = true,
     tint: Color = Color.Unspecified,
     surfaceColor: Color = Color.Unspecified,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     content: @Composable RowScope.() -> Unit
 ) {
     val isLight = !isSystemInDarkTheme()
@@ -36,9 +38,9 @@ fun AppButton(
     } else if (glassStyle == ThemeStyle.Solid) {
         if (isLight) Color(0xFFE5E5EA) else BgElevated
     } else if (isLight) {
-        Color.White.copy(alpha = 0.25f)
+        Color.White.copy(alpha = 0.62f)
     } else {
-        Color.White.copy(alpha = 0.12f)
+        Color.White.copy(alpha = 0.28f)
     }
 
     Row(
@@ -52,7 +54,7 @@ fun AppButton(
                 role = Role.Button,
                 onClick = onClick
             )
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(contentPadding),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
         content = content

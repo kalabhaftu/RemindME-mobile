@@ -42,9 +42,10 @@ fun SelectedDaySheet(
     val glassStyle = LocalThemeStyle.current
     val isDarkSheet = androidx.compose.foundation.isSystemInDarkTheme()
     val sheetBg = when {
-        glassStyle == ThemeStyle.Glass && isDarkSheet -> Color(0xFF1C2340).copy(alpha = 0.88f)
-        glassStyle == ThemeStyle.Glass -> Color.White.copy(alpha = 0.75f)
-        else -> AppColors.bgElevated
+        glassStyle == ThemeStyle.Glass && isDarkSheet -> Color(0xFF1A1A2E).copy(alpha = 0.95f)
+        glassStyle == ThemeStyle.Glass -> Color(0xFFE0EAFC).copy(alpha = 0.92f)
+        isDarkSheet -> AppColors.bgElevated
+        else -> Color(0xFFF2F2F7)
     }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
