@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.LocalTime
 import com.remindme.app.ui.components.BottomSheetPickerItem
 import com.remindme.app.ui.components.PickerField
 import com.remindme.app.ui.theme.Accent500
@@ -38,14 +39,18 @@ import com.remindme.app.ui.theme.TextTertiary
 data class ChannelPref(
     val enabled: Boolean = true,
     val leadTime: String = "morning_of",
-    val customTime: String = "09:00",
+    val customTime: String = "",
     val offsetDays: Int = 0
 )
 
 private fun formatTime12h(time: String): String {
     val parts = time.split(":")
-    val hour = parts.getOrNull(0)?.toIntOrNull() ?: return time
+    val hour = parts.getOrNull(0)?.toIntOrNull() ?: return formatTime12h(LocalTime.now())
     val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+    return formatTime12h(hour, minute)
+}
+
+private fun formatTime12h(hour: Int, minute: Int): String {
     val amPm = if (hour < 12) "AM" else "PM"
     val displayHour = when {
         hour == 0 -> 12
@@ -60,6 +65,8 @@ private fun formatTime12h(time: String): String {
         append(amPm)
     }
 }
+
+private fun formatTime12h(time: LocalTime): String = formatTime12h(time.hour, time.minute)
 
 val CHANNELS = listOf("email", "push", "telegram", "in_app")
 
@@ -181,9 +188,10 @@ fun NotificationPrefsForm(
                         
                         if (pref.leadTime == "custom") {
                             var showTimePicker by remember { mutableStateOf(false) }
+                            val now = LocalTime.now()
                             val timePickerState = rememberTimePickerState(
-                                initialHour = pref.customTime.substringBefore(":").toIntOrNull() ?: 9,
-                                initialMinute = pref.customTime.substringAfter(":").toIntOrNull() ?: 0,
+                                initialHour = pref.customTime.substringBefore(":").toIntOrNull() ?: now.hour,
+                                initialMinute = pref.customTime.substringAfter(":").toIntOrNull() ?: now.minute,
                                 is24Hour = false
                             )
 

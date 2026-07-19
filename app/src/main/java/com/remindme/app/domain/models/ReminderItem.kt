@@ -121,7 +121,7 @@ data class NotificationPreference(
     @SerialName("lead_time")
     val leadTime: String = "morning_of",
     @SerialName("custom_time")
-    val customTime: String = "09:00",
+    val customTime: String = "",
     @SerialName("offset_days")
     val offsetDays: Int = 0
 )

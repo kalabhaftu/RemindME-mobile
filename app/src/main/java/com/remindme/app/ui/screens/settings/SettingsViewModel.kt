@@ -35,7 +35,7 @@ data class SettingsUiState(
     val telegramEnabled: Boolean = false,
     val inAppEnabled: Boolean = true,
     val defaultLeadTime: String = "morning_of",
-    val defaultCustomTime: String = "09:00",
+    val defaultCustomTime: String = "",
     val nudgeDelayHours: Int = 4,
     val timezone: String = "UTC",
 
@@ -90,7 +90,7 @@ class SettingsViewModel : ViewModel() {
                     val tz = response["timezone"]?.let { it.toString().removeSurrounding("\"") } ?: "UTC"
                     val nudge = response["nudge_delay_hours"]?.toString()?.toIntOrNull() ?: 4
                     val leadTime = response["default_lead_time"]?.toString()?.removeSurrounding("\"") ?: "morning_of"
-                    val customTime = response["default_custom_time"]?.toString()?.removeSurrounding("\"") ?: "09:00"
+                    val customTime = response["default_custom_time"]?.toString()?.removeSurrounding("\"") ?: ""
 
                     var em = true
                     var pu = false

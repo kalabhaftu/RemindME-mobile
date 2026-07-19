@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import com.remindme.app.ui.theme.AppColors
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,9 +25,10 @@ fun DateTimePickerDialog(
         initialSelectedDateMillis = initialDate?.atZone(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
             ?: System.currentTimeMillis()
     )
+    val now = LocalTime.now()
     val timePickerState = rememberTimePickerState(
-        initialHour = initialDate?.hour ?: 9,
-        initialMinute = initialDate?.minute ?: 0
+        initialHour = initialDate?.hour ?: now.hour,
+        initialMinute = initialDate?.minute ?: now.minute
     )
 
     if (!showTimePicker) {
