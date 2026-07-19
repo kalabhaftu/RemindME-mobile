@@ -82,7 +82,7 @@ fun MainNavigation() {
                 }
             }
             else -> {
-                if (backStack.lastOrNull() == AuthCheck || backStack.lastOrNull() == Main) {
+                if (backStack.isNotEmpty() && (backStack.lastOrNull() == AuthCheck || backStack.lastOrNull() == Main)) {
                     backStack.clear()
                     backStack.add(Login)
                 }

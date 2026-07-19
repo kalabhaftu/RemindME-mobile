@@ -220,7 +220,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                         }
                     }
                     IconButton(onClick = { viewModel.deleteTelegramToken() }) {
-                        Icon(Icons.Rounded.Delete, contentDescription = "Delete", tint = Color.Red)
+                        Icon(Icons.Rounded.Delete, contentDescription = "Delete", tint = StateDanger)
                     }
                 }
             }
@@ -505,7 +505,7 @@ fun DeliveryLogSection(uiState: SettingsUiState) {
                 uiState.deliveryLogs.forEach { log ->
                     val color = when (log.status) {
                         "sent" -> StateSuccess
-                        "failed" -> Color.Red
+                        "failed" -> StateDanger
                         else -> TextTertiary
                     }
                     Row(
@@ -579,31 +579,31 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(Color.Red.copy(alpha = 0.05f))
-            .border(1.dp, Color.Red.copy(alpha = 0.2f), RoundedCornerShape(24.dp))
+            .background(StateDanger.copy(alpha = 0.05f))
+            .border(1.dp, StateDanger.copy(alpha = 0.2f), RoundedCornerShape(24.dp))
             .padding(20.dp)
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Rounded.Security, contentDescription = null, tint = Color.Red, modifier = Modifier.size(20.dp))
+                Icon(Icons.Rounded.Security, contentDescription = null, tint = StateDanger, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Danger Zone", style = MaterialTheme.typography.titleMedium, color = Color.Red)
+                Text("Danger Zone", style = MaterialTheme.typography.titleMedium, color = StateDanger)
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "Permanently delete your account, all reminders, and revoke all external tokens. This action cannot be undone.",
-                color = Color.Red.copy(alpha = 0.8f),
+                color = StateDanger.copy(alpha = 0.8f),
                 fontSize = 13.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
             AppButton(
                 onClick = { viewModel.deleteAccount(onNavigateHome) },
                 modifier = Modifier.fillMaxWidth().height(48.dp),
-                surfaceColor = Color.Red.copy(alpha = 0.2f)
+                surfaceColor = StateDanger.copy(alpha = 0.2f)
             ) {
-                AppIcon(Icons.Rounded.Delete, modifier = Modifier.size(18.dp), color = Color.Red)
+                AppIcon(Icons.Rounded.Delete, modifier = Modifier.size(18.dp), color = StateDanger)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Delete Account", color = Color.Red)
+                Text("Delete Account", color = StateDanger)
             }
         }
     }

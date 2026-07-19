@@ -90,7 +90,8 @@ fun NotificationsScreen(
                                     Text(
                                         title,
                                         color = if (selectedTab == index) TextPrimary else TextTertiary,
-                                        fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal
+                                        fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal,
+                                        maxLines = 1
                                     ) 
                                 }
                             )

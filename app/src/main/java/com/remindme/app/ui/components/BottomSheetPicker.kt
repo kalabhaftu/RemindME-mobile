@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.LocalThemeStyle
+import com.remindme.app.ui.components.ThemeStyle
 import com.remindme.app.ui.theme.Accent500
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
@@ -108,10 +110,11 @@ fun <T> BottomSheetPicker(
         onDismiss()
     }
 
+    val glassStyle = LocalThemeStyle.current
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.2f))
+            .background(if (glassStyle == ThemeStyle.Glass) Color.Black.copy(alpha = 0.1f) else Color.Black.copy(alpha = 0.2f))
             .clickable { dismiss() }
     ) {
         AnimatedVisibility(

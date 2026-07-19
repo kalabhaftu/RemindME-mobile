@@ -100,7 +100,7 @@ fun TemplatesScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.2f))
+                    .background(Color.Black.copy(alpha = 0.1f))
                     .clickable { showCreate = false }
             ) {
                 Box(
