@@ -59,6 +59,7 @@ class MagicLinkViewModel : ViewModel() {
                 SupabaseManager.client.auth.signInWith(OTP) {
                     this.email = email
                     createUser = true
+                    redirectTo = "remindme://login-callback"
                 }
                 _uiState.update { it.copy(step = MagicLinkStep.SENT) }
             } catch (e: Exception) {

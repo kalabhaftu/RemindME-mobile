@@ -106,9 +106,10 @@ fun AddSubscriptionScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             DateTile(
-                label = "Renewal Date & Time *",
+                label = "Renewal Date *",
                 value = uiState.renewalDate,
-                placeholder = "Select date and time",
+                placeholder = "Select renewal date",
+                formatter = { it.format(java.time.format.DateTimeFormatter.ofPattern("MMM d, yyyy")) },
                 onTap = { showDatePicker = true }
             )
             
@@ -125,31 +126,35 @@ fun AddSubscriptionScreen(
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    PickerField(
-                        label = "Currency",
-                        value = uiState.currency,
-                        displayValue = { it },
-                        title = "Select currency",
-                        items = listOf("USD", "EUR", "GBP").map { BottomSheetPickerItem(it, it) },
-                        onChanged = { viewModel.updateCurrency(it) }
-                    )
+                    AppCard(borderRadius = 16.dp) {
+                        PickerField(
+                            label = "Currency",
+                            value = uiState.currency,
+                            displayValue = { it },
+                            title = "Select currency",
+                            items = listOf("USD", "EUR", "GBP").map { BottomSheetPickerItem(it, it) },
+                            onChanged = { viewModel.updateCurrency(it) }
+                        )
+                    }
                 }
             }
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            PickerField(
-                label = "Cycle",
-                value = uiState.cycle,
-                displayValue = { it.replaceFirstChar { char -> char.uppercaseChar() } },
-                title = "Select billing cycle",
-                items = listOf(
-                    BottomSheetPickerItem("weekly", "Weekly"),
-                    BottomSheetPickerItem("monthly", "Monthly"),
-                    BottomSheetPickerItem("yearly", "Yearly")
-                ),
-                onChanged = { viewModel.updateCycle(it) }
-            )
+            AppCard(borderRadius = 16.dp) {
+                PickerField(
+                    label = "Cycle",
+                    value = uiState.cycle,
+                    displayValue = { it.replaceFirstChar { char -> char.uppercaseChar() } },
+                    title = "Select billing cycle",
+                    items = listOf(
+                        BottomSheetPickerItem("weekly", "Weekly"),
+                        BottomSheetPickerItem("monthly", "Monthly"),
+                        BottomSheetPickerItem("yearly", "Yearly")
+                    ),
+                    onChanged = { viewModel.updateCycle(it) }
+                )
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -194,7 +199,8 @@ fun AddSubscriptionScreen(
                 onDateTimeSelected = {
                     viewModel.updateRenewalDate(it)
                     showDatePicker = false
-                }
+                },
+                dateOnly = true
             )
         }
     }

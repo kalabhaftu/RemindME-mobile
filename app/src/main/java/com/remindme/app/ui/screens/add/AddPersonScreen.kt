@@ -154,9 +154,10 @@ fun AddPersonScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             DateTile(
-                label = "Birthdate & Time *",
+                label = "Birthdate *",
                 value = uiState.birthdate,
-                placeholder = "Select date and time",
+                placeholder = "Select birthdate",
+                formatter = { it.format(java.time.format.DateTimeFormatter.ofPattern("MMM d, yyyy")) },
                 onTap = {
                     showDatePicker = true
                 }
@@ -164,28 +165,32 @@ fun AddPersonScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            PickerField(
-                label = "Gender",
-                value = uiState.gender,
-                displayValue = { AppConstants.GENDER_LABELS[it] ?: it },
-                title = "Select gender",
-                items = AppConstants.GENDER_LABELS.map { BottomSheetPickerItem(it.key, it.value) },
-                onChanged = { viewModel.updateGender(it) }
-            )
+            AppCard(borderRadius = 16.dp) {
+                PickerField(
+                    label = "Gender",
+                    value = uiState.gender,
+                    displayValue = { AppConstants.GENDER_LABELS[it] ?: it },
+                    title = "Select gender",
+                    items = AppConstants.GENDER_LABELS.map { BottomSheetPickerItem(it.key, it.value) },
+                    onChanged = { viewModel.updateGender(it) }
+                )
+            }
             
-            PickerField(
-                label = "Relationship",
-                value = uiState.relationship,
-                displayValue = {
-                    val entry = AppConstants.RELATIONSHIP_LABELS[it]
-                    if (entry != null) "${entry.second} ${entry.first}" else it
-                },
-                title = "Select relationship",
-                items = AppConstants.RELATIONSHIP_LABELS.map { 
-                    BottomSheetPickerItem(it.key, "${it.value.second} ${it.value.first}")
-                },
-                onChanged = { viewModel.updateRelationship(it) }
-            )
+            AppCard(borderRadius = 16.dp) {
+                PickerField(
+                    label = "Relationship",
+                    value = uiState.relationship,
+                    displayValue = {
+                        val entry = AppConstants.RELATIONSHIP_LABELS[it]
+                        if (entry != null) "${entry.second} ${entry.first}" else it
+                    },
+                    title = "Select relationship",
+                    items = AppConstants.RELATIONSHIP_LABELS.map { 
+                        BottomSheetPickerItem(it.key, "${it.value.second} ${it.value.first}")
+                    },
+                    onChanged = { viewModel.updateRelationship(it) }
+                )
+            }
             
             if (uiState.relationship == "other") {
                 AppTextField(
@@ -242,7 +247,8 @@ fun AddPersonScreen(
                 onDateTimeSelected = {
                     viewModel.updateBirthdate(it)
                     showDatePicker = false
-                }
+                },
+                dateOnly = true
             )
         }
     }

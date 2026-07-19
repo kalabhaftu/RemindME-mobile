@@ -17,7 +17,8 @@ import java.time.ZoneId
 fun DateTimePickerDialog(
     initialDate: LocalDateTime?,
     onDismissRequest: () -> Unit,
-    onDateTimeSelected: (LocalDateTime) -> Unit
+    onDateTimeSelected: (LocalDateTime) -> Unit,
+    dateOnly: Boolean = false
 ) {
     var showTimePicker by remember { mutableStateOf(false) }
     
@@ -25,18 +26,28 @@ fun DateTimePickerDialog(
         initialSelectedDateMillis = initialDate?.atZone(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
             ?: System.currentTimeMillis()
     )
-    val now = LocalTime.now()
     val timePickerState = rememberTimePickerState(
-        initialHour = initialDate?.hour ?: now.hour,
-        initialMinute = initialDate?.minute ?: now.minute
+        initialHour = initialDate?.hour ?: 9,
+        initialMinute = initialDate?.minute ?: 0
     )
 
     if (!showTimePicker) {
         DatePickerDialog(
             onDismissRequest = onDismissRequest,
             confirmButton = {
-                TextButton(onClick = { showTimePicker = true }) {
-                    Text("Next", color = AppColors.accent500)
+                TextButton(onClick = {
+                    if (dateOnly) {
+                        val selectedMillis = datePickerState.selectedDateMillis
+                        if (selectedMillis != null) {
+                            val date = Instant.ofEpochMilli(selectedMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+                            val dateTime = date.atTime(12, 0)
+                            onDateTimeSelected(dateTime)
+                        }
+                    } else {
+                        showTimePicker = true
+                    }
+                }) {
+                    Text(if (dateOnly) "Confirm" else "Next", color = AppColors.accent500)
                 }
             },
             dismissButton = {
