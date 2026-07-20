@@ -34,7 +34,6 @@ android {
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY", "")}\"")
         buildConfigField("String", "WEB_API_URL", "\"${localProperties.getProperty("WEB_API_URL", "https://remind-me-web-roan.vercel.app")}\"")
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProperties.getProperty("GOOGLE_WEB_CLIENT_ID", "")}\"")
-        buildConfigField("String", "MAGIC_LINK_REDIRECT_URL", "\"${localProperties.getProperty("MAGIC_LINK_REDIRECT_URL", "remindamie://fallback")}\"")
     }
 
     signingConfigs {

@@ -1,6 +1,5 @@
 package com.remindme.app.data.remote
 
-import com.remindme.app.BuildConfig
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
@@ -10,14 +9,12 @@ import io.github.jan.supabase.realtime.Realtime
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import kotlinx.serialization.json.Json
-import android.net.Uri
 
 object SupabaseManager {
     lateinit var client: SupabaseClient
         private set
 
-    val magicLinkRedirectUrl: String
-        get() = BuildConfig.MAGIC_LINK_REDIRECT_URL
+    const val magicLinkRedirectUrl = "remindme://login-callback"
 
     fun initialize(url: String, key: String) {
         client = createSupabaseClient(supabaseUrl = url, supabaseKey = key) {
@@ -35,9 +32,8 @@ object SupabaseManager {
             )
             install(Postgrest)
             install(Auth) {
-                val redirect = Uri.parse(BuildConfig.MAGIC_LINK_REDIRECT_URL)
-                scheme = redirect.scheme ?: "remindamie"
-                host = redirect.host ?: "fallback"
+                scheme = "remindme"
+                host = "login-callback"
                 flowType = FlowType.PKCE
             }
             install(Realtime)
