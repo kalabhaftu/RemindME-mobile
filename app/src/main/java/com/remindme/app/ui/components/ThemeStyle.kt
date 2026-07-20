@@ -25,7 +25,7 @@ fun appSurfaceColor(elevated: Boolean = false): Color = when (LocalThemeStyle.cu
 
 @Composable
 fun appControlColor(): Color = when (LocalThemeStyle.current) {
-    ThemeStyle.Glass -> Color(0xB8243550)
+    ThemeStyle.Glass -> Color(0xE02A3D5B)
     ThemeStyle.Solid -> Color(0xFF252D40)
 }
 

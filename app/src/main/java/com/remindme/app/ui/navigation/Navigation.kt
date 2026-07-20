@@ -45,7 +45,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun MainNavigation() {
+fun MainNavigation(
+    openReminderId: String? = null,
+    onReminderOpened: () -> Unit = {}
+) {
     val context = LocalContext.current
     var sessionStatus by remember { mutableStateOf<io.github.jan.supabase.auth.status.SessionStatus?>(null) }
     var glassStyle by remember { mutableStateOf(ThemePrefs.getStyle(context)) }
@@ -96,6 +99,15 @@ fun MainNavigation() {
                     backStack.add(Login)
                 }
             }
+        }
+    }
+
+    LaunchedEffect(openReminderId, sessionStatus) {
+        if (openReminderId != null && sessionStatus is io.github.jan.supabase.auth.status.SessionStatus.Authenticated) {
+            if (backStack.lastOrNull() != EditReminder(openReminderId)) {
+                backStack.add(EditReminder(openReminderId))
+            }
+            onReminderOpened()
         }
     }
 

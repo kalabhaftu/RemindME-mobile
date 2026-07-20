@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -16,6 +17,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.remindme.app.R
 import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.EmptyState
@@ -42,6 +46,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import androidx.compose.ui.layout.ContentScale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -202,7 +207,7 @@ fun PersonRow(person: ReminderItem, onClick: () -> Unit) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Row(modifier = Modifier.weight(3f), verticalAlignment = Alignment.CenterVertically) {
-                    AppIcon(imageVector = Icons.Default.Person, size = 18.dp)
+                    PersonAvatar(person.name, person.person?.avatarUrl)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = person.name,
@@ -266,6 +271,35 @@ fun PersonRow(person: ReminderItem, onClick: () -> Unit) {
                     .clip(RoundedCornerShape(4.dp)),
                 color = Accent500,
                 trackColor = BgSurface1
+            )
+        }
+    }
+}
+
+@Composable
+private fun PersonAvatar(name: String, avatarUrl: String?) {
+    var failed by androidx.compose.runtime.remember(avatarUrl) { mutableStateOf(false) }
+    Box(
+        modifier = Modifier
+            .size(32.dp)
+            .clip(CircleShape)
+            .background(Accent500.copy(alpha = 0.18f)),
+        contentAlignment = Alignment.Center
+    ) {
+        if (!avatarUrl.isNullOrBlank() && !failed) {
+            AsyncImage(
+                model = avatarUrl,
+                contentDescription = "$name avatar",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                onError = { failed = true }
+            )
+        } else {
+            Text(
+                text = name.trim().split(Regex("\\s+")).take(2).mapNotNull { it.firstOrNull() }.joinToString("").uppercase(),
+                color = Accent400,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
             )
         }
     }

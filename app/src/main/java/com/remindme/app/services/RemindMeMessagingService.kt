@@ -6,6 +6,10 @@ import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import android.app.PendingIntent
+import android.content.Intent
+import androidx.core.app.TaskStackBuilder
+import com.remindme.app.MainActivity
 
 class RemindMeMessagingService : FirebaseMessagingService() {
 
@@ -28,13 +32,15 @@ class RemindMeMessagingService : FirebaseMessagingService() {
         
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "RemindME"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
+        val reminderId = remoteMessage.data["reminder_item_id"]
+        val category = remoteMessage.data["category"] ?: "reminder"
 
         if (body.isNotEmpty()) {
-            showNotification(title, body)
+            showNotification(title, body, reminderId, category)
         }
     }
 
-    private fun showNotification(title: String, message: String) {
+    private fun showNotification(title: String, message: String, reminderId: String?, category: String) {
         val channelId = "remindme_channel"
         val notificationManager = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
@@ -47,11 +53,27 @@ class RemindMeMessagingService : FirebaseMessagingService() {
             notificationManager.createNotificationChannel(channel)
         }
 
+        val contentIntent = TaskStackBuilder.create(this).run {
+            val intent = Intent(this@RemindMeMessagingService, MainActivity::class.java).apply {
+                if (!reminderId.isNullOrBlank()) {
+                    putExtra("open_reminder_id", reminderId)
+                    putExtra("open_reminder_category", category)
+                }
+                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
+            addNextIntentWithParentStack(intent)
+            getPendingIntent(
+                (reminderId ?: "$title:$message").hashCode(),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
         val builder = androidx.core.app.NotificationCompat.Builder(this, channelId)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle(title)
             .setContentText(message)
             .setAutoCancel(true)
+            .setContentIntent(contentIntent)
             .setPriority(androidx.core.app.NotificationCompat.PRIORITY_DEFAULT)
 
         // System.currentTimeMillis().toInt() truncates a 64-bit timestamp to

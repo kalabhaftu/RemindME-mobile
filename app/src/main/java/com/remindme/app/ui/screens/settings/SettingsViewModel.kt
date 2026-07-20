@@ -360,6 +360,9 @@ class SettingsViewModel : ViewModel() {
             val conn = url.openConnection() as HttpURLConnection
             conn.setRequestProperty("Authorization", "Bearer $token")
             conn.requestMethod = "DELETE"
+            conn.doOutput = true
+            conn.setRequestProperty("Content-Type", "application/json")
+            conn.outputStream.use { it.write("{\"confirmation\":\"DELETE\"}".toByteArray()) }
             
             if (conn.responseCode == 200) {
                 supabase.auth.signOut()
@@ -390,7 +393,7 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    fun exportData(context: android.content.Context) = viewModelScope.launch(Dispatchers.IO) {
+    fun exportData(context: android.content.Context, destination: android.net.Uri) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val token = supabase.auth.currentSessionOrNull()?.accessToken ?: throw Exception("Not logged in")
             val url = URL("$webApiUrl/api/account/export")
@@ -400,16 +403,39 @@ class SettingsViewModel : ViewModel() {
 
             if (conn.responseCode == 200) {
                 val json = conn.inputStream.bufferedReader().use { it.readText() }
-                val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                clipboard.setPrimaryClip(android.content.ClipData.newPlainText("RemindME Export", json))
+                context.contentResolver.openOutputStream(destination)?.use { it.write(json.toByteArray()) }
+                    ?: throw Exception("Unable to open export destination")
                 withContext(Dispatchers.Main) {
-                    _uiState.update { it.copy(message = "Data exported and copied to clipboard!") }
+                    _uiState.update { it.copy(message = "Export saved as ${destination.lastPathSegment ?: "JSON file"}") }
                 }
             } else {
                 _uiState.update { it.copy(error = "Export failed: HTTP ${conn.responseCode}") }
             }
         } catch (e: Exception) {
             _uiState.update { it.copy(error = "Failed to export data") }
+        }
+    }
+
+    fun importData(context: android.content.Context, source: android.net.Uri) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val token = supabase.auth.currentSessionOrNull()?.accessToken ?: throw Exception("Not logged in")
+            val json = context.contentResolver.openInputStream(source)?.bufferedReader()?.use { it.readText() }
+                ?: throw Exception("Unable to read import file")
+            if (json.length > 2_000_000 || !json.trimStart().startsWith("{")) throw Exception("Invalid JSON export")
+            val conn = (URL("$webApiUrl/api/account/import").openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                doOutput = true
+                setRequestProperty("Authorization", "Bearer $token")
+                setRequestProperty("Content-Type", "application/json")
+            }
+            conn.outputStream.use { it.write(json.toByteArray()) }
+            val body = (if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream)
+                .bufferedReader().use { it.readText() }
+            if (conn.responseCode !in 200..299) throw Exception(JSONObject(body).optString("error", "Import failed"))
+            val result = JSONObject(body)
+            _uiState.update { it.copy(message = "Imported ${result.optInt("imported")} reminders; skipped ${result.optInt("skipped")} duplicates") }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = e.message ?: "Failed to import data") }
         }
     }
 

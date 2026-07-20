@@ -24,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.remindme.app.ui.components.BottomSheetPicker
 import com.remindme.app.ui.components.*
 import com.remindme.app.ui.components.AppIcon
@@ -531,6 +533,12 @@ fun DeliveryLogSection(uiState: SettingsUiState) {
 @Composable
 fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri -> uri?.let { viewModel.exportData(context, it) } }
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri -> uri?.let { viewModel.importData(context, it) } }
     SettingsSection("Account") {
         Text("Export your data or sign out on all devices.", color = TextSecondary, fontSize = 13.sp)
         Spacer(modifier = Modifier.height(16.dp))
@@ -546,7 +554,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
         Spacer(modifier = Modifier.height(12.dp))
 
         AppButton(
-            onClick = { viewModel.exportData(context) },
+            onClick = { exportLauncher.launch("remindme-export-${java.time.LocalDate.now()}.json") },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
             AppIcon(Icons.Rounded.Download, modifier = Modifier.size(18.dp), color = TextPrimary)
@@ -554,6 +562,18 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             Text("Export Data (JSON)", color = TextPrimary)
         }
         Spacer(modifier = Modifier.height(12.dp))
+
+        AppButton(
+            onClick = { importLauncher.launch(arrayOf("application/json", "text/plain")) },
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) {
+            AppIcon(Icons.Rounded.UploadFile, modifier = Modifier.size(18.dp), color = TextPrimary)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Import JSON", color = TextPrimary)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text("RemindME v${com.remindme.app.BuildConfig.VERSION_NAME}", color = TextTertiary, fontSize = 12.sp)
 
         AppButton(
             onClick = { viewModel.signOut(onNavigateHome) },
@@ -578,6 +598,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
 
 @Composable
 fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -600,7 +621,7 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
             )
             Spacer(modifier = Modifier.height(16.dp))
             AppButton(
-                onClick = { viewModel.deleteAccount(onNavigateHome) },
+                onClick = { showDeleteConfirmation = true },
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 surfaceColor = StateDanger.copy(alpha = 0.2f)
             ) {
@@ -609,6 +630,26 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
                 Text("Delete Account", color = StateDanger)
             }
         }
+    }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            containerColor = appSurfaceColor(elevated = true),
+            titleContentColor = TextPrimary,
+            textContentColor = TextSecondary,
+            title = { Text("Delete account?", color = TextPrimary) },
+            text = { Text("This permanently deletes your reminders, settings, delivery channels, and account. This cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteConfirmation = false
+                    viewModel.deleteAccount(onNavigateHome)
+                }) { Text("Delete", color = StateDanger) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) { Text("Cancel", color = TextSecondary) }
+            }
+        )
     }
 }
 

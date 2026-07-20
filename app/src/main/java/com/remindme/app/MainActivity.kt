@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 
 class MainActivity : ComponentActivity() {
 
+    private var pendingReminderId by mutableStateOf<String?>(null)
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -36,6 +38,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        pendingReminderId = intent.getStringExtra("open_reminder_id")
 
         val prefs = getSharedPreferences("crash_prefs", android.content.Context.MODE_PRIVATE)
         val lastCrash = prefs.getString("last_crash", null)
@@ -87,7 +90,10 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
-                MainNavigation()
+                MainNavigation(
+                    openReminderId = pendingReminderId,
+                    onReminderOpened = { pendingReminderId = null }
+                )
             }
         }
         
@@ -96,6 +102,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
+        pendingReminderId = intent.getStringExtra("open_reminder_id")
         com.remindme.app.data.remote.SupabaseManager.client.handleDeeplinks(intent)
     }
 

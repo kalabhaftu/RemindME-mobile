@@ -108,7 +108,7 @@ fun NotificationsScreen(
                 if (uiState.isLoading) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 when (selectedTab) {
                     0 -> UpcomingTab(upcoming, onOpenReminder)
-                    1 -> InAppTab(uiState.inAppNotifications, viewModel::markRead)
+                    1 -> InAppTab(uiState.inAppNotifications, viewModel::markRead, onOpenReminder)
                     2 -> MissedTab(missed, onOpenReminder)
                 }
             }
@@ -165,7 +165,11 @@ fun UpcomingTab(occurrences: List<ReminderOccurrence>, onOpenReminder: (String) 
 }
 
 @Composable
-fun InAppTab(notifications: List<InAppNotification>, onMarkRead: (String) -> Unit) {
+fun InAppTab(
+    notifications: List<InAppNotification>,
+    onMarkRead: (String) -> Unit,
+    onOpenReminder: (String) -> Unit
+) {
     if (notifications.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -187,7 +191,10 @@ fun InAppTab(notifications: List<InAppNotification>, onMarkRead: (String) -> Uni
                 AppCard(
                     borderRadius = 16.dp,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                        .clickable(enabled = isUnread) { onMarkRead(n.id) }
+                        .clickable {
+                            if (isUnread) onMarkRead(n.id)
+                            n.reminder_item_id?.let(onOpenReminder)
+                        }
                 ) {
                     Row(
                         modifier = Modifier.padding(14.dp),

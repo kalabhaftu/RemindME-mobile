@@ -19,7 +19,12 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
         val category = intent.getStringExtra("reminder_category") ?: "TASK"
 
         val contentIntent = TaskStackBuilder.create(context).run {
-            addNextIntentWithParentStack(Intent(context, MainActivity::class.java))
+            val openIntent = Intent(context, MainActivity::class.java).apply {
+                putExtra("open_reminder_id", reminderId)
+                putExtra("open_reminder_category", category)
+                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
+            addNextIntentWithParentStack(openIntent)
             getPendingIntent(
                 reminderId.hashCode(),
                 android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE

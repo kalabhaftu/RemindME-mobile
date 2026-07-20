@@ -33,6 +33,7 @@ import java.time.LocalDate
 data class InAppNotification(
     val id: String,
     val user_id: String,
+    val reminder_item_id: String? = null,
     val title: String? = null,
     val body: String? = null,
     val created_at: String,
