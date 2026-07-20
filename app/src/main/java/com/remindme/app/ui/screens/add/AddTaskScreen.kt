@@ -1,5 +1,10 @@
 package com.remindme.app.ui.screens.add
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -10,6 +15,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.ui.components.*
 import com.remindme.app.ui.theme.*
@@ -32,6 +39,12 @@ fun AddTaskScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (!granted) android.widget.Toast.makeText(context, "Notifications are off. You can enable them in Android Settings.", android.widget.Toast.LENGTH_LONG).show()
+    }
     var showDatePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -47,6 +60,15 @@ fun AddTaskScreen(
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+            ) {
+                val prefs = context.getSharedPreferences("remindme_prefs", 0)
+                if (!prefs.getBoolean("notification_prompted_after_add", false)) {
+                    prefs.edit().putBoolean("notification_prompted_after_add", true).apply()
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
             onBack()
         }
     }

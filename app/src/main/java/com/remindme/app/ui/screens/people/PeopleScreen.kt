@@ -66,9 +66,9 @@ fun PeopleScreen(
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
     ) {
         item {
-            if (uiState.isLoading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = Accent500)
-                Spacer(modifier = Modifier.height(8.dp))
+            if (uiState.isLoading && people.isEmpty()) {
+                PeopleContentSkeleton()
+                Spacer(modifier = Modifier.height(16.dp))
             }
             Spacer(modifier = Modifier.height(4.dp))
             AppTextField(

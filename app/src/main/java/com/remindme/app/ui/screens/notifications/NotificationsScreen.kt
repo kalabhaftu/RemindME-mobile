@@ -107,7 +107,7 @@ fun NotificationsScreen(
                 onRefresh = { viewModel.loadData() }
             ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                if (uiState.isLoading) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                if (uiState.isLoading) NotificationContentSkeleton()
                 when (selectedTab) {
                     0 -> UpcomingTab(upcoming, onOpenReminder)
                     1 -> InAppTab(uiState.inAppNotifications, viewModel::markRead, onOpenReminder)

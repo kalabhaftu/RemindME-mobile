@@ -106,9 +106,6 @@ fun SettingsScreen(
                     ),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    if (uiState.isLoading) {
-                        item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
-                    }
                     item {
                         TelegramSection(uiState, viewModel)
                         Spacer(modifier = Modifier.height(24.dp))
@@ -481,10 +478,25 @@ fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
 
 @Composable
 fun TestNotificationsSection(viewModel: SettingsViewModel) {
+    val context = LocalContext.current
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (!granted) Toast.makeText(context, "Allow notifications in Android Settings to receive push reminders.", Toast.LENGTH_LONG).show()
+    }
+    fun testPush() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            viewModel.testChannel("push")
+        }
+    }
     SettingsSection("Test Notifications") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TestButton("Email", AppIcons.Email, Modifier.weight(1f)) { viewModel.testChannel("email") }
-            TestButton("Push", AppIcons.Notifications, Modifier.weight(1f)) { viewModel.testChannel("push") }
+            TestButton("Push", AppIcons.Notifications, Modifier.weight(1f)) { testPush() }
             TestButton("Telegram", AppIcons.Send, Modifier.weight(1f)) { viewModel.testChannel("telegram") }
         }
     }
@@ -687,7 +699,10 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
     ) { uri -> uri?.let { viewModel.importData(context, it) } }
     val contactsPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { granted -> if (granted) viewModel.importAllContacts(context) }
+    ) { granted ->
+        if (granted) viewModel.importAllContacts(context)
+        else Toast.makeText(context, "Allow Contacts access to import birthdays.", Toast.LENGTH_LONG).show()
+    }
     SettingsSection("Account") {
         Text("Export your data or sign out on all devices.", color = TextSecondary, fontSize = 13.sp)
         Spacer(modifier = Modifier.height(16.dp))
@@ -713,7 +728,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
         Spacer(modifier = Modifier.height(12.dp))
 
         AppButton(
-            onClick = { importLauncher.launch(arrayOf("application/json", "text/plain")) },
+            onClick = { importLauncher.launch(arrayOf("application/json")) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
             AppIcon(iconRes = AppIcons.UploadFile, modifier = Modifier.size(18.dp), color = TextPrimary)
@@ -741,10 +756,10 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
                 AppIcon(iconRes = AppIcons.People, modifier = Modifier.size(18.dp), color = TextPrimary)
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Text(if (uiState.isImportingContacts) "Importing contacts…" else "Import All Contacts", color = TextPrimary)
+            Text(if (uiState.isImportingContacts) "Importing contacts…" else "Import from Contacts", color = TextPrimary)
         }
         Text(
-            "Imports every device contact in one run. Contacts without a birthday are added without a birthday notification; duplicates are skipped.",
+            "Imports all device contacts that include birthday information. Contacts without birthdays are skipped; duplicates are skipped.",
             color = TextTertiary,
             fontSize = 11.sp,
             lineHeight = 16.sp,

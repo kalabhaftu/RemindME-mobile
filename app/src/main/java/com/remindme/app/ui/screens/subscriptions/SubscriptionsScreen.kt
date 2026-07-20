@@ -27,6 +27,7 @@ import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.SwipeDeleteBackground
 import com.remindme.app.ui.components.AppPullToRefresh
+import com.remindme.app.ui.components.ReminderListContentSkeleton
 import com.remindme.app.ui.components.ResilientBrandImage
 import com.remindme.app.ui.theme.*
 import com.remindme.app.R
@@ -61,9 +62,7 @@ fun SubscriptionsScreen(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
     ) {
-        if (uiState.isLoading) {
-            item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = Accent500) }
-        }
+        if (uiState.isLoading && subscriptions.isEmpty()) item { ReminderListContentSkeleton() }
         if (subscriptions.isEmpty() && !uiState.isLoading) {
             item {
                 Box(modifier = Modifier.padding(top = 120.dp)) {

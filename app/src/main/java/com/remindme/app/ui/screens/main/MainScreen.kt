@@ -28,6 +28,7 @@ import com.remindme.app.ui.navigation.AddSubscription
 import com.remindme.app.ui.navigation.AddTask
 import com.remindme.app.ui.navigation.EditReminder
 import com.remindme.app.ui.navigation.PersonDetail
+import com.remindme.app.ui.navigation.ReminderPreview
 import com.remindme.app.ui.screens.dashboard.DashboardScreen
 import com.remindme.app.ui.screens.holidays.HolidaysScreen
 import com.remindme.app.ui.screens.people.PeopleScreen
@@ -145,7 +146,9 @@ fun MainScreen(
                     onNavigateToAddPerson = { onItemClick(AddPerson) },
                     onNavigateToAddSubscription = { onItemClick(AddSubscription) },
                     onNavigateToAddTask = { onItemClick(AddTask) },
-                    onNavigateToHolidays = { selectedTab = 4 }
+                    onNavigateToHolidays = { selectedTab = 4 },
+                    onNavigateToPreview = { onItemClick(ReminderPreview(it)) },
+                    onNavigateToEdit = { onItemClick(EditReminder(it)) }
                 )
                 1 -> PeopleScreen(onNavigateToDetail = { onItemClick(PersonDetail(it)) })
                 2 -> SubscriptionsScreen(onNavigateToEdit = { onItemClick(EditReminder(it)) })

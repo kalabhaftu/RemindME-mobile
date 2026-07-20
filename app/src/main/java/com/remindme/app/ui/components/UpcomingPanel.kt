@@ -31,6 +31,7 @@ fun UpcomingPanel(
     occurrences: List<ReminderOccurrence>,
     onMarkDone: (String, LocalDate) -> Unit,
     onSnooze: (String, LocalDate) -> Unit,
+    onPreview: (com.remindme.app.domain.models.ReminderItem) -> Unit,
     onEdit: (com.remindme.app.domain.models.ReminderItem) -> Unit
 ) {
     var filter by remember { mutableStateOf(UpcomingFilter.SevenDays) }
@@ -91,6 +92,7 @@ fun UpcomingPanel(
                             occurrence = occ,
                             onMarkDone = { onMarkDone(occ.item.id, occ.date) },
                             onSnooze = { onSnooze(occ.item.id, occ.date) },
+                            onPreview = { onPreview(occ.item) },
                             onEdit = { onEdit(occ.item) }
                         )
                     }
@@ -105,6 +107,7 @@ fun UpcomingItem(
     occurrence: ReminderOccurrence,
     onMarkDone: () -> Unit,
     onSnooze: () -> Unit,
+    onPreview: () -> Unit,
     onEdit: () -> Unit
 ) {
     val item = occurrence.item
@@ -125,7 +128,7 @@ fun UpcomingItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .clickable { onEdit() }
+                .clickable { onPreview() }
                 .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

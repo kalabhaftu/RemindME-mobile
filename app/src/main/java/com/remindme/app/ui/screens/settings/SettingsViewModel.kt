@@ -316,6 +316,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                         continue
                     }
                     val birthdate = birthdayByContactId[cursor.getString(idIndex)]
+                    if (birthdate == null) {
+                        withoutBirthday++
+                        continue
+                    }
                     val now = LocalDateTime.now()
                     val item = com.remindme.app.domain.models.ReminderItem(
                         id = UUID.randomUUID().toString(),
@@ -329,31 +333,27 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                             relationship = "friend",
                             gender = "unspecified"
                         ),
-                        recurrenceRules = birthdate?.let {
-                            com.remindme.app.domain.models.RecurrenceRules(
-                                frequency = "yearly",
-                                ends = "never",
-                                nextOccurrenceAt = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
-                                    category = "person",
-                                    birthdate = it
-                                )
+                        recurrenceRules = com.remindme.app.domain.models.RecurrenceRules(
+                            frequency = "yearly",
+                            ends = "never",
+                            nextOccurrenceAt = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
+                                category = "person",
+                                birthdate = birthdate
                             )
-                        },
-                        notificationPreferences = birthdate?.let {
-                            defaults.map { (channel, pref) ->
-                                com.remindme.app.domain.models.NotificationPreference(
-                                    channel = channel,
-                                    enabled = pref.enabled,
-                                    leadTime = pref.leadTime,
-                                    customTime = pref.customTime,
-                                    offsetDays = pref.offsetDays
-                                )
-                            }
+                        ),
+                        notificationPreferences = defaults.map { (channel, pref) ->
+                            com.remindme.app.domain.models.NotificationPreference(
+                                channel = channel,
+                                enabled = pref.enabled,
+                                leadTime = pref.leadTime,
+                                customTime = pref.customTime,
+                                offsetDays = pref.offsetDays
+                            )
                         }
                     )
                     repository.addReminder(item)
                     imported++
-                    if (birthdate == null) withoutBirthday++ else withBirthday++
+                    withBirthday++
                 }
             } ?: throw Exception("Unable to read contacts")
 
@@ -616,16 +616,20 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     withContext(Dispatchers.Main) { _uiState.update { it.copy(message = "There are no reminders to export yet") } }
                     return@launch
                 }
-                context.contentResolver.openOutputStream(destination)?.use { it.write(json.toByteArray()) }
+                val bytes = json.toByteArray(Charsets.UTF_8)
+                context.contentResolver.openOutputStream(destination, "wt")?.use { output ->
+                    output.write(bytes)
+                    output.flush()
+                }
                     ?: throw Exception("Unable to open export destination")
                 withContext(Dispatchers.Main) {
-                    _uiState.update { it.copy(message = "Export saved as ${destination.lastPathSegment ?: "JSON file"}") }
+                    _uiState.update { it.copy(message = "Export saved (${bytes.size} bytes) as ${destination.lastPathSegment ?: "JSON file"}") }
                 }
             } else {
                 _uiState.update { it.copy(error = "Export failed: HTTP ${conn.responseCode}") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = "Failed to export data") }
+            _uiState.update { it.copy(error = e.message ?: "Failed to export data") }
         }
     }
 
