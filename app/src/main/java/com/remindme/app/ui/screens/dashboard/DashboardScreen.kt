@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.Event
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,6 +27,7 @@ import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.Spinner
+import com.remindme.app.ui.components.AppPullToRefresh
 import com.remindme.app.ui.theme.Accent500
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
@@ -52,6 +53,10 @@ fun DashboardScreen(
         val peopleCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.PERSON } }
         val subsCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.SUBSCRIPTION } }
         val tasksCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.TASK } }
+        AppPullToRefresh(
+            isRefreshing = uiState.isLoading,
+            onRefresh = { viewModel.fetchReminders() }
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -73,16 +78,16 @@ fun DashboardScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Person", icon = Icons.Default.Person, onTap = onNavigateToAddPerson)
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Subscription", icon = Icons.Default.CreditCard, onTap = onNavigateToAddSubscription)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Person", icon = Icons.Outlined.Person, onTap = onNavigateToAddPerson)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Subscription", icon = Icons.Outlined.CreditCard, onTap = onNavigateToAddSubscription)
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Task", icon = Icons.Default.Add, onTap = onNavigateToAddTask)
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Holiday", icon = Icons.Default.Event, onTap = onNavigateToHolidays)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Task", icon = Icons.Outlined.Add, onTap = onNavigateToAddTask)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Holiday", icon = Icons.Outlined.Event, onTap = onNavigateToHolidays)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -127,6 +132,7 @@ fun DashboardScreen(
                 },
                 onDismiss = { viewModel.clearSelectedDate() }
             )
+        }
         }
     }
     uiState.error?.let { error ->

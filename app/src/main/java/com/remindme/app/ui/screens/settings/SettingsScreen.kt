@@ -10,8 +10,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.*
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.automirrored.outlined.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -187,7 +187,7 @@ fun AppearanceSection(onNavigateToThemeSelector: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(label, color = Accent500, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                     Spacer(modifier = Modifier.width(8.dp))
-                    AppIcon(Icons.Rounded.ChevronRight, color = TextTertiary, size = 18.dp)
+                    AppIcon(Icons.Outlined.ChevronRight, color = TextTertiary, size = 18.dp)
                 }
             }
         }
@@ -224,7 +224,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                         }
                     }
                     IconButton(onClick = { viewModel.deleteTelegramToken() }) {
-                        Icon(Icons.Rounded.Delete, contentDescription = "Delete", tint = StateDanger)
+                        Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = StateDanger)
                     }
                 }
             }
@@ -253,7 +253,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(uiState.maskedChatId, fontFamily = FontFamily.Monospace, fontSize = 13.sp, color = TextPrimary)
                         }
-                        Icon(Icons.Rounded.CheckCircle, contentDescription = "Checked", tint = StateSuccess)
+                        Icon(Icons.Outlined.CheckCircle, contentDescription = "Checked", tint = StateSuccess)
                     }
                 }
             } else {
@@ -270,7 +270,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                         onClick = { viewModel.detectChatId() },
                         modifier = Modifier.weight(1f).height(48.dp)
                     ) {
-                        AppIcon(Icons.Rounded.WifiTethering, color = TextPrimary, size = 18.dp)
+                        AppIcon(Icons.Outlined.WifiTethering, color = TextPrimary, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Detect Chat ID", fontSize = 14.sp)
                     }
@@ -280,7 +280,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                         modifier = Modifier.weight(1f).height(48.dp),
                         tint = Accent500
                     ) {
-                        AppIcon(Icons.Rounded.Save, color = Accent500, size = 18.dp)
+                        AppIcon(Icons.Outlined.Save, color = Accent500, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Save", fontSize = 14.sp)
                     }
@@ -300,7 +300,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 tint = Accent500
             ) {
-                AppIcon(Icons.Rounded.Save, color = Accent500, size = 18.dp)
+                AppIcon(Icons.Outlined.Save, color = Accent500, size = 18.dp)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Save Token", fontSize = 14.sp)
             }
@@ -362,7 +362,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
                 onClick = onNavigateToNotificationHelp,
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
             ) {
-                AppIcon(Icons.AutoMirrored.Rounded.HelpOutline, modifier = Modifier.size(16.dp), color = Accent500)
+                AppIcon(Icons.AutoMirrored.Outlined.HelpOutline, modifier = Modifier.size(16.dp), color = Accent500)
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Help", color = Accent500, fontSize = 13.sp)
             }
@@ -480,9 +480,9 @@ fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
 fun TestNotificationsSection(viewModel: SettingsViewModel) {
     SettingsSection("Test Notifications") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TestButton("Email", Icons.Rounded.Email, Modifier.weight(1f)) { viewModel.testChannel("email") }
-            TestButton("Push", Icons.Rounded.Notifications, Modifier.weight(1f)) { viewModel.testChannel("push") }
-            TestButton("Telegram", Icons.AutoMirrored.Rounded.Send, Modifier.weight(1f)) { viewModel.testChannel("telegram") }
+            TestButton("Email", Icons.Outlined.Email, Modifier.weight(1f)) { viewModel.testChannel("email") }
+            TestButton("Push", Icons.Outlined.Notifications, Modifier.weight(1f)) { viewModel.testChannel("push") }
+            TestButton("Telegram", Icons.AutoMirrored.Outlined.Send, Modifier.weight(1f)) { viewModel.testChannel("telegram") }
         }
     }
 }
@@ -547,7 +547,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             onClick = { viewModel.checkForUpdate(context) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            AppIcon(Icons.Rounded.Update, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(Icons.Outlined.Update, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Check for Updates", color = TextPrimary)
         }
@@ -557,7 +557,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             onClick = { exportLauncher.launch("remindme-export-${java.time.LocalDate.now()}.json") },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            AppIcon(Icons.Rounded.Download, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(Icons.Outlined.Download, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Export Data (JSON)", color = TextPrimary)
         }
@@ -567,7 +567,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             onClick = { importLauncher.launch(arrayOf("application/json", "text/plain")) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            AppIcon(Icons.Rounded.UploadFile, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(Icons.Outlined.UploadFile, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Import JSON", color = TextPrimary)
         }
@@ -579,7 +579,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             onClick = { viewModel.signOut(onNavigateHome) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            AppIcon(Icons.AutoMirrored.Rounded.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(Icons.AutoMirrored.Outlined.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sign Out (This Device)", color = TextPrimary)
         }
@@ -589,7 +589,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             onClick = { viewModel.signOutAllDevices(onNavigateHome) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            AppIcon(Icons.Rounded.PhonelinkErase, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(Icons.Outlined.PhonelinkErase, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sign Out All Devices", color = TextPrimary)
         }
@@ -609,7 +609,7 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Rounded.Security, contentDescription = null, tint = StateDanger, modifier = Modifier.size(20.dp))
+                Icon(Icons.Outlined.Security, contentDescription = null, tint = StateDanger, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Danger Zone", style = MaterialTheme.typography.titleMedium, color = StateDanger)
             }
@@ -625,7 +625,7 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 surfaceColor = StateDanger.copy(alpha = 0.2f)
             ) {
-                AppIcon(Icons.Rounded.Delete, modifier = Modifier.size(18.dp), color = StateDanger)
+                AppIcon(Icons.Outlined.Delete, modifier = Modifier.size(18.dp), color = StateDanger)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Delete Account", color = StateDanger)
             }
@@ -753,9 +753,9 @@ fun ThemeSelectorScreen(
                                 fontSize = 16.sp
                             )
                             if (isSelected) {
-                                AppIcon(Icons.Rounded.CheckCircle, color = Accent500, size = 20.dp)
+                                AppIcon(Icons.Outlined.CheckCircle, color = Accent500, size = 20.dp)
                             } else {
-                                AppIcon(Icons.Rounded.Circle, color = TextTertiary, size = 20.dp)
+                                AppIcon(Icons.Outlined.Circle, color = TextTertiary, size = 20.dp)
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
@@ -783,7 +783,7 @@ fun ThemeSelectorScreen(
                                             .background(Accent500.copy(alpha = 0.2f)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        AppIcon(Icons.Rounded.Notifications, color = Accent500, size = 20.dp)
+                                        AppIcon(Icons.Outlined.Notifications, color = Accent500, size = 20.dp)
                                     }
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Column {

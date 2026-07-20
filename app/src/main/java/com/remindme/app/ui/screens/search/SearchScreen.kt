@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +24,7 @@ import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.AppTextField
 import com.remindme.app.ui.components.CircledBackButton
+import com.remindme.app.ui.components.AppPullToRefresh
 import com.remindme.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,6 +59,10 @@ fun SearchScreen(
                 )
             }
 
+            AppPullToRefresh(
+                isRefreshing = uiState.isLoading,
+                onRefresh = { viewModel.refresh() }
+            ) {
             if (uiState.isLoading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = Accent500)
             }
@@ -84,6 +89,7 @@ fun SearchScreen(
                     }
                 }
             }
+            }
         }
     }
 }
@@ -107,10 +113,10 @@ fun SearchResultItem(item: ReminderItem, onClick: () -> Unit) {
             ) {
                 Box(modifier = Modifier.padding(10.dp)) {
                     val icon = when (item.category) {
-                        CategoryType.PERSON -> Icons.Rounded.Person
-                        CategoryType.SUBSCRIPTION -> Icons.Rounded.CreditCard
-                        CategoryType.CUSTOM_HOLIDAY -> Icons.Rounded.CardGiftcard
-                        CategoryType.TASK -> Icons.Rounded.Checklist
+                        CategoryType.PERSON -> Icons.Outlined.Person
+                        CategoryType.SUBSCRIPTION -> Icons.Outlined.CreditCard
+                        CategoryType.CUSTOM_HOLIDAY -> Icons.Outlined.CardGiftcard
+                        CategoryType.TASK -> Icons.Outlined.Checklist
                     }
                     AppIcon(imageVector = icon, color = Accent500, size = 22.dp)
                 }
@@ -141,7 +147,7 @@ fun SearchResultItem(item: ReminderItem, onClick: () -> Unit) {
                     )
                 }
             }
-            AppIcon(imageVector = Icons.Rounded.ChevronRight, size = 18.dp, color = TextTertiary)
+            AppIcon(imageVector = Icons.Outlined.ChevronRight, size = 18.dp, color = TextTertiary)
         }
     }
 }

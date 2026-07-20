@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -59,7 +59,7 @@ fun TemplatesScreen(
                     modifier = Modifier.weight(1f),
                     actions = {
                         IconButton(onClick = { showCreate = true }) {
-                            AppIcon(imageVector = Icons.Rounded.Add, color = TextPrimary)
+                            AppIcon(imageVector = Icons.Outlined.Add, color = TextPrimary)
                         }
                     }
                 )
@@ -67,6 +67,10 @@ fun TemplatesScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            AppPullToRefresh(
+                isRefreshing = uiState.isLoading,
+                onRefresh = { viewModel.loadTemplates() }
+            ) {
             LazyColumn(
                 contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp, start = 16.dp, end = 16.dp),
                 modifier = Modifier.fillMaxSize()
@@ -78,7 +82,7 @@ fun TemplatesScreen(
                             modifier = Modifier.fillMaxWidth().padding(32.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Icon(Icons.Rounded.ViewList, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
+                            Icon(Icons.Outlined.ViewList, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
                             Spacer(modifier = Modifier.height(16.dp))
                             Text("No templates yet", color = TextSecondary, fontSize = 16.sp)
                         }
@@ -91,6 +95,7 @@ fun TemplatesScreen(
                         onDelete = { viewModel.deleteTemplate(template.id) }
                     )
                 }
+            }
             }
         }
     }
@@ -137,10 +142,10 @@ fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -
             ) {
                 Box(modifier = Modifier.padding(10.dp)) {
                     val icon = when (template.category) {
-                        "person" -> Icons.Rounded.Person
-                        "subscription" -> Icons.Rounded.CreditCard
-                        "custom_holiday" -> Icons.Rounded.CardGiftcard
-                        else -> Icons.Rounded.Checklist
+                        "person" -> Icons.Outlined.Person
+                        "subscription" -> Icons.Outlined.CreditCard
+                        "custom_holiday" -> Icons.Outlined.CardGiftcard
+                        else -> Icons.Outlined.Checklist
                     }
                     AppIcon(imageVector = icon, color = Accent500, size = 22.dp)
                 }
@@ -162,7 +167,7 @@ fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -
                 )
             }
             IconButton(onClick = onDelete) {
-                AppIcon(imageVector = Icons.Rounded.Delete, color = StateDanger, size = 20.dp)
+                AppIcon(imageVector = Icons.Outlined.Delete, color = StateDanger, size = 20.dp)
             }
         }
     }
@@ -231,7 +236,7 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
                     modifier = Modifier.weight(1f).height(48.dp),
                     tint = Accent500
                 ) {
-                    AppIcon(Icons.Rounded.Add, color = Accent500, size = 18.dp)
+                    AppIcon(Icons.Outlined.Add, color = Accent500, size = 18.dp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Create", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }

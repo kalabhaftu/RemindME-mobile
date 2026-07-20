@@ -24,12 +24,12 @@ import com.remindme.app.ui.theme.AppColors
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.FormatListBulleted
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Event
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.FormatListBulleted
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +66,7 @@ fun SelectedDaySheet(
                     color = AppColors.textPrimary
                 )
                 IconButton(onClick = onDismiss) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = AppColors.textSecondary)
+                    Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close", tint = AppColors.textSecondary)
                 }
             }
             
@@ -75,7 +75,7 @@ fun SelectedDaySheet(
             if (occurrences.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(imageVector = Icons.Default.Event, contentDescription = null, tint = AppColors.textTertiary, modifier = Modifier.size(40.dp))
+                        Icon(imageVector = Icons.Outlined.Event, contentDescription = null, tint = AppColors.textTertiary, modifier = Modifier.size(40.dp))
                         Spacer(modifier = Modifier.height(16.dp))
                         Text("No reminders on this day.", color = AppColors.textTertiary, fontSize = 14.sp)
                     }
@@ -101,10 +101,10 @@ fun SelectedDaySheet(
                                 ) {
                                     AppIcon(
                                         imageVector = when (item.category) {
-                                            CategoryType.TASK -> Icons.Default.FormatListBulleted
-                                            CategoryType.PERSON -> Icons.Default.Person
-                                            CategoryType.SUBSCRIPTION -> Icons.Default.CreditCard
-                                            CategoryType.CUSTOM_HOLIDAY -> Icons.Default.Event
+                                            CategoryType.TASK -> Icons.Outlined.FormatListBulleted
+                                            CategoryType.PERSON -> Icons.Outlined.Person
+                                            CategoryType.SUBSCRIPTION -> Icons.Outlined.CreditCard
+                                            CategoryType.CUSTOM_HOLIDAY -> Icons.Outlined.Event
                                         },
                                         tint = if (isDone) AppColors.textTertiary else AppColors.accent500,
                                         modifier = Modifier.size(18.dp)
@@ -136,7 +136,7 @@ fun SelectedDaySheet(
                                 
                                 if (item.category == CategoryType.TASK && !isDone) {
                                     IconButton(onClick = { onMarkDone(item.id, occ.date) }) {
-                                        AppIcon(imageVector = Icons.Default.CheckCircle, tint = AppColors.stateSuccess, modifier = Modifier.size(24.dp))
+                                        AppIcon(imageVector = Icons.Outlined.CheckCircle, tint = AppColors.stateSuccess, modifier = Modifier.size(24.dp))
                                     }
                                 }
                             }

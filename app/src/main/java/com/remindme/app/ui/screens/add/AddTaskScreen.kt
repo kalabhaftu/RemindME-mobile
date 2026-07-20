@@ -7,7 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,12 +19,12 @@ import com.remindme.app.ui.theme.*
 import java.time.LocalDateTime
 
 val TASK_ICONS = listOf(
-    Triple("trash", Icons.Default.Delete, "Take out trash"),
-    Triple("water", Icons.Default.WaterDrop, "Drink water"),
+    Triple("trash", Icons.Outlined.Delete, "Take out trash"),
+    Triple("water", Icons.Outlined.WaterDrop, "Drink water"),
     Triple("fitness", Icons.AutoMirrored.Filled.DirectionsRun, "Exercise"),
-    Triple("study", Icons.Default.Book, "Study"),
-    Triple("rent", Icons.Default.Home, "Pay rent"),
-    Triple("medication", Icons.Default.MedicalServices, "Medication")
+    Triple("study", Icons.Outlined.Book, "Study"),
+    Triple("rent", Icons.Outlined.Home, "Pay rent"),
+    Triple("medication", Icons.Outlined.MedicalServices, "Medication")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -11,11 +11,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.FormatListBulleted
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Event
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.FormatListBulleted
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.appScrimColor
@@ -74,7 +74,7 @@ fun QuickAddSheet(
                     color = AppColors.textPrimary
                 )
                 IconButton(onClick = onDismiss) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = AppColors.textSecondary)
+                    Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close", tint = AppColors.textSecondary)
                 }
             }
             
@@ -87,7 +87,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Person",
-                    icon = Icons.Default.Person,
+                    icon = Icons.Outlined.Person,
                     onClick = {
                         onDismiss()
                         onNavigateToAddPerson()
@@ -96,7 +96,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Subscription",
-                    icon = Icons.Default.CreditCard,
+                    icon = Icons.Outlined.CreditCard,
                     onClick = {
                         onDismiss()
                         onNavigateToAddSubscription()
@@ -111,7 +111,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Task",
-                    icon = Icons.Default.FormatListBulleted,
+                    icon = Icons.Outlined.FormatListBulleted,
                     onClick = {
                         onDismiss()
                         onNavigateToAddTask()
@@ -120,7 +120,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Holiday",
-                    icon = Icons.Default.Event,
+                    icon = Icons.Outlined.Event,
                     onClick = {
                         onDismiss()
                         onNavigateToAddHoliday()

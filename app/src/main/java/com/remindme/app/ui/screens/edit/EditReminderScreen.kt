@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -121,7 +121,7 @@ fun EditReminderScreen(
                     enabled = !uiState.isSaving,
                     surfaceColor = appSurfaceColor()
                 ) {
-                    AppIcon(Icons.Rounded.Delete, color = StateDanger)
+                    AppIcon(Icons.Outlined.Delete, color = StateDanger)
                     Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                     Text("Delete reminder", color = StateDanger)
                 }

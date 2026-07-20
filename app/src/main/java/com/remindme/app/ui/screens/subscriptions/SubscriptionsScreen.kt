@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,6 +32,7 @@ import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.SwipeDeleteBackground
+import com.remindme.app.ui.components.AppPullToRefresh
 import com.remindme.app.ui.theme.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -56,6 +57,10 @@ fun SubscriptionsScreen(
             ) { Text(error) }
         }
 
+    AppPullToRefresh(
+        isRefreshing = uiState.isLoading,
+        onRefresh = { viewModel.fetchSubscriptions() }
+    ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
@@ -105,6 +110,7 @@ fun SubscriptionsScreen(
                 )
             }
         }
+    }
     }
     }
 }

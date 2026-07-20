@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,6 +31,7 @@ import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.SwipeDeleteBackground
 import com.remindme.app.ui.components.appScrimColor
 import com.remindme.app.ui.components.appSurfaceColor
+import com.remindme.app.ui.components.AppPullToRefresh
 import com.remindme.app.ui.theme.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -44,6 +45,10 @@ fun HolidaysScreen(
     val haptic = LocalHapticFeedback.current
     var showCountryPicker by remember { mutableStateOf(false) }
 
+    AppPullToRefresh(
+        isRefreshing = uiState.isLoadingCountries || uiState.isLoadingHolidays,
+        onRefresh = { viewModel.refresh() }
+    ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
@@ -88,7 +93,7 @@ fun HolidaysScreen(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                AppIcon(imageVector = Icons.Rounded.CardGiftcard, size = 16.dp, color = TextPrimary)
+                                AppIcon(imageVector = Icons.Outlined.CardGiftcard, size = 16.dp, color = TextPrimary)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = name,
@@ -96,7 +101,7 @@ fun HolidaysScreen(
                                     fontSize = 13.sp,
                                     modifier = Modifier.weight(1f)
                                 )
-                                AppIcon(imageVector = Icons.Rounded.ArrowBack, size = 14.dp, color = TextPrimary)
+                                AppIcon(imageVector = Icons.Outlined.ArrowBack, size = 14.dp, color = TextPrimary)
                             }
                         }
                     }
@@ -125,7 +130,7 @@ fun HolidaysScreen(
                         modifier = Modifier.wrapContentSize()
                     ) {
                         Box(modifier = Modifier.padding(8.dp)) {
-                            AppIcon(imageVector = Icons.Rounded.Public, size = 18.dp, color = Accent500)
+                            AppIcon(imageVector = Icons.Outlined.Public, size = 18.dp, color = Accent500)
                         }
                     }
                     Spacer(modifier = Modifier.width(12.dp))
@@ -137,7 +142,7 @@ fun HolidaysScreen(
                     if (uiState.isLoadingCountries) {
                         Spinner(modifier = Modifier.size(18.dp))
                     }
-                    AppIcon(imageVector = Icons.Rounded.KeyboardArrowDown, size = 20.dp, color = TextTertiary)
+                    AppIcon(imageVector = Icons.Outlined.KeyboardArrowDown, size = 20.dp, color = TextTertiary)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -169,7 +174,7 @@ fun HolidaysScreen(
                         ) {
                             Box(modifier = Modifier.padding(8.dp)) {
                                 AppIcon(
-                                    imageVector = Icons.Rounded.CardGiftcard,
+                                    imageVector = Icons.Outlined.CardGiftcard,
                                     size = 18.dp,
                                     color = if (active) Accent500 else TextTertiary
                                 )
@@ -196,7 +201,7 @@ fun HolidaysScreen(
                             Spinner(modifier = Modifier.size(24.dp))
                         } else {
                             AppIcon(
-                                imageVector = if (active) Icons.Rounded.CheckCircle else Icons.Rounded.AddCircle,
+                                imageVector = if (active) Icons.Outlined.CheckCircle else Icons.Outlined.AddCircle,
                                 color = if (active) Accent500 else TextTertiary,
                                 size = 24.dp
                             )
@@ -205,6 +210,7 @@ fun HolidaysScreen(
                 }
             }
         }
+    }
     }
 
     if (showCountryPicker) {
@@ -261,7 +267,7 @@ fun HolidaysScreen(
                                     modifier = Modifier.weight(1f)
                                 )
                                 if (isSelected) {
-                                    AppIcon(imageVector = Icons.Rounded.Check, size = 18.dp, color = Accent500)
+                                    AppIcon(imageVector = Icons.Outlined.Check, size = 18.dp, color = Accent500)
                                 }
                             }
                         }

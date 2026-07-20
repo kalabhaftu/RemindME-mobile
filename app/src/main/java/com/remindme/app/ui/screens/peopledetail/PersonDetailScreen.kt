@@ -6,7 +6,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -85,10 +85,10 @@ fun PersonDetailScreen(
                     modifier = Modifier.weight(1f),
                     actions = {
                         IconButton(onClick = { onEdit(personId) }) {
-                            AppIcon(imageVector = Icons.Rounded.Edit, color = TextSecondary)
+                            AppIcon(imageVector = Icons.Outlined.Edit, color = TextSecondary)
                         }
                         IconButton(onClick = { showDeleteConfirm = true }) {
-                            AppIcon(imageVector = Icons.Rounded.Delete, color = StateDanger)
+                            AppIcon(imageVector = Icons.Outlined.Delete, color = StateDanger)
                         }
                     }
                 )

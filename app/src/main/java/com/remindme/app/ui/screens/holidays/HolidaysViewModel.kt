@@ -118,6 +118,11 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
         loadHolidays(code)
     }
 
+    fun refresh() {
+        loadCountries()
+        fetchSubscribed()
+    }
+
     private fun loadHolidays(code: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoadingHolidays = true) }

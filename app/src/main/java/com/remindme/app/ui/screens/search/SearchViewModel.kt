@@ -35,6 +35,10 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         search(query)
     }
 
+    fun refresh() {
+        search(_uiState.value.query)
+    }
+
     private fun search(query: String) {
         searchJob?.cancel()
         if (query.trim().isEmpty()) {

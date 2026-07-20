@@ -5,20 +5,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.AddCard
-import androidx.compose.material.icons.filled.NoteAdd
-import androidx.compose.material.icons.rounded.Book
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.CreditCard
+import androidx.compose.material.icons.outlined.Event
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.AddCard
+import androidx.compose.material.icons.outlined.NoteAdd
+import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.foundation.clickable
 import com.remindme.app.ui.components.AppCard
 import androidx.compose.runtime.Composable
@@ -67,7 +67,7 @@ fun MainScreen(
                 actions = {
                     androidx.compose.foundation.layout.Box {
                         androidx.compose.material3.IconButton(onClick = { showMenu = true }) {
-                            AppIcon(Icons.Default.MoreVert, color = AppColors.textPrimary)
+                            AppIcon(Icons.Outlined.MoreVert, color = AppColors.textPrimary)
                         }
                         com.remindme.app.ui.components.PopupMenu(
                             expanded = showMenu,
@@ -77,22 +77,22 @@ fun MainScreen(
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Search",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Search) },
-                                icon = Icons.Rounded.Search
+                                icon = Icons.Outlined.Search
                             )
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Templates",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Templates) },
-                                icon = Icons.Rounded.Book
+                                icon = Icons.Outlined.Book
                             )
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Notifications",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Notifications) },
-                                icon = Icons.Rounded.Notifications
+                                icon = Icons.Outlined.Notifications
                             )
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Settings",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Settings) },
-                                icon = Icons.Rounded.Settings
+                                icon = Icons.Outlined.Settings
                             )
                         }
                     }
@@ -110,7 +110,7 @@ fun MainScreen(
                     selected = selectedTab == 0
                 ) {
                     AppIcon(
-                        imageVector = Icons.Default.Home,
+                        imageVector = Icons.Outlined.Home,
                         color = if (selectedTab == 0) Accent500 else TextPrimary
                     )
                 }
@@ -119,7 +119,7 @@ fun MainScreen(
                     selected = selectedTab == 1
                 ) {
                     AppIcon(
-                        imageVector = Icons.Default.People,
+                        imageVector = Icons.Outlined.People,
                         color = if (selectedTab == 1) Accent500 else TextPrimary
                     )
                 }
@@ -128,7 +128,7 @@ fun MainScreen(
                     selected = selectedTab == 2
                 ) {
                     AppIcon(
-                        imageVector = Icons.Default.CreditCard,
+                        imageVector = Icons.Outlined.CreditCard,
                         color = if (selectedTab == 2) Accent500 else TextPrimary
                     )
                 }
@@ -137,7 +137,7 @@ fun MainScreen(
                     selected = selectedTab == 3
                 ) {
                     AppIcon(
-                        imageVector = Icons.Default.CheckCircle,
+                        imageVector = Icons.Outlined.CheckCircle,
                         color = if (selectedTab == 3) Accent500 else TextPrimary
                     )
                 }
@@ -146,7 +146,7 @@ fun MainScreen(
                     selected = selectedTab == 4
                 ) {
                     AppIcon(
-                        imageVector = Icons.Default.Event,
+                        imageVector = Icons.Outlined.Event,
                         color = if (selectedTab == 4) Accent500 else TextPrimary
                     )
                 }
@@ -190,10 +190,10 @@ fun MainScreen(
                     ) {
                         // Contextually correct icon per tab
                         val fabIcon = when (selectedTab) {
-                            1 -> Icons.Default.PersonAdd      // People → add person
-                            2 -> Icons.Default.AddCard        // Subscriptions → add card/subscription
-                            3 -> Icons.Default.NoteAdd        // Tasks → add note/task
-                            else -> Icons.Default.Add          // Home → QuickAdd
+                            1 -> Icons.Outlined.PersonAdd      // People → add person
+                            2 -> Icons.Outlined.AddCard        // Subscriptions → add card/subscription
+                            3 -> Icons.Outlined.NoteAdd        // Tasks → add note/task
+                            else -> Icons.Outlined.Add          // Home → QuickAdd
                         }
                         Box(
                             modifier = Modifier.fillMaxSize(),

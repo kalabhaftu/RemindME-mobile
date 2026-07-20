@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -72,7 +72,7 @@ fun PickerField(
             )
         }
         AppIcon(
-            imageVector = Icons.Rounded.KeyboardArrowDown,
+            imageVector = Icons.Outlined.KeyboardArrowDown,
             color = TextTertiary,
             size = 20.dp
         )
@@ -181,7 +181,7 @@ fun <T> BottomSheetPicker(
                                     )
                                     if (isSelected) {
                                         AppIcon(
-                                            imageVector = Icons.Rounded.Check,
+                                            imageVector = Icons.Outlined.Check,
                                             color = Accent500,
                                             size = 20.dp
                                         )

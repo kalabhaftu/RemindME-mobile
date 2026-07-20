@@ -14,9 +14,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.KeyboardArrowLeft
-import androidx.compose.material.icons.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -104,10 +104,10 @@ fun CalendarGrid(
                 }
 
                 IconButton(onClick = { navigate(-1) }, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Rounded.KeyboardArrowLeft, contentDescription = "Prev", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Outlined.KeyboardArrowLeft, contentDescription = "Prev", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
                 }
                 IconButton(onClick = { navigate(1) }, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Rounded.KeyboardArrowRight, contentDescription = "Next", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Outlined.KeyboardArrowRight, contentDescription = "Next", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
                 }
             }
 
@@ -350,7 +350,7 @@ private fun DayCell(
                         occurrences.take(3).forEach { occ ->
                             if (occ.status == OccurrenceStatus.COMPLETED_PAST) {
                                 Icon(
-                                    Icons.Rounded.Check,
+                                    Icons.Outlined.Check,
                                     contentDescription = null,
                                     tint = AppColors.stateSuccess.copy(alpha = 0.5f),
                                     modifier = Modifier.size(8.dp)

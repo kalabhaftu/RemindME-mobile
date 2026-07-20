@@ -11,8 +11,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -60,6 +60,10 @@ fun PeopleScreen(
     val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
+    AppPullToRefresh(
+        isRefreshing = uiState.isLoading,
+        onRefresh = { viewModel.fetchPeople() }
+    ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
@@ -74,7 +78,7 @@ fun PeopleScreen(
                 value = uiState.searchQuery,
                 onValueChange = viewModel::updateSearchQuery,
                 placeholder = "Search people...",
-                prefixIcon = { AppIcon(imageVector = Icons.Default.Search) },
+                prefixIcon = { AppIcon(imageVector = Icons.Outlined.Search) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -169,6 +173,7 @@ fun PeopleScreen(
                 )
             }
         }
+    }
     }
     uiState.error?.let { error ->
         Snackbar(

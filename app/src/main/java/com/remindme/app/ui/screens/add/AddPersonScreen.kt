@@ -6,9 +6,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -175,7 +175,7 @@ fun AddPersonScreen(
                         )
                     } else {
                         AppIcon(
-                            imageVector = Icons.Default.CameraAlt,
+                            imageVector = Icons.Outlined.CameraAlt,
                             color = TextTertiary,
                             size = 28.dp
                         )
@@ -202,7 +202,7 @@ fun AddPersonScreen(
                 },
                 modifier = Modifier.fillMaxWidth().height(44.dp)
             ) {
-                AppIcon(Icons.Default.Person, color = Accent400, size = 18.dp)
+                AppIcon(Icons.Outlined.Person, color = Accent400, size = 18.dp)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Import from contacts", color = TextPrimary, fontSize = 13.sp)
             }

@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,6 +29,7 @@ import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.SwipeDeleteBackground
+import com.remindme.app.ui.components.AppPullToRefresh
 import com.remindme.app.ui.theme.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -51,6 +52,10 @@ fun TasksScreen(
             ) { Text(error) }
         }
 
+    AppPullToRefresh(
+        isRefreshing = uiState.isLoading,
+        onRefresh = { viewModel.fetchTasks() }
+    ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
@@ -106,6 +111,7 @@ fun TasksScreen(
         }
     }
     }
+    }
 }
 
 @Composable
@@ -114,13 +120,13 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
 
     fun getIconForKey(key: String?): ImageVector {
         return when (key) {
-            "water" -> Icons.Rounded.WaterDrop
-            "trash" -> Icons.Rounded.Delete
-            "fitness" -> Icons.Rounded.FitnessCenter
-            "study" -> Icons.Rounded.MenuBook
-            "rent" -> Icons.Rounded.Home
-            "medication" -> Icons.Rounded.Medication
-            else -> Icons.Rounded.List
+            "water" -> Icons.Outlined.WaterDrop
+            "trash" -> Icons.Outlined.Delete
+            "fitness" -> Icons.Outlined.FitnessCenter
+            "study" -> Icons.Outlined.MenuBook
+            "rent" -> Icons.Outlined.Home
+            "medication" -> Icons.Outlined.Medication
+            else -> Icons.Outlined.List
         }
     }
 
@@ -165,7 +171,7 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AppIcon(
-                            imageVector = Icons.Rounded.AccessTime,
+                            imageVector = Icons.Outlined.AccessTime,
                             color = TextTertiary,
                             size = 12.dp
                         )
@@ -196,7 +202,7 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
                     AppIcon(
-                        imageVector = Icons.Rounded.CheckCircle,
+                        imageVector = Icons.Outlined.CheckCircle,
                         color = StateSuccess,
                         size = 24.dp
                     )

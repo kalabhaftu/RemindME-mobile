@@ -7,12 +7,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.rounded.AccessTime
-import androidx.compose.material.icons.rounded.Email
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.automirrored.rounded.Send
-import androidx.compose.material.icons.rounded.Smartphone
+import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -212,7 +212,7 @@ fun NotificationPrefsForm(
                                     ) {
                                         Box(modifier = Modifier.padding(7.dp)) {
                                             AppIcon(
-                                                imageVector = Icons.Rounded.AccessTime,
+                                                imageVector = Icons.Outlined.AccessTime,
                                                 tint = Accent500,
                                                 modifier = Modifier.size(16.dp)
                                             )
@@ -226,7 +226,7 @@ fun NotificationPrefsForm(
                                         modifier = Modifier.weight(1f)
                                     )
                                     AppIcon(
-                                        imageVector = Icons.Default.ChevronRight,
+                                        imageVector = Icons.Outlined.ChevronRight,
                                         tint = TextTertiary,
                                         modifier = Modifier.size(16.dp)
                                     )
@@ -275,11 +275,11 @@ fun NotificationPrefsForm(
 }
 
 private fun getChannelIcon(channel: String) = when(channel) {
-    "email" -> Icons.Rounded.Email
-    "push" -> Icons.Rounded.Notifications
-    "telegram" -> Icons.AutoMirrored.Rounded.Send
-    "in_app" -> Icons.Rounded.Smartphone
-    else -> Icons.Rounded.Notifications
+    "email" -> Icons.Outlined.Email
+    "push" -> Icons.Outlined.Notifications
+    "telegram" -> Icons.AutoMirrored.Outlined.Send
+    "in_app" -> Icons.Outlined.Smartphone
+    else -> Icons.Outlined.Notifications
 }
 
 private fun getChannelLabel(channel: String) = when(channel) {

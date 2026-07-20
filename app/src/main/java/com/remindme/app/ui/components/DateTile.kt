@@ -3,8 +3,8 @@ package com.remindme.app.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,7 +42,7 @@ fun DateTile(
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
                     AppIcon(
-                        imageVector = Icons.Default.CalendarToday,
+                        imageVector = Icons.Outlined.CalendarToday,
                         tint = if (hasValue) Accent500 else TextTertiary,
                         modifier = Modifier.size(18.dp)
                     )
@@ -69,7 +69,7 @@ fun DateTile(
             }
             
             AppIcon(
-                imageVector = Icons.Default.ChevronRight,
+                imageVector = Icons.Outlined.ChevronRight,
                 tint = TextTertiary,
                 modifier = Modifier.size(18.dp)
             )

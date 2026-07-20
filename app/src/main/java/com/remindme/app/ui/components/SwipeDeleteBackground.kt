@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SwipeToDismissBoxState
@@ -29,11 +29,10 @@ fun SwipeDeleteBackground(
     bottomPadding: Dp = 8.dp,
     endPadding: Dp = 20.dp,
 ) {
-    val isSettled = dismissState.currentValue == SwipeToDismissBoxValue.Settled &&
-            dismissState.targetValue == SwipeToDismissBoxValue.Settled
-
-    val bgColor = if (isSettled) Color.Transparent else StateDanger
-    val iconColor = if (isSettled) Color.Transparent else Color.White
+    val isDeleting = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
+    val reveal = if (isDeleting) (0.2f + dismissState.progress * 0.8f).coerceIn(0.2f, 1f) else 0f
+    val bgColor = StateDanger.copy(alpha = reveal)
+    val iconColor = Color.White.copy(alpha = reveal)
 
     Box(
         modifier = modifier
@@ -45,7 +44,7 @@ fun SwipeDeleteBackground(
         contentAlignment = Alignment.CenterEnd
     ) {
         Icon(
-            imageVector = Icons.Default.Delete,
+            imageVector = Icons.Outlined.Delete,
             contentDescription = "Delete",
             tint = iconColor
         )

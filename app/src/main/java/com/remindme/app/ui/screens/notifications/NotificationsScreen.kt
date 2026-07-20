@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
@@ -104,6 +104,10 @@ fun NotificationsScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            AppPullToRefresh(
+                isRefreshing = uiState.isLoading,
+                onRefresh = { viewModel.loadData() }
+            ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 if (uiState.isLoading) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 when (selectedTab) {
@@ -111,6 +115,7 @@ fun NotificationsScreen(
                     1 -> InAppTab(uiState.inAppNotifications, viewModel::markRead, onOpenReminder)
                     2 -> MissedTab(missed, onOpenReminder)
                 }
+            }
             }
         }
     }
@@ -173,7 +178,7 @@ fun InAppTab(
     if (notifications.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Rounded.Notifications, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
+                Icon(Icons.Outlined.Notifications, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("No in-app notifications yet.", color = TextSecondary, fontSize = 16.sp)
             }
@@ -235,7 +240,7 @@ fun MissedTab(occurrences: List<ReminderOccurrence>, onOpenReminder: (String) ->
     if (occurrences.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Rounded.History, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
+                Icon(Icons.Outlined.History, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("No missed reminders.", color = TextSecondary, fontSize = 16.sp)
             }
@@ -268,7 +273,7 @@ fun OccurrenceTile(occ: ReminderOccurrence, isMissed: Boolean = false, onOpenRem
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
                     AppIcon(
-                        imageVector = if (isMissed) Icons.Rounded.Warning else Icons.Rounded.Notifications,
+                        imageVector = if (isMissed) Icons.Outlined.Warning else Icons.Outlined.Notifications,
                         size = 18.dp,
                         color = if (isMissed) StateWarning else Accent500
                     )
