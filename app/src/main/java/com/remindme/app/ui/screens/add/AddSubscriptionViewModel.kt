@@ -9,6 +9,7 @@ import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
 import com.remindme.app.data.repository.OfflineReminderRepository
 import com.remindme.app.ui.components.ChannelPref
+import com.remindme.app.ui.components.NotificationPrefsStore
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,14 +48,7 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
     private var resolveLogoJob: Job? = null
 
     init {
-        // Load default notification prefs
-        val defaultPrefs = mapOf(
-            "email" to ChannelPref(),
-            "push" to ChannelPref(),
-            "telegram" to ChannelPref(),
-            "in_app" to ChannelPref()
-        )
-        _uiState.update { it.copy(notificationPrefs = defaultPrefs) }
+        _uiState.update { it.copy(notificationPrefs = NotificationPrefsStore.load(application)) }
     }
 
     fun updateName(name: String) {
@@ -197,6 +191,7 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
                 )
 
                 repository.addReminder(item)
+                NotificationPrefsStore.save(getApplication(), _uiState.value.notificationPrefs)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = "Failed to save subscription") }

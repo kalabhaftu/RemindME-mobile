@@ -113,8 +113,6 @@ fun <T> BottomSheetPicker(
         onDismiss()
     }
 
-    val glassStyle = LocalThemeStyle.current
-    
     Popup(
         onDismissRequest = { dismiss() },
         properties = PopupProperties(
@@ -125,7 +123,7 @@ fun <T> BottomSheetPicker(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = if (glassStyle == ThemeStyle.Glass) 0.40f else 0.55f))
+                .background(appScrimColor())
                 .clickable { dismiss() }
         ) {
             AnimatedVisibility(

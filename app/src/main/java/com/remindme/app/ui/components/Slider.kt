@@ -2,7 +2,6 @@ package com.remindme.app.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,7 +34,6 @@ import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.compose.ui.util.lerp
 import com.remindme.app.ui.utils.DampedDragAnimation
-import com.remindme.app.ui.theme.Accent500
 import kotlinx.coroutines.flow.collectLatest
 
 private fun Capsule(): Shape = GenericShape { size, _ ->
@@ -51,15 +49,8 @@ fun Slider(
     visibilityThreshold: Float = 0.01f,
     modifier: Modifier = Modifier
 ) {
-    val isLightTheme = !isSystemInDarkTheme()
-    val glassStyle = LocalThemeStyle.current
-    val accentColor = Accent500
-    val trackColor = if (glassStyle == ThemeStyle.Solid) {
-        if (isLightTheme) Color(0xFFD1D1D6) else Color(0xFF3A3A3C)
-    } else if (isLightTheme) Color(0xFF787878).copy(0.2f)
-    else Color(0xFF787880).copy(0.36f)
-
-    val trackBackdrop = Unit
+    val accentColor = AppTextColors.accent
+    val trackColor = appControlColor()
 
     BoxWithConstraints(
         modifier.fillMaxWidth(),

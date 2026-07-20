@@ -72,10 +72,12 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
             val tables = listOf("reminder_items", "holiday_details")
             
             tables.forEach { table ->
-                realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
-                    this.table = table
-                }?.collect {
-                    fetchSubscribed()
+                launch {
+                    realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
+                        this.table = table
+                    }?.collect {
+                        fetchSubscribed()
+                    }
                 }
             }
             realtimeChannel?.subscribe()

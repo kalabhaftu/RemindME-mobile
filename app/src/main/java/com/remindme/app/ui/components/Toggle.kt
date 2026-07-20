@@ -1,6 +1,5 @@
 package com.remindme.app.ui.components
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.GenericShape
@@ -19,7 +18,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
@@ -34,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
 import androidx.compose.ui.util.lerp
 import com.remindme.app.ui.utils.DampedDragAnimation
-import com.remindme.app.ui.theme.Accent500
 import kotlinx.coroutines.flow.collectLatest
 
 private fun Capsule(): Shape = GenericShape { size, _ ->
@@ -49,23 +46,9 @@ fun Toggle(
     modifier: Modifier = Modifier,
     
 ) {
-    val isLightTheme = !isSystemInDarkTheme()
-    val glassStyle = LocalThemeStyle.current
-
-    // Use brand Accent500 (not iOS green)
-    val accentColor = Accent500
-
-    // Track background when OFF
-    val trackOffColor = if (glassStyle == ThemeStyle.Solid) {
-        if (isLightTheme) Color(0xFFD1D1D6) else Color(0xFF3A3A3C)
-    } else if (isLightTheme) {
-        Color.White.copy(alpha = 0.50f)
-    } else {
-        Color.White.copy(alpha = 0.35f)
-    }
-
-    // Thumb color
-    val thumbColor = if (isLightTheme) Color.White else Color.White
+    val accentColor = AppTextColors.accent
+    val trackOffColor = appControlColor()
+    val thumbColor = AppTextColors.primary
 
     val density = LocalDensity.current
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr

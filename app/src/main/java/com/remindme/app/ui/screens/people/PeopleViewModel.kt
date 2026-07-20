@@ -92,10 +92,12 @@ class PeopleViewModel(application: Application) : AndroidViewModel(application) 
             val tables = listOf("reminder_items", "person_details")
             
             tables.forEach { table ->
-                realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
-                    this.table = table
-                }?.collect {
-                    fetchPeople(showLoading = false)
+                launch {
+                    realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
+                        this.table = table
+                    }?.collect {
+                        fetchPeople(showLoading = false)
+                    }
                 }
             }
             realtimeChannel?.subscribe()

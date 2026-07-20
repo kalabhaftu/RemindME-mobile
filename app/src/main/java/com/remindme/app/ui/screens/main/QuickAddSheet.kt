@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.FormatListBulleted
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.appScrimColor
+import com.remindme.app.ui.components.appSurfaceColor
 import com.remindme.app.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,9 +36,9 @@ fun QuickAddSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+        containerColor = appSurfaceColor(elevated = true),
         contentColor = AppColors.textPrimary,
-        scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.55f),
+        scrimColor = appScrimColor(),
         dragHandle = null
     ) {
         AppCard(

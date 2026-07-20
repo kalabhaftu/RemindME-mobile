@@ -1,7 +1,6 @@
 package com.remindme.app.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,33 +26,10 @@ fun AppCard(
     elevated: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
-    val glassStyle = LocalThemeStyle.current
-
-    val bgColor = when {
-        tintColor != null -> tintColor
-        glassStyle == ThemeStyle.Solid -> {
-            if (isDark) BgElevated else Color(0xFFF2F2F7)
-        }
-        elevated -> {
-            // Popup/sheet/FAB surfaces: use the app's background base color at near-full opacity
-            // so they look solid and match the app theme without being see-through
-            if (isDark) Color(0xFF1A1A2E).copy(alpha = 0.96f)
-            else Color(0xFFE0EAFC).copy(alpha = 0.94f)
-        }
-        else -> {
-            // Standard card: semi-transparent frosted tint over the gradient background
-            // High enough to be readable, low enough to show gradient depth
-            if (isDark) Color.White.copy(alpha = 0.22f)
-            else Color.White.copy(alpha = 0.55f)
-        }
-    }
+    val bgColor = tintColor ?: appSurfaceColor(elevated)
 
     val shape = RoundedCornerShape(borderRadius)
 
-    // Note: Do NOT use Modifier.blur() here — it blurs the entire layer including content
-    // (text, icons), making everything unreadable. The frosted-glass look comes from the
-    // semi-transparent background color alone, which lets the gradient behind show through.
     Box(modifier = modifier) {
         Box(
             modifier = Modifier

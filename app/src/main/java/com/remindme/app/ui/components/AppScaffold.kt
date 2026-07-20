@@ -1,7 +1,6 @@
 package com.remindme.app.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -27,12 +26,7 @@ fun AppScaffold(
     glassStyle: ThemeStyle = LocalThemeStyle.current,
     content: @Composable (PaddingValues) -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
-    val gradientColors = if (isDark) {
-        listOf(Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460))
-    } else {
-        listOf(Color(0xFFE0EAFC), Color(0xFFCFDEF3))
-    }
+    val gradientColors = listOf(Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460))
 
     var appBarHeightPx by remember { mutableStateOf(0) }
     var bottomBarHeightPx by remember { mutableStateOf(0) }

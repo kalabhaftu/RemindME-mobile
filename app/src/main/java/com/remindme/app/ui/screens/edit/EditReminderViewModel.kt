@@ -17,6 +17,8 @@ import java.time.LocalDateTime
 
 data class EditReminderUiState(
     val reminder: ReminderItem? = null,
+    val draftName: String = "",
+    val draftNotes: String = "",
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val error: String? = null,
@@ -35,11 +37,33 @@ class EditReminderViewModel(application: Application) : AndroidViewModel(applica
             try {
                 val reminders = repository.getReminders()
                 val reminder = reminders.find { it.id == reminderId }
-                _uiState.update { it.copy(isLoading = false, reminder = reminder, error = null) }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        reminder = reminder,
+                        draftName = reminder?.name.orEmpty(),
+                        draftNotes = reminder?.notes.orEmpty(),
+                        error = null
+                    )
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = "Failed to load reminder") }
             }
         }
+    }
+
+    fun updateName(value: String) = _uiState.update { it.copy(draftName = value) }
+
+    fun updateNotes(value: String) = _uiState.update { it.copy(draftNotes = value) }
+
+    fun saveChanges() {
+        val state = _uiState.value
+        val reminder = state.reminder ?: return
+        if (state.draftName.isBlank()) {
+            _uiState.update { it.copy(error = "Name is required") }
+            return
+        }
+        updateReminder(reminder.copy(name = state.draftName.trim(), notes = state.draftNotes.trim().ifEmpty { null }))
     }
 
     fun updateReminder(updatedReminder: ReminderItem) {

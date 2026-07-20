@@ -3,7 +3,6 @@ package com.remindme.app.ui.components
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.background
@@ -56,19 +55,8 @@ fun NavTabs(
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit
 ) {
-    val isLightTheme = !isSystemInDarkTheme()
-    val glassStyle = LocalThemeStyle.current
-    val accentColor = Accent500
-    val containerColor =
-        if (glassStyle == ThemeStyle.Solid) {
-            if (isLightTheme) Color(0xFFF2F2F7) else Color(0xFF1C1C2E)
-        } else if (isLightTheme) {
-            Color.White.copy(alpha = 0.62f)
-        } else {
-            Color.White.copy(alpha = 0.28f)
-        }
-
-    val tabsBackdrop = Unit
+    val accentColor = AppTextColors.accent
+    val containerColor = appSurfaceColor()
 
     BoxWithConstraints(
         modifier

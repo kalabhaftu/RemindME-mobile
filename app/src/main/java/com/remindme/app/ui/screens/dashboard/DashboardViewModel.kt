@@ -51,10 +51,12 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             )
             
             tables.forEach { table ->
-                realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
-                    this.table = table
-                }?.collect {
-                    fetchReminders(showLoading = false)
+                launch {
+                    realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
+                        this.table = table
+                    }?.collect {
+                        fetchReminders(showLoading = false)
+                    }
                 }
             }
             realtimeChannel?.subscribe()

@@ -40,6 +40,8 @@ import com.remindme.app.ui.components.AppScaffold
 import com.remindme.app.ui.navigation.AddPerson
 import com.remindme.app.ui.navigation.AddSubscription
 import com.remindme.app.ui.navigation.AddTask
+import com.remindme.app.ui.navigation.EditReminder
+import com.remindme.app.ui.navigation.PersonDetail
 import com.remindme.app.ui.screens.dashboard.DashboardScreen
 import com.remindme.app.ui.screens.holidays.HolidaysScreen
 import com.remindme.app.ui.screens.people.PeopleScreen
@@ -159,9 +161,9 @@ fun MainScreen(
                     onNavigateToAddTask = { onItemClick(AddTask) },
                     onNavigateToHolidays = { selectedTab = 4 }
                 )
-                1 -> PeopleScreen()
-                2 -> SubscriptionsScreen()
-                3 -> TasksScreen()
+                1 -> PeopleScreen(onNavigateToDetail = { onItemClick(PersonDetail(it)) })
+                2 -> SubscriptionsScreen(onNavigateToEdit = { onItemClick(EditReminder(it)) })
+                3 -> TasksScreen(onNavigateToEdit = { onItemClick(EditReminder(it)) })
                 4 -> HolidaysScreen()
             }
             

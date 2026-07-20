@@ -28,6 +28,7 @@ import com.remindme.app.ui.screens.login.MagicLinkScreen
 import com.remindme.app.ui.screens.peopledetail.PersonDetailScreen
 import com.remindme.app.ui.screens.search.SearchScreen
 import com.remindme.app.ui.screens.settings.SettingsScreen
+import com.remindme.app.ui.screens.edit.EditReminderScreen
 import com.remindme.app.ui.screens.notifications.NotificationHelpScreen
 import com.remindme.app.ui.screens.templates.TemplatesScreen
 import io.github.jan.supabase.auth.auth
@@ -145,6 +146,12 @@ fun MainNavigation() {
             entry<AddTask> {
                 AddTaskScreen(onBack = { backStack.removeLastOrNull() })
             }
+            entry<EditReminder> { key ->
+                EditReminderScreen(
+                    reminderId = key.reminderId,
+                    onBack = { backStack.removeLastOrNull() }
+                )
+            }
             entry<PersonDetail> { key ->
                 PersonDetailScreen(
                     personId = key.personId,
@@ -162,16 +169,7 @@ fun MainNavigation() {
                 val context = LocalContext.current
                 SearchScreen(
                     onItemClick = { id, category ->
-                        when (category) {
-                            CategoryType.PERSON -> backStack.add(PersonDetail(id))
-                            else -> {
-                                android.widget.Toast.makeText(
-                                    context,
-                                    "Viewing/editing for ${category.name.lowercase()} is coming soon!",
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
+                        backStack.add(EditReminder(id))
                     },
                     onBack = { backStack.removeLastOrNull() }
                 )
@@ -217,7 +215,7 @@ fun MainNavigation() {
             }
             entry<Notifications> {
                 com.remindme.app.ui.screens.notifications.NotificationsScreen(
-                    onOpenReminder = { id -> backStack.add(PersonDetail(id)) },
+                    onOpenReminder = { id -> backStack.add(EditReminder(id)) },
                     onBack = { backStack.removeLastOrNull() }
                 )
             }

@@ -29,6 +29,8 @@ import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.SwipeDeleteBackground
+import com.remindme.app.ui.components.appScrimColor
+import com.remindme.app.ui.components.appSurfaceColor
 import com.remindme.app.ui.theme.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -55,15 +57,6 @@ fun HolidaysScreen(
     ) {
 
         if (uiState.subscribedKeys.isNotEmpty()) {
-            item {
-                Text(
-                    text = "Your reminders — swipe to remove",
-                    fontSize = 12.sp,
-                    color = TextTertiary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
             items(uiState.subscribedKeys.toList(), key = { it }) { key ->
                 val parts = key.split("-")
                 val name = if (parts.size > 2) parts.subList(2, parts.size).joinToString("-") else key
@@ -219,19 +212,10 @@ fun HolidaysScreen(
     }
 
     if (showCountryPicker) {
-        val isPickerDark = androidx.compose.foundation.isSystemInDarkTheme()
-        val glassStyle = com.remindme.app.ui.components.LocalThemeStyle.current
-        val pickerBg = when {
-            glassStyle == com.remindme.app.ui.components.ThemeStyle.Glass && isPickerDark ->
-                androidx.compose.ui.graphics.Color(0xFF1C2340).copy(alpha = 0.92f)
-            glassStyle == com.remindme.app.ui.components.ThemeStyle.Glass ->
-                androidx.compose.ui.graphics.Color.White.copy(alpha = 0.80f)
-            else -> BgElevated
-        }
         ModalBottomSheet(
             onDismissRequest = { showCountryPicker = false },
-            containerColor = pickerBg,
-            scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.55f),
+            containerColor = appSurfaceColor(elevated = true),
+            scrimColor = appScrimColor(),
             dragHandle = {
                 Box(
                     modifier = Modifier

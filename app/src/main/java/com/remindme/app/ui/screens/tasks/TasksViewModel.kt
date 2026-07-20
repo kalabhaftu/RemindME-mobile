@@ -64,10 +64,12 @@ class TasksViewModel(application: Application) : AndroidViewModel(application) {
             val tables = listOf("reminder_items", "task_details")
             
             tables.forEach { table ->
-                realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
-                    this.table = table
-                }?.collect {
-                    fetchTasks(showLoading = false)
+                launch {
+                    realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
+                        this.table = table
+                    }?.collect {
+                        fetchTasks(showLoading = false)
+                    }
                 }
             }
             realtimeChannel?.subscribe()

@@ -1,7 +1,6 @@
 package com.remindme.app.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import com.remindme.app.ui.theme.BgElevated
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,15 +34,7 @@ fun TopBar(
     bottom: @Composable (() -> Unit)? = null,
     statusBarsPadding: Boolean = true
 ) {
-    val isLight = !isSystemInDarkTheme()
-    val glassStyle = LocalThemeStyle.current
-    val bgColor = if (glassStyle == ThemeStyle.Solid) {
-        if (isLight) Color(0xFFF2F2F7) else BgElevated
-    } else if (isLight) {
-        Color.White.copy(alpha = 0.62f)
-    } else {
-        Color.White.copy(alpha = 0.28f)
-    }
+    val bgColor = appSurfaceColor(elevated = true)
 
     Column(
         modifier = modifier

@@ -66,10 +66,12 @@ class SubscriptionsViewModel(application: Application) : AndroidViewModel(applic
             val tables = listOf("reminder_items", "subscription_details")
             
             tables.forEach { table ->
-                realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
-                    this.table = table
-                }?.collect {
-                    fetchSubscriptions(showLoading = false)
+                launch {
+                    realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
+                        this.table = table
+                    }?.collect {
+                        fetchSubscriptions(showLoading = false)
+                    }
                 }
             }
             realtimeChannel?.subscribe()

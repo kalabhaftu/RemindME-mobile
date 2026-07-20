@@ -3,7 +3,6 @@ package com.remindme.app.ui.components
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,7 +16,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.remindme.app.ui.theme.BgElevated
 
 @Composable
 fun AppButton(
@@ -30,17 +28,10 @@ fun AppButton(
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     content: @Composable RowScope.() -> Unit
 ) {
-    val isLight = !isSystemInDarkTheme()
-    val glassStyle = LocalThemeStyle.current
-
-    val bgColor = if (surfaceColor != Color.Unspecified) {
-        surfaceColor
-    } else if (glassStyle == ThemeStyle.Solid) {
-        if (isLight) Color(0xFFE5E5EA) else BgElevated
-    } else if (isLight) {
-        Color.White.copy(alpha = 0.62f)
-    } else {
-        Color.White.copy(alpha = 0.28f)
+    val bgColor = when {
+        surfaceColor != Color.Unspecified -> surfaceColor
+        tint != Color.Unspecified -> tint
+        else -> appControlColor()
     }
 
     Row(

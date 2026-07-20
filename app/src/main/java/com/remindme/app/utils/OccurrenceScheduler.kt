@@ -24,7 +24,7 @@ object OccurrenceScheduler {
      * matches a future now() tick). Always convert through the device zone
      * to a real UTC instant before formatting.
      */
-    private fun toUtcIso(local: LocalDateTime): String {
+    fun toUtcIso(local: LocalDateTime): String {
         return local.atZone(ZoneId.systemDefault())
             .withZoneSameInstant(ZoneId.of("UTC"))
             .format(DateTimeFormatter.ISO_INSTANT)
