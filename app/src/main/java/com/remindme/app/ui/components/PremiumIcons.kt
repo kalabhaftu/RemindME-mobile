@@ -1,0 +1,76 @@
+package com.remindme.app.ui.components
+
+import com.composables.icons.lucide.R as LucideR
+
+object PremiumIcons {
+    val AccessTime = LucideR.drawable.lucide_ic_clock_3
+    val Add = LucideR.drawable.lucide_ic_plus
+    val AddCircle = LucideR.drawable.lucide_ic_circle_plus
+    val ArrowBack = LucideR.drawable.lucide_ic_arrow_left
+    val Book = LucideR.drawable.lucide_ic_book_open
+    val Cake = LucideR.drawable.lucide_ic_cake
+    val CalendarToday = LucideR.drawable.lucide_ic_calendar_days
+    val CalendarViewWeek = LucideR.drawable.lucide_ic_calendar_range
+    val CameraAlt = LucideR.drawable.lucide_ic_camera
+    val CardGiftcard = LucideR.drawable.lucide_ic_gift
+    val Check = LucideR.drawable.lucide_ic_check
+    val CheckCircle = LucideR.drawable.lucide_ic_circle_check
+    val Checklist = LucideR.drawable.lucide_ic_list_checks
+    val ChevronRight = LucideR.drawable.lucide_ic_chevron_right
+    val Circle = LucideR.drawable.lucide_ic_circle
+    val Close = LucideR.drawable.lucide_ic_x
+    val ContentCopy = LucideR.drawable.lucide_ic_copy
+    val CreditCard = LucideR.drawable.lucide_ic_credit_card
+    val DateRange = LucideR.drawable.lucide_ic_calendar_range
+    val Delete = LucideR.drawable.lucide_ic_trash_2
+    val Download = LucideR.drawable.lucide_ic_download
+    val Edit = LucideR.drawable.lucide_ic_pen
+    val Email = LucideR.drawable.lucide_ic_mail
+    val Error = LucideR.drawable.lucide_ic_circle_alert
+    val Event = LucideR.drawable.lucide_ic_calendar_days
+    val FitnessCenter = LucideR.drawable.lucide_ic_dumbbell
+    val FormatListBulleted = LucideR.drawable.lucide_ic_list
+    val HelpOutline = LucideR.drawable.lucide_ic_info
+    val History = LucideR.drawable.lucide_ic_history
+    val Home = LucideR.drawable.lucide_ic_house
+    val KeyboardArrowDown = LucideR.drawable.lucide_ic_chevron_down
+    val KeyboardArrowLeft = LucideR.drawable.lucide_ic_chevron_left
+    val KeyboardArrowRight = LucideR.drawable.lucide_ic_chevron_right
+    val List = LucideR.drawable.lucide_ic_list
+    val Logout = LucideR.drawable.lucide_ic_log_out
+    val MailOutline = LucideR.drawable.lucide_ic_mail
+    val MedicalServices = LucideR.drawable.lucide_ic_pill
+    val Medication = LucideR.drawable.lucide_ic_pill
+    val MenuBook = LucideR.drawable.lucide_ic_book_open
+    val MoreVert = LucideR.drawable.lucide_ic_ellipsis_vertical
+    val Notifications = LucideR.drawable.lucide_ic_bell
+    val OpenInNew = LucideR.drawable.lucide_ic_external_link
+    val People = LucideR.drawable.lucide_ic_users_round
+    val Person = LucideR.drawable.lucide_ic_user_round
+    val UserRoundPlus = LucideR.drawable.lucide_ic_user_round_plus
+    val PersonSearch = LucideR.drawable.lucide_ic_user_search
+    val PhonelinkErase = LucideR.drawable.lucide_ic_smartphone
+    val Public = LucideR.drawable.lucide_ic_globe
+    val Refresh = LucideR.drawable.lucide_ic_refresh_cw
+    val Save = LucideR.drawable.lucide_ic_save
+    val Search = LucideR.drawable.lucide_ic_search
+    val Security = LucideR.drawable.lucide_ic_shield_check
+    val Send = LucideR.drawable.lucide_ic_send
+    val Settings = LucideR.drawable.lucide_ic_settings
+    val Share = LucideR.drawable.lucide_ic_share_2
+    val Smartphone = LucideR.drawable.lucide_ic_smartphone
+    val Snooze = LucideR.drawable.lucide_ic_alarm_clock
+    val Timer = LucideR.drawable.lucide_ic_timer
+    val Update = LucideR.drawable.lucide_ic_refresh_cw
+    val UploadFile = LucideR.drawable.lucide_ic_file_up
+    val ViewList = LucideR.drawable.lucide_ic_list
+    val Visibility = LucideR.drawable.lucide_ic_eye
+    val VisibilityOff = LucideR.drawable.lucide_ic_eye_off
+    val Warning = LucideR.drawable.lucide_ic_triangle_alert
+    val WaterDrop = LucideR.drawable.lucide_ic_droplet
+    val WbSunny = LucideR.drawable.lucide_ic_sun
+    val WifiTethering = LucideR.drawable.lucide_ic_wifi
+    val NoteAdd = LucideR.drawable.lucide_ic_list_plus
+    val AddCard = LucideR.drawable.lucide_ic_credit_card
+    val Activity = LucideR.drawable.lucide_ic_activity
+}

@@ -10,9 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -22,9 +19,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
 import com.remindme.app.ui.components.GoogleLogo
 import com.remindme.app.ui.components.AppScaffold
+import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.AppButton
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.AppTextField
+import com.remindme.app.ui.components.PremiumIcons
 import com.remindme.app.ui.theme.*
 
 
@@ -84,8 +83,8 @@ fun LoginScreen(
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 suffixIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
+                        AppIcon(
+                            iconRes = if (passwordVisible) PremiumIcons.Visibility else PremiumIcons.VisibilityOff,
                             contentDescription = if (passwordVisible) "Hide password" else "Show password",
                             tint = TextTertiary
                         )

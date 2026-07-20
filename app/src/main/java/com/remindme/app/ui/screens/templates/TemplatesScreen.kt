@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -59,7 +57,7 @@ fun TemplatesScreen(
                     modifier = Modifier.weight(1f),
                     actions = {
                         IconButton(onClick = { showCreate = true }) {
-                            AppIcon(imageVector = Icons.Outlined.Add, color = TextPrimary)
+                            AppIcon(iconRes = PremiumIcons.Add, color = TextPrimary)
                         }
                     }
                 )
@@ -82,7 +80,7 @@ fun TemplatesScreen(
                             modifier = Modifier.fillMaxWidth().padding(32.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Icon(Icons.Outlined.ViewList, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
+                            AppIcon(iconRes = PremiumIcons.ViewList, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
                             Spacer(modifier = Modifier.height(16.dp))
                             Text("No templates yet", color = TextSecondary, fontSize = 16.sp)
                         }
@@ -142,12 +140,12 @@ fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -
             ) {
                 Box(modifier = Modifier.padding(10.dp)) {
                     val icon = when (template.category) {
-                        "person" -> Icons.Outlined.Person
-                        "subscription" -> Icons.Outlined.CreditCard
-                        "custom_holiday" -> Icons.Outlined.CardGiftcard
-                        else -> Icons.Outlined.Checklist
+                        "person" -> PremiumIcons.Person
+                        "subscription" -> PremiumIcons.CreditCard
+                        "custom_holiday" -> PremiumIcons.CardGiftcard
+                        else -> PremiumIcons.Checklist
                     }
-                    AppIcon(imageVector = icon, color = Accent500, size = 22.dp)
+                    AppIcon(iconRes = icon, color = Accent500, size = 22.dp)
                 }
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -167,7 +165,7 @@ fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -
                 )
             }
             IconButton(onClick = onDelete) {
-                AppIcon(imageVector = Icons.Outlined.Delete, color = StateDanger, size = 20.dp)
+                AppIcon(iconRes = PremiumIcons.Delete, color = StateDanger, size = 20.dp)
             }
         }
     }
@@ -236,7 +234,7 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
                     modifier = Modifier.weight(1f).height(48.dp),
                     tint = Accent500
                 ) {
-                    AppIcon(Icons.Outlined.Add, color = Accent500, size = 18.dp)
+                    AppIcon(iconRes = PremiumIcons.Add, color = Accent500, size = 18.dp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Create", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }

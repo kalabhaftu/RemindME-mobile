@@ -5,8 +5,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -81,7 +79,7 @@ fun UpcomingPanel(
             if (filtered.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        AppIcon(Icons.Outlined.Notifications, size = 32.dp, color = AppColors.textTertiary)
+                        AppIcon(iconRes = PremiumIcons.Notifications, size = 32.dp, color = AppColors.textTertiary)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("All caught up", color = AppColors.textSecondary, fontSize = 14.sp)
                     }
@@ -113,10 +111,10 @@ fun UpcomingItem(
     val isDone = occurrence.status == OccurrenceStatus.COMPLETED_PAST
 
     val iconRes = when (item.category) {
-        CategoryType.TASK -> Icons.Outlined.Checklist
-        CategoryType.PERSON -> Icons.Outlined.Person
-        CategoryType.SUBSCRIPTION -> Icons.Outlined.CreditCard
-        CategoryType.CUSTOM_HOLIDAY -> Icons.Outlined.Cake
+        CategoryType.TASK -> PremiumIcons.Checklist
+        CategoryType.PERSON -> PremiumIcons.Person
+        CategoryType.SUBSCRIPTION -> PremiumIcons.CreditCard
+        CategoryType.CUSTOM_HOLIDAY -> PremiumIcons.Cake
     }
 
     AppCard(
@@ -136,7 +134,7 @@ fun UpcomingItem(
                 padding = 9.dp
             ) {
                 AppIcon(
-                    imageVector = iconRes,
+                    iconRes = iconRes,
                     size = 18.dp,
                     tint = if (isDone) AppColors.textTertiary else AppColors.accent500
                 )
@@ -173,7 +171,7 @@ fun UpcomingItem(
                         padding = 8.dp,
                         modifier = Modifier.clickable { onSnooze() }
                     ) {
-                        AppIcon(imageVector = Icons.Outlined.Snooze, size = 18.dp, color = AppColors.stateWarning)
+                        AppIcon(iconRes = PremiumIcons.Snooze, size = 18.dp, color = AppColors.stateWarning)
                     }
                     Spacer(modifier = Modifier.width(6.dp))
                     AppCard(
@@ -181,7 +179,7 @@ fun UpcomingItem(
                         padding = 8.dp,
                         modifier = Modifier.clickable { onMarkDone() }
                     ) {
-                        AppIcon(imageVector = Icons.Outlined.CheckCircle, size = 18.dp, color = AppColors.stateSuccess)
+                        AppIcon(iconRes = PremiumIcons.CheckCircle, size = 18.dp, color = AppColors.stateSuccess)
                     }
                     Spacer(modifier = Modifier.width(6.dp))
                 }
@@ -191,7 +189,7 @@ fun UpcomingItem(
                         padding = 8.dp,
                         modifier = Modifier.clickable { onEdit() }
                     ) {
-                        AppIcon(imageVector = Icons.Outlined.Edit, size = 18.dp, color = AppColors.textTertiary)
+                        AppIcon(iconRes = PremiumIcons.Edit, size = 18.dp, color = AppColors.textTertiary)
                     }
                 }
             }

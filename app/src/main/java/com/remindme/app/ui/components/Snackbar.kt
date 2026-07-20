@@ -1,15 +1,11 @@
 package com.remindme.app.ui.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -20,7 +16,7 @@ import com.remindme.app.ui.theme.StateDanger
 fun Snackbar(
     message: String,
     modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
+    icon: Int? = null,
     isError: Boolean = false,
     
 ) {
@@ -34,10 +30,10 @@ fun Snackbar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (icon != null || isError) {
-                val displayIcon = icon ?: if (isError) Icons.Outlined.Error else Icons.Outlined.CheckCircle
+                val displayIcon = icon ?: if (isError) PremiumIcons.Error else PremiumIcons.CheckCircle
                 val iconColor = if (isError) StateDanger else AppColors.accent500
                 AppIcon(
-                    imageVector = displayIcon,
+                    iconRes = displayIcon,
                     color = iconColor,
                     size = 24.dp
                 )

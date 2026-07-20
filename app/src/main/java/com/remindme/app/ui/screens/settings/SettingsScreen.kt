@@ -9,9 +9,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.*
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -199,7 +196,7 @@ fun AppearanceSection(onNavigateToThemeSelector: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(label, color = Accent500, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                     Spacer(modifier = Modifier.width(8.dp))
-                    AppIcon(Icons.Outlined.ChevronRight, color = TextTertiary, size = 18.dp)
+                    AppIcon(iconRes = PremiumIcons.ChevronRight, color = TextTertiary, size = 18.dp)
                 }
             }
         }
@@ -236,7 +233,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                         }
                     }
                     IconButton(onClick = { viewModel.deleteTelegramToken() }) {
-                        Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = StateDanger)
+                        AppIcon(iconRes = PremiumIcons.Delete, contentDescription = "Delete", tint = StateDanger)
                     }
                 }
             }
@@ -265,7 +262,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(uiState.maskedChatId, fontFamily = FontFamily.Monospace, fontSize = 13.sp, color = TextPrimary)
                         }
-                        Icon(Icons.Outlined.CheckCircle, contentDescription = "Checked", tint = StateSuccess)
+                        AppIcon(iconRes = PremiumIcons.CheckCircle, contentDescription = "Checked", tint = StateSuccess)
                     }
                 }
             } else {
@@ -282,7 +279,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                         onClick = { viewModel.detectChatId() },
                         modifier = Modifier.weight(1f).height(48.dp)
                     ) {
-                        AppIcon(Icons.Outlined.WifiTethering, color = TextPrimary, size = 18.dp)
+                        AppIcon(iconRes = PremiumIcons.WifiTethering, color = TextPrimary, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Detect Chat ID", fontSize = 14.sp)
                     }
@@ -292,7 +289,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                         modifier = Modifier.weight(1f).height(48.dp),
                         tint = Accent500
                     ) {
-                        AppIcon(Icons.Outlined.Save, color = Accent500, size = 18.dp)
+                        AppIcon(iconRes = PremiumIcons.Save, color = Accent500, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Save", fontSize = 14.sp)
                     }
@@ -312,7 +309,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 tint = Accent500
             ) {
-                AppIcon(Icons.Outlined.Save, color = Accent500, size = 18.dp)
+                AppIcon(iconRes = PremiumIcons.Save, color = Accent500, size = 18.dp)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Save Token", fontSize = 14.sp)
             }
@@ -374,7 +371,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
                 onClick = onNavigateToNotificationHelp,
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
             ) {
-                AppIcon(Icons.AutoMirrored.Outlined.HelpOutline, modifier = Modifier.size(16.dp), color = Accent500)
+                AppIcon(iconRes = PremiumIcons.HelpOutline, modifier = Modifier.size(16.dp), color = Accent500)
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Help", color = Accent500, fontSize = 13.sp)
             }
@@ -450,10 +447,7 @@ fun GlassSwitch(title: String, checked: Boolean, onCheckedChange: (Boolean) -> U
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(title, fontWeight = FontWeight.Medium, color = TextPrimary)
-            Toggle(
-                selected = { checked },
-                onSelect = onCheckedChange
-            )
+            AppSwitch(checked = checked, onCheckedChange = onCheckedChange)
         }
     }
 }
@@ -471,10 +465,7 @@ fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(title, fontWeight = FontWeight.Medium, color = TextPrimary)
-                    Toggle(
-                        selected = { checked },
-                        onSelect = onCheckedChange
-                    )
+                    AppSwitch(checked = checked, onCheckedChange = onCheckedChange)
                 }
                 if (index != rows.lastIndex) {
                     androidx.compose.material3.HorizontalDivider(
@@ -492,21 +483,21 @@ fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
 fun TestNotificationsSection(viewModel: SettingsViewModel) {
     SettingsSection("Test Notifications") {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TestButton("Email", Icons.Outlined.Email, Modifier.weight(1f)) { viewModel.testChannel("email") }
-            TestButton("Push", Icons.Outlined.Notifications, Modifier.weight(1f)) { viewModel.testChannel("push") }
-            TestButton("Telegram", Icons.AutoMirrored.Outlined.Send, Modifier.weight(1f)) { viewModel.testChannel("telegram") }
+            TestButton("Email", PremiumIcons.Email, Modifier.weight(1f)) { viewModel.testChannel("email") }
+            TestButton("Push", PremiumIcons.Notifications, Modifier.weight(1f)) { viewModel.testChannel("push") }
+            TestButton("Telegram", PremiumIcons.Send, Modifier.weight(1f)) { viewModel.testChannel("telegram") }
         }
     }
 }
 
 @Composable
-fun TestButton(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun TestButton(label: String, icon: Int, modifier: Modifier = Modifier, onClick: () -> Unit) {
     AppButton(
         onClick = onClick,
         modifier = modifier.height(48.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 8.dp)
     ) {
-        AppIcon(icon, color = TextPrimary, size = 16.dp)
+        AppIcon(iconRes = icon, color = TextPrimary, size = 16.dp)
         Spacer(modifier = Modifier.width(4.dp))
         Text(label, fontSize = 12.sp, maxLines = 1)
     }
@@ -576,7 +567,7 @@ fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsVie
                     onClick = { viewModel.loadCalendarFeed() },
                     modifier = Modifier.fillMaxWidth().height(48.dp)
                 ) {
-                    AppIcon(Icons.Outlined.Refresh, color = TextPrimary, size = 18.dp)
+                    AppIcon(iconRes = PremiumIcons.Refresh, color = TextPrimary, size = 18.dp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Retry", color = TextPrimary)
                 }
@@ -601,7 +592,7 @@ fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsVie
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 tint = Accent500
             ) {
-                AppIcon(Icons.Outlined.ContentCopy, color = Accent500, size = 18.dp)
+                AppIcon(iconRes = PremiumIcons.ContentCopy, color = Accent500, size = 18.dp)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Copy webcal link", color = TextPrimary)
             }
@@ -630,7 +621,7 @@ fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsVie
                 },
                 modifier = Modifier.fillMaxWidth().height(48.dp)
             ) {
-                AppIcon(Icons.AutoMirrored.Outlined.OpenInNew, color = TextPrimary, size = 18.dp)
+                AppIcon(iconRes = PremiumIcons.OpenInNew, color = TextPrimary, size = 18.dp)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Open calendar app", color = TextPrimary)
             }
@@ -705,7 +696,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             onClick = { viewModel.checkForUpdate(context) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            AppIcon(Icons.Outlined.Update, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(iconRes = PremiumIcons.Update, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Check for Updates", color = TextPrimary)
         }
@@ -715,7 +706,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             onClick = { exportLauncher.launch("remindme-export-${java.time.LocalDate.now()}.json") },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            AppIcon(Icons.Outlined.Download, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(iconRes = PremiumIcons.Download, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Export Data (JSON)", color = TextPrimary)
         }
@@ -725,7 +716,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             onClick = { importLauncher.launch(arrayOf("application/json", "text/plain")) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            AppIcon(Icons.Outlined.UploadFile, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(iconRes = PremiumIcons.UploadFile, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Import JSON", color = TextPrimary)
         }
@@ -747,7 +738,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             if (uiState.isImportingContacts) {
                 Spinner(size = 18.dp)
             } else {
-                AppIcon(Icons.Outlined.People, modifier = Modifier.size(18.dp), color = TextPrimary)
+                AppIcon(iconRes = PremiumIcons.People, modifier = Modifier.size(18.dp), color = TextPrimary)
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(if (uiState.isImportingContacts) "Importing contacts…" else "Import All Contacts", color = TextPrimary)
@@ -761,13 +752,11 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("RemindME v${com.remindme.app.BuildConfig.VERSION_NAME}", color = TextTertiary, fontSize = 12.sp)
-
         AppButton(
             onClick = { viewModel.signOut(onNavigateHome) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            AppIcon(Icons.AutoMirrored.Outlined.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(iconRes = PremiumIcons.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sign Out (This Device)", color = TextPrimary)
         }
@@ -777,7 +766,7 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             onClick = { viewModel.signOutAllDevices(onNavigateHome) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            AppIcon(Icons.Outlined.PhonelinkErase, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(iconRes = PremiumIcons.PhonelinkErase, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sign Out All Devices", color = TextPrimary)
         }
@@ -821,7 +810,7 @@ fun AboutSupportSection() {
                 },
                 modifier = Modifier.weight(1f).height(46.dp)
             ) {
-                AppIcon(Icons.Outlined.Share, color = TextPrimary, size = 17.dp)
+                AppIcon(iconRes = PremiumIcons.Share, color = TextPrimary, size = 17.dp)
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("Share", color = TextPrimary)
             }
@@ -829,7 +818,7 @@ fun AboutSupportSection() {
                 onClick = {
                     runCatching {
                         context.startActivity(android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
-                            data = android.net.Uri.parse("mailto:?subject=RemindME feedback")
+                            data = android.net.Uri.parse("mailto:kalabhaftu1@gmail.com?subject=RemindME%20feedback")
                         })
                     }.onFailure {
                         Toast.makeText(context, "No email app available", Toast.LENGTH_SHORT).show()
@@ -837,7 +826,7 @@ fun AboutSupportSection() {
                 },
                 modifier = Modifier.weight(1f).height(46.dp)
             ) {
-                AppIcon(Icons.Outlined.MailOutline, color = TextPrimary, size = 17.dp)
+                AppIcon(iconRes = PremiumIcons.MailOutline, color = TextPrimary, size = 17.dp)
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("Feedback", color = TextPrimary)
             }
@@ -867,7 +856,7 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.Security, contentDescription = null, tint = StateDanger, modifier = Modifier.size(20.dp))
+                AppIcon(iconRes = PremiumIcons.Security, contentDescription = null, tint = StateDanger, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Danger Zone", style = MaterialTheme.typography.titleMedium, color = StateDanger)
             }
@@ -883,7 +872,7 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 surfaceColor = StateDanger.copy(alpha = 0.2f)
             ) {
-                AppIcon(Icons.Outlined.Delete, modifier = Modifier.size(18.dp), color = StateDanger)
+                AppIcon(iconRes = PremiumIcons.Delete, modifier = Modifier.size(18.dp), color = StateDanger)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Delete Account", color = StateDanger)
             }
@@ -1011,9 +1000,9 @@ fun ThemeSelectorScreen(
                                 fontSize = 16.sp
                             )
                             if (isSelected) {
-                                AppIcon(Icons.Outlined.CheckCircle, color = Accent500, size = 20.dp)
+                                AppIcon(iconRes = PremiumIcons.CheckCircle, color = Accent500, size = 20.dp)
                             } else {
-                                AppIcon(Icons.Outlined.Circle, color = TextTertiary, size = 20.dp)
+                                AppIcon(iconRes = PremiumIcons.Circle, color = TextTertiary, size = 20.dp)
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
@@ -1041,7 +1030,7 @@ fun ThemeSelectorScreen(
                                             .background(Accent500.copy(alpha = 0.2f)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        AppIcon(Icons.Outlined.Notifications, color = Accent500, size = 20.dp)
+                                        AppIcon(iconRes = PremiumIcons.Notifications, color = Accent500, size = 20.dp)
                                     }
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Column {

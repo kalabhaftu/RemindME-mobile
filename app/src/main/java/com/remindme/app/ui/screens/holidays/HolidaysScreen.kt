@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.PremiumIcons
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.SwipeDeleteBackground
 import com.remindme.app.ui.components.appScrimColor
@@ -93,7 +92,7 @@ fun HolidaysScreen(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                AppIcon(imageVector = Icons.Outlined.CardGiftcard, size = 16.dp, color = TextPrimary)
+                                AppIcon(iconRes = PremiumIcons.CardGiftcard, size = 16.dp, color = TextPrimary)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = name,
@@ -101,7 +100,7 @@ fun HolidaysScreen(
                                     fontSize = 13.sp,
                                     modifier = Modifier.weight(1f)
                                 )
-                                AppIcon(imageVector = Icons.Outlined.ArrowBack, size = 14.dp, color = TextPrimary)
+                                AppIcon(iconRes = PremiumIcons.ArrowBack, size = 14.dp, color = TextPrimary)
                             }
                         }
                     }
@@ -130,7 +129,7 @@ fun HolidaysScreen(
                         modifier = Modifier.wrapContentSize()
                     ) {
                         Box(modifier = Modifier.padding(8.dp)) {
-                            AppIcon(imageVector = Icons.Outlined.Public, size = 18.dp, color = Accent500)
+                            AppIcon(iconRes = PremiumIcons.Public, size = 18.dp, color = Accent500)
                         }
                     }
                     Spacer(modifier = Modifier.width(12.dp))
@@ -142,7 +141,7 @@ fun HolidaysScreen(
                     if (uiState.isLoadingCountries) {
                         Spinner(modifier = Modifier.size(18.dp))
                     }
-                    AppIcon(imageVector = Icons.Outlined.KeyboardArrowDown, size = 20.dp, color = TextTertiary)
+                    AppIcon(iconRes = PremiumIcons.KeyboardArrowDown, size = 20.dp, color = TextTertiary)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -174,7 +173,7 @@ fun HolidaysScreen(
                         ) {
                             Box(modifier = Modifier.padding(8.dp)) {
                                 AppIcon(
-                                    imageVector = Icons.Outlined.CardGiftcard,
+                                    iconRes = PremiumIcons.CardGiftcard,
                                     size = 18.dp,
                                     color = if (active) Accent500 else TextTertiary
                                 )
@@ -201,7 +200,7 @@ fun HolidaysScreen(
                             Spinner(modifier = Modifier.size(24.dp))
                         } else {
                             AppIcon(
-                                imageVector = if (active) Icons.Outlined.CheckCircle else Icons.Outlined.AddCircle,
+                                iconRes = if (active) PremiumIcons.CheckCircle else PremiumIcons.AddCircle,
                                 color = if (active) Accent500 else TextTertiary,
                                 size = 24.dp
                             )
@@ -267,7 +266,7 @@ fun HolidaysScreen(
                                     modifier = Modifier.weight(1f)
                                 )
                                 if (isSelected) {
-                                    AppIcon(imageVector = Icons.Outlined.Check, size = 18.dp, color = Accent500)
+                                    AppIcon(iconRes = PremiumIcons.Check, size = 18.dp, color = Accent500)
                                 }
                             }
                         }

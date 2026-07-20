@@ -4,21 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.CreditCard
-import androidx.compose.material.icons.outlined.Event
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.People
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.PersonAdd
-import androidx.compose.material.icons.outlined.AddCard
-import androidx.compose.material.icons.outlined.NoteAdd
-import androidx.compose.material.icons.outlined.Book
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.foundation.clickable
 import com.remindme.app.ui.components.AppCard
 import androidx.compose.runtime.Composable
@@ -36,6 +21,7 @@ import androidx.navigation3.runtime.NavKey
 import com.remindme.app.ui.components.NavTab
 import com.remindme.app.ui.components.NavTabs
 import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.PremiumIcons
 import com.remindme.app.ui.components.AppScaffold
 import com.remindme.app.ui.navigation.AddPerson
 import com.remindme.app.ui.navigation.AddSubscription
@@ -48,7 +34,6 @@ import com.remindme.app.ui.screens.people.PeopleScreen
 import com.remindme.app.ui.screens.subscriptions.SubscriptionsScreen
 import com.remindme.app.ui.screens.tasks.TasksScreen
 import com.remindme.app.ui.theme.*
-import com.composables.icons.lucide.R as LucideR
 
 @Composable
 fun MainScreen(
@@ -68,7 +53,7 @@ fun MainScreen(
                 actions = {
                     androidx.compose.foundation.layout.Box {
                         androidx.compose.material3.IconButton(onClick = { showMenu = true }) {
-                            AppIcon(Icons.Outlined.MoreVert, color = AppColors.textPrimary)
+                            AppIcon(iconRes = PremiumIcons.MoreVert, color = AppColors.textPrimary)
                         }
                         com.remindme.app.ui.components.PopupMenu(
                             expanded = showMenu,
@@ -78,22 +63,22 @@ fun MainScreen(
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Search",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Search) },
-                                icon = Icons.Outlined.Search
+                                icon = PremiumIcons.Search
                             )
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Templates",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Templates) },
-                                icon = Icons.Outlined.Book
+                                icon = PremiumIcons.Book
                             )
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Notifications",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Notifications) },
-                                icon = Icons.Outlined.Notifications
+                                icon = PremiumIcons.Notifications
                             )
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Settings",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Settings) },
-                                icon = Icons.Outlined.Settings
+                                icon = PremiumIcons.Settings
                             )
                         }
                     }
@@ -111,7 +96,7 @@ fun MainScreen(
                     selected = selectedTab == 0
                 ) {
                     AppIcon(
-                        iconRes = LucideR.drawable.lucide_ic_house,
+                        iconRes = PremiumIcons.Home,
                         color = if (selectedTab == 0) Accent500 else TextPrimary
                     )
                 }
@@ -120,7 +105,7 @@ fun MainScreen(
                     selected = selectedTab == 1
                 ) {
                     AppIcon(
-                        iconRes = LucideR.drawable.lucide_ic_users_round,
+                        iconRes = PremiumIcons.People,
                         color = if (selectedTab == 1) Accent500 else TextPrimary
                     )
                 }
@@ -129,7 +114,7 @@ fun MainScreen(
                     selected = selectedTab == 2
                 ) {
                     AppIcon(
-                        iconRes = LucideR.drawable.lucide_ic_credit_card,
+                        iconRes = PremiumIcons.CreditCard,
                         color = if (selectedTab == 2) Accent500 else TextPrimary
                     )
                 }
@@ -138,7 +123,7 @@ fun MainScreen(
                     selected = selectedTab == 3
                 ) {
                     AppIcon(
-                        iconRes = LucideR.drawable.lucide_ic_circle_check,
+                        iconRes = PremiumIcons.CheckCircle,
                         color = if (selectedTab == 3) Accent500 else TextPrimary
                     )
                 }
@@ -147,7 +132,7 @@ fun MainScreen(
                     selected = selectedTab == 4
                 ) {
                     AppIcon(
-                        iconRes = LucideR.drawable.lucide_ic_calendar_days,
+                        iconRes = PremiumIcons.CalendarToday,
                         color = if (selectedTab == 4) Accent500 else TextPrimary
                     )
                 }
@@ -191,10 +176,10 @@ fun MainScreen(
                     ) {
                         // Contextually correct icon per tab
                         val fabIcon = when (selectedTab) {
-                            1 -> LucideR.drawable.lucide_ic_user_round_plus
-                            2 -> LucideR.drawable.lucide_ic_credit_card
-                            3 -> LucideR.drawable.lucide_ic_list_plus
-                            else -> LucideR.drawable.lucide_ic_plus
+                            1 -> PremiumIcons.UserRoundPlus
+                            2 -> PremiumIcons.CreditCard
+                            3 -> PremiumIcons.NoteAdd
+                            else -> PremiumIcons.Add
                         }
                         Box(
                             modifier = Modifier.fillMaxSize(),

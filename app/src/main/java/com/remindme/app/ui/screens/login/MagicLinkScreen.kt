@@ -1,10 +1,6 @@
 package com.remindme.app.ui.screens.login
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MailOutline
-import androidx.compose.material.icons.outlined.PersonSearch
-import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -132,7 +128,7 @@ private fun SentStep() {
         modifier = Modifier.padding(24.dp)
     ) {
         AppIcon(
-            imageVector = Icons.Outlined.MailOutline,
+            iconRes = PremiumIcons.MailOutline,
             modifier = Modifier.size(56.dp),
             color = Accent500
         )
@@ -167,7 +163,7 @@ private fun NotFoundStep(uiState: MagicLinkUiState, viewModel: MagicLinkViewMode
         modifier = Modifier.padding(24.dp)
     ) {
         AppIcon(
-            imageVector = Icons.Outlined.PersonSearch,
+            iconRes = PremiumIcons.PersonSearch,
             modifier = Modifier.size(56.dp),
             color = TextTertiary
         )
@@ -210,7 +206,7 @@ private fun ErrorStep(uiState: MagicLinkUiState, viewModel: MagicLinkViewModel) 
         modifier = Modifier.padding(24.dp)
     ) {
         AppIcon(
-            imageVector = Icons.Outlined.Warning,
+            iconRes = PremiumIcons.Warning,
             modifier = Modifier.size(56.dp),
             color = MaterialTheme.colorScheme.error
         )

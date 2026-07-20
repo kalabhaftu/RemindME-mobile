@@ -5,9 +5,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsRun
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,12 +16,12 @@ import com.remindme.app.ui.theme.*
 import java.time.LocalDateTime
 
 val TASK_ICONS = listOf(
-    Triple("trash", Icons.Outlined.Delete, "Take out trash"),
-    Triple("water", Icons.Outlined.WaterDrop, "Drink water"),
-    Triple("fitness", Icons.AutoMirrored.Filled.DirectionsRun, "Exercise"),
-    Triple("study", Icons.Outlined.Book, "Study"),
-    Triple("rent", Icons.Outlined.Home, "Pay rent"),
-    Triple("medication", Icons.Outlined.MedicalServices, "Medication")
+    Triple("trash", PremiumIcons.Delete, "Take out trash"),
+    Triple("water", PremiumIcons.WaterDrop, "Drink water"),
+    Triple("fitness", PremiumIcons.Activity, "Exercise"),
+    Triple("study", PremiumIcons.Book, "Study"),
+    Triple("rent", PremiumIcons.Home, "Pay rent"),
+    Triple("medication", PremiumIcons.MedicalServices, "Medication")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,7 +111,7 @@ fun AddTaskScreen(
                                 modifier = Modifier.clickable { viewModel.updateIconKey(icon.first) }
                             ) {
                                 AppIcon(
-                                    imageVector = icon.second,
+                                    iconRes = icon.second,
                                     size = 22.dp,
                                     color = if (selected) Accent500 else TextTertiary
                                 )

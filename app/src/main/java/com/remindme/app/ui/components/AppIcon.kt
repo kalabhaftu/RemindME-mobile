@@ -17,12 +17,13 @@ fun AppIcon(
     modifier: Modifier = Modifier,
     size: Dp = 24.dp,
     color: Color = Color.Unspecified,
-    tint: Color = Color.Unspecified
+    tint: Color = Color.Unspecified,
+    contentDescription: String? = null
 ) {
     val resolvedTint = if (tint != Color.Unspecified) tint else color
     Icon(
         imageVector = imageVector,
-        contentDescription = null,
+        contentDescription = contentDescription,
         modifier = modifier.size(size),
         tint = resolvedTint
     )
@@ -34,12 +35,13 @@ fun AppIcon(
     modifier: Modifier = Modifier,
     size: Dp = 24.dp,
     color: Color = Color.Unspecified,
-    tint: Color = Color.Unspecified
+    tint: Color = Color.Unspecified,
+    contentDescription: String? = null
 ) {
     val resolvedTint = if (tint != Color.Unspecified) tint else color
     androidx.compose.material3.Icon(
         painter = painterResource(iconRes),
-        contentDescription = null,
+        contentDescription = contentDescription,
         modifier = modifier.size(size),
         tint = resolvedTint
     )

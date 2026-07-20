@@ -4,11 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.CreditCard
-import androidx.compose.material.icons.outlined.Event
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,6 +20,7 @@ import com.remindme.app.domain.models.CategoryType
 import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.PremiumIcons
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.AppPullToRefresh
 import com.remindme.app.ui.theme.Accent500
@@ -78,16 +73,16 @@ fun DashboardScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Person", icon = Icons.Outlined.Person, onTap = onNavigateToAddPerson)
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Subscription", icon = Icons.Outlined.CreditCard, onTap = onNavigateToAddSubscription)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Person", icon = PremiumIcons.Person, onTap = onNavigateToAddPerson)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Subscription", icon = PremiumIcons.CreditCard, onTap = onNavigateToAddSubscription)
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Task", icon = Icons.Outlined.Add, onTap = onNavigateToAddTask)
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Holiday", icon = Icons.Outlined.Event, onTap = onNavigateToHolidays)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Task", icon = PremiumIcons.Add, onTap = onNavigateToAddTask)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Holiday", icon = PremiumIcons.Event, onTap = onNavigateToHolidays)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -178,7 +173,7 @@ fun StatCard(modifier: Modifier = Modifier, label: String, count: Int) {
 }
 
 @Composable
-fun QuickAddTile(modifier: Modifier = Modifier, label: String, icon: ImageVector, onTap: () -> Unit) {
+fun QuickAddTile(modifier: Modifier = Modifier, label: String, icon: Int, onTap: () -> Unit) {
     AppCard(
         modifier = modifier.clickable { onTap() },
         borderRadius = 16.dp
@@ -189,7 +184,7 @@ fun QuickAddTile(modifier: Modifier = Modifier, label: String, icon: ImageVector
                 .fillMaxWidth(),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
-            AppIcon(imageVector = icon, size = 20.dp, color = TextPrimary)
+            AppIcon(iconRes = icon, size = 20.dp, color = TextPrimary)
             Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = label,

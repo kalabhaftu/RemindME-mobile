@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.remindme.app.domain.models.CategoryType
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.PremiumIcons
 import com.remindme.app.ui.components.appSurfaceColor
 import com.remindme.app.ui.components.appScrimColor
 import com.remindme.app.domain.models.OccurrenceStatus
@@ -23,13 +24,6 @@ import androidx.compose.ui.graphics.Color
 import com.remindme.app.ui.theme.AppColors
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Event
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.CreditCard
-import androidx.compose.material.icons.outlined.FormatListBulleted
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +60,7 @@ fun SelectedDaySheet(
                     color = AppColors.textPrimary
                 )
                 IconButton(onClick = onDismiss) {
-                    Icon(imageVector = Icons.Outlined.Close, contentDescription = "Close", tint = AppColors.textSecondary)
+                    AppIcon(iconRes = PremiumIcons.Close, contentDescription = "Close", tint = AppColors.textSecondary)
                 }
             }
             
@@ -75,7 +69,7 @@ fun SelectedDaySheet(
             if (occurrences.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(imageVector = Icons.Outlined.Event, contentDescription = null, tint = AppColors.textTertiary, modifier = Modifier.size(40.dp))
+                        AppIcon(iconRes = PremiumIcons.Event, contentDescription = null, tint = AppColors.textTertiary, modifier = Modifier.size(40.dp))
                         Spacer(modifier = Modifier.height(16.dp))
                         Text("No reminders on this day.", color = AppColors.textTertiary, fontSize = 14.sp)
                     }
@@ -100,11 +94,11 @@ fun SelectedDaySheet(
                                     modifier = Modifier.padding(9.dp)
                                 ) {
                                     AppIcon(
-                                        imageVector = when (item.category) {
-                                            CategoryType.TASK -> Icons.Outlined.FormatListBulleted
-                                            CategoryType.PERSON -> Icons.Outlined.Person
-                                            CategoryType.SUBSCRIPTION -> Icons.Outlined.CreditCard
-                                            CategoryType.CUSTOM_HOLIDAY -> Icons.Outlined.Event
+                                        iconRes = when (item.category) {
+                                            CategoryType.TASK -> PremiumIcons.FormatListBulleted
+                                            CategoryType.PERSON -> PremiumIcons.Person
+                                            CategoryType.SUBSCRIPTION -> PremiumIcons.CreditCard
+                                            CategoryType.CUSTOM_HOLIDAY -> PremiumIcons.Event
                                         },
                                         tint = if (isDone) AppColors.textTertiary else AppColors.accent500,
                                         modifier = Modifier.size(18.dp)
@@ -136,7 +130,7 @@ fun SelectedDaySheet(
                                 
                                 if (item.category == CategoryType.TASK && !isDone) {
                                     IconButton(onClick = { onMarkDone(item.id, occ.date) }) {
-                                        AppIcon(imageVector = Icons.Outlined.CheckCircle, tint = AppColors.stateSuccess, modifier = Modifier.size(24.dp))
+                                        AppIcon(iconRes = PremiumIcons.CheckCircle, tint = AppColors.stateSuccess, modifier = Modifier.size(24.dp))
                                     }
                                 }
                             }

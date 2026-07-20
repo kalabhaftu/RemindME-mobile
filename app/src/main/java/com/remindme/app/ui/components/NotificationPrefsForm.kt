@@ -6,13 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ChevronRight
-import androidx.compose.material.icons.outlined.AccessTime
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.automirrored.outlined.Send
-import androidx.compose.material.icons.outlined.Smartphone
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -121,7 +114,7 @@ fun NotificationPrefsForm(
                         ) {
                             Box(modifier = Modifier.padding(6.dp)) {
                                 AppIcon(
-                                    imageVector = getChannelIcon(channel),
+                                    iconRes = getChannelIcon(channel),
                                     tint = Accent500,
                                     modifier = Modifier.size(15.dp)
                                 )
@@ -212,7 +205,7 @@ fun NotificationPrefsForm(
                                     ) {
                                         Box(modifier = Modifier.padding(7.dp)) {
                                             AppIcon(
-                                                imageVector = Icons.Outlined.AccessTime,
+                                                iconRes = PremiumIcons.AccessTime,
                                                 tint = Accent500,
                                                 modifier = Modifier.size(16.dp)
                                             )
@@ -226,7 +219,7 @@ fun NotificationPrefsForm(
                                         modifier = Modifier.weight(1f)
                                     )
                                     AppIcon(
-                                        imageVector = Icons.Outlined.ChevronRight,
+                                        iconRes = PremiumIcons.ChevronRight,
                                         tint = TextTertiary,
                                         modifier = Modifier.size(16.dp)
                                     )
@@ -275,11 +268,11 @@ fun NotificationPrefsForm(
 }
 
 private fun getChannelIcon(channel: String) = when(channel) {
-    "email" -> Icons.Outlined.Email
-    "push" -> Icons.Outlined.Notifications
-    "telegram" -> Icons.AutoMirrored.Outlined.Send
-    "in_app" -> Icons.Outlined.Smartphone
-    else -> Icons.Outlined.Notifications
+    "email" -> PremiumIcons.Email
+    "push" -> PremiumIcons.Notifications
+    "telegram" -> PremiumIcons.Send
+    "in_app" -> PremiumIcons.Smartphone
+    else -> PremiumIcons.Notifications
 }
 
 private fun getChannelLabel(channel: String) = when(channel) {
@@ -289,4 +282,3 @@ private fun getChannelLabel(channel: String) = when(channel) {
     "in_app" -> "In-App"
     else -> channel.uppercase()
 }
-

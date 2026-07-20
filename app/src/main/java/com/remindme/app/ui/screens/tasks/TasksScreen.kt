@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -15,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +24,7 @@ import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.EmptyState
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.PremiumIcons
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.SwipeDeleteBackground
 import com.remindme.app.ui.components.AppPullToRefresh
@@ -118,15 +116,15 @@ fun TasksScreen(
 fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
     val dueStr = item.task?.dueAt
 
-    fun getIconForKey(key: String?): ImageVector {
+    fun getIconForKey(key: String?): Int {
         return when (key) {
-            "water" -> Icons.Outlined.WaterDrop
-            "trash" -> Icons.Outlined.Delete
-            "fitness" -> Icons.Outlined.FitnessCenter
-            "study" -> Icons.Outlined.MenuBook
-            "rent" -> Icons.Outlined.Home
-            "medication" -> Icons.Outlined.Medication
-            else -> Icons.Outlined.List
+            "water" -> PremiumIcons.WaterDrop
+            "trash" -> PremiumIcons.Delete
+            "fitness" -> PremiumIcons.FitnessCenter
+            "study" -> PremiumIcons.MenuBook
+            "rent" -> PremiumIcons.Home
+            "medication" -> PremiumIcons.Medication
+            else -> PremiumIcons.List
         }
     }
 
@@ -151,7 +149,7 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
             ) {
                 Box(modifier = Modifier.padding(10.dp)) {
                     AppIcon(
-                        imageVector = getIconForKey(item.iconKey),
+                        iconRes = getIconForKey(item.iconKey),
                         color = Accent500,
                         size = 22.dp
                     )
@@ -171,7 +169,7 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AppIcon(
-                            imageVector = Icons.Outlined.AccessTime,
+                            iconRes = PremiumIcons.AccessTime,
                             color = TextTertiary,
                             size = 12.dp
                         )
@@ -202,7 +200,7 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
                     AppIcon(
-                        imageVector = Icons.Outlined.CheckCircle,
+                        iconRes = PremiumIcons.CheckCircle,
                         color = StateSuccess,
                         size = 24.dp
                     )

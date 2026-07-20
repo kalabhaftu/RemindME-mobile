@@ -9,13 +9,11 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -66,7 +64,7 @@ fun PopupMenu(
 fun PopupMenuItem(
     text: String,
     onClick: () -> Unit,
-    icon: ImageVector? = null,
+    icon: Int? = null,
     isDestructive: Boolean = false
 ) {
     Row(
@@ -81,8 +79,8 @@ fun PopupMenuItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null) {
-            Icon(
-                imageVector = icon,
+            AppIcon(
+                iconRes = icon,
                 contentDescription = null,
                 tint = if (isDestructive) AppColors.stateDanger else AppColors.textSecondary,
                 modifier = Modifier.size(20.dp)

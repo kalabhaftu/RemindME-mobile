@@ -4,8 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +19,7 @@ import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.AppScaffold
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.PremiumIcons
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.AppTextField
 import com.remindme.app.ui.components.CircledBackButton
@@ -113,12 +112,12 @@ fun SearchResultItem(item: ReminderItem, onClick: () -> Unit) {
             ) {
                 Box(modifier = Modifier.padding(10.dp)) {
                     val icon = when (item.category) {
-                        CategoryType.PERSON -> Icons.Outlined.Person
-                        CategoryType.SUBSCRIPTION -> Icons.Outlined.CreditCard
-                        CategoryType.CUSTOM_HOLIDAY -> Icons.Outlined.CardGiftcard
-                        CategoryType.TASK -> Icons.Outlined.Checklist
+                        CategoryType.PERSON -> PremiumIcons.Person
+                        CategoryType.SUBSCRIPTION -> PremiumIcons.CreditCard
+                        CategoryType.CUSTOM_HOLIDAY -> PremiumIcons.CardGiftcard
+                        CategoryType.TASK -> PremiumIcons.Checklist
                     }
-                    AppIcon(imageVector = icon, color = Accent500, size = 22.dp)
+                    AppIcon(iconRes = icon, color = Accent500, size = 22.dp)
                 }
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -147,7 +146,7 @@ fun SearchResultItem(item: ReminderItem, onClick: () -> Unit) {
                     )
                 }
             }
-            AppIcon(imageVector = Icons.Outlined.ChevronRight, size = 18.dp, color = TextTertiary)
+            AppIcon(iconRes = PremiumIcons.ChevronRight, size = 18.dp, color = TextTertiary)
         }
     }
 }
