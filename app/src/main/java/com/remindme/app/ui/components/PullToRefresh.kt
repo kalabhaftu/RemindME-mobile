@@ -5,6 +5,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -17,7 +18,9 @@ fun AppPullToRefresh(
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .zIndex(2f)
     ) {
         content()
     }

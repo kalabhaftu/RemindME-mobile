@@ -37,7 +37,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun TasksScreen(
     viewModel: TasksViewModel = viewModel(),
-    onNavigateToEdit: (String) -> Unit = {}
+    onNavigateToPreview: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val tasks by viewModel.sortedTasks.collectAsState()
@@ -99,7 +99,7 @@ fun TasksScreen(
                     content = {
                         TaskRow(
                             item = task,
-                            onClick = { onNavigateToEdit(task.id) },
+                            onClick = { onNavigateToPreview(task.id) },
                             onMarkDone = { viewModel.markTaskDone(task) }
                         )
                     }

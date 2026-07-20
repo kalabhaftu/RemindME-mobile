@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 
 @Composable
 fun AppScaffold(
@@ -63,6 +64,7 @@ fun AppScaffold(
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
+                        .zIndex(10f)
                         .onSizeChanged { appBarHeightPx = it.height }
                 ) {
                     appBar()
@@ -75,13 +77,14 @@ fun AppScaffold(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 24.dp)
+                        .zIndex(10f)
                         .onSizeChanged { bottomBarHeightPx = it.height }
                 ) {
                     bottomBar()
                 }
             }
 
-            Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp)) {
+            Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp).zIndex(12f)) {
                 snackbarHost()
             }
         }

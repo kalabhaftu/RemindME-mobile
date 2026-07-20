@@ -20,6 +20,7 @@ import java.time.LocalDateTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddSubscriptionScreen(
+    subscriptionId: String? = null,
     viewModel: AddSubscriptionViewModel = viewModel(),
     onBack: () -> Unit = {}
 ) {
@@ -28,8 +29,12 @@ fun AddSubscriptionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showDatePicker by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        viewModel.resetForNewSubscription()
+    LaunchedEffect(subscriptionId) {
+        if (subscriptionId == null) {
+            viewModel.resetForNewSubscription()
+        } else {
+            viewModel.loadSubscription(subscriptionId)
+        }
     }
 
     LaunchedEffect(uiState.error) {
@@ -57,7 +62,7 @@ fun AddSubscriptionScreen(
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
                 TopBar(
-                    title = "Add Subscription",
+                    title = if (subscriptionId == null) "Add Subscription" else "Edit Subscription",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f)
                 )
@@ -191,7 +196,7 @@ fun AddSubscriptionScreen(
                 if (uiState.isLoading) {
                     Spinner(size = 20.dp)
                 } else {
-                    Text("Save", color = TextPrimary)
+                    Text(if (subscriptionId == null) "Save" else "Save Subscription", color = TextPrimary)
                 }
             }
         }

@@ -1,7 +1,4 @@
 package com.remindme.app.ui.screens.add
-import com.remindme.app.domain.models.CategoryType
-
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import android.app.Application
@@ -19,10 +16,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import io.github.jan.supabase.auth.auth
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
 import com.remindme.app.services.LogoResolver
 
 data class AddSubscriptionUiState(
@@ -39,7 +32,8 @@ data class AddSubscriptionUiState(
     val notificationPrefs: Map<String, ChannelPref> = emptyMap(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isSuccess: Boolean = false
+    val isSuccess: Boolean = false,
+    val existingSubscriptionId: String? = null
 )
 
 class AddSubscriptionViewModel(application: Application) : AndroidViewModel(application) {
@@ -84,13 +78,56 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
                 isResolvingLogo = false,
                 isLoading = false,
                 error = null,
-                isSuccess = false
+                isSuccess = false,
+                existingSubscriptionId = null
             )
         }
     }
     
     fun clearError() = _uiState.update { it.copy(error = null) }
     fun setError(error: String) = _uiState.update { it.copy(error = error) }
+
+    fun loadSubscription(subscriptionId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null, existingSubscriptionId = subscriptionId) }
+            try {
+                val item = repository.getReminder(subscriptionId)
+                if (item?.category != com.remindme.app.domain.models.CategoryType.SUBSCRIPTION) {
+                    _uiState.update { it.copy(isLoading = false, error = "Subscription not found") }
+                    return@launch
+                }
+                val subscription = item.subscription
+                _uiState.update {
+                    it.copy(
+                        name = item.name,
+                        amount = subscription?.billingAmount?.toString() ?: "",
+                        currency = subscription?.billingCurrency ?: "USD",
+                        cycle = subscription?.cycle ?: "monthly",
+                        renewalDate = subscription?.renewalDate?.let { value ->
+                            runCatching { java.time.LocalDate.parse(value.take(10)).atStartOfDay() }.getOrNull()
+                        },
+                        notes = item.notes ?: "",
+                        logoUrl = subscription?.logoUrl,
+                        logoDomain = subscription?.logoDomain,
+                        logoLoaded = false,
+                        notificationPrefs = item.notificationPreferences
+                            ?.associate { pref ->
+                                pref.channel to ChannelPref(
+                                    enabled = pref.enabled,
+                                    leadTime = pref.leadTime,
+                                    customTime = pref.customTime,
+                                    offsetDays = pref.offsetDays
+                                )
+                            }
+                            ?: it.notificationPrefs,
+                        isLoading = false
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load subscription: ${e.message ?: "Unknown error"}") }
+            }
+        }
+    }
 
     private suspend fun resolveLogo(query: String) {
         if (query.isBlank()) return
@@ -127,7 +164,7 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
-                val id = java.util.UUID.randomUUID().toString()
+                val id = _uiState.value.existingSubscriptionId ?: java.util.UUID.randomUUID().toString()
                 val now = LocalDateTime.now()
                 val renewalDateStr = currentRenewalDate.toLocalDate().toString()
                 
@@ -176,7 +213,11 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
                     notificationPreferences = notificationPrefs
                 )
 
-                repository.addReminder(item)
+                if (_uiState.value.existingSubscriptionId != null) {
+                    repository.updateReminder(item)
+                } else {
+                    repository.addReminder(item)
+                }
                 NotificationPrefsStore.save(getApplication(), _uiState.value.notificationPrefs)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {

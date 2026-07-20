@@ -1,8 +1,4 @@
 package com.remindme.app.ui.screens.add
-import com.remindme.app.domain.models.CategoryType
-
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -28,7 +24,8 @@ data class AddTaskUiState(
     val notificationPrefs: Map<String, ChannelPref> = emptyMap(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isSuccess: Boolean = false
+    val isSuccess: Boolean = false,
+    val existingTaskId: String? = null
 )
 
 class AddTaskViewModel(application: Application) : AndroidViewModel(application) {
@@ -55,13 +52,54 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
                 iconKey = "trash",
                 isLoading = false,
                 error = null,
-                isSuccess = false
+                isSuccess = false,
+                existingTaskId = null
             )
         }
     }
     
     fun clearError() = _uiState.update { it.copy(error = null) }
     fun setError(error: String) = _uiState.update { it.copy(error = error) }
+
+    fun loadTask(taskId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null, existingTaskId = taskId) }
+            try {
+                val item = repository.getReminder(taskId)
+                if (item?.category != com.remindme.app.domain.models.CategoryType.TASK) {
+                    _uiState.update { it.copy(isLoading = false, error = "Task not found") }
+                    return@launch
+                }
+                _uiState.update {
+                    it.copy(
+                        name = item.name,
+                        notes = item.notes ?: "",
+                        dueAt = item.task?.dueAt?.let { value ->
+                            runCatching {
+                                java.time.OffsetDateTime.parse(value).toLocalDateTime()
+                            }.getOrElse {
+                                java.time.LocalDateTime.parse(value.removeSuffix("Z"))
+                            }
+                        },
+                        iconKey = item.iconKey ?: "trash",
+                        notificationPrefs = item.notificationPreferences
+                            ?.associate { pref ->
+                                pref.channel to ChannelPref(
+                                    enabled = pref.enabled,
+                                    leadTime = pref.leadTime,
+                                    customTime = pref.customTime,
+                                    offsetDays = pref.offsetDays
+                                )
+                            }
+                            ?: it.notificationPrefs,
+                        isLoading = false
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load task: ${e.message ?: "Unknown error"}") }
+            }
+        }
+    }
 
     fun saveTask() {
         val currentName = _uiState.value.name
@@ -79,7 +117,7 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
-                val id = java.util.UUID.randomUUID().toString()
+                val id = _uiState.value.existingTaskId ?: java.util.UUID.randomUUID().toString()
                 val now = LocalDateTime.now()
                 val dueAtStr = com.remindme.app.utils.OccurrenceScheduler.toUtcIso(currentDueAt)
                 
@@ -122,7 +160,11 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
                     notificationPreferences = notificationPrefs
                 )
 
-                repository.addReminder(item)
+                if (_uiState.value.existingTaskId != null) {
+                    repository.updateReminder(item)
+                } else {
+                    repository.addReminder(item)
+                }
                 NotificationPrefsStore.save(getApplication(), _uiState.value.notificationPrefs)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {

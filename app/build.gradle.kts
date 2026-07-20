@@ -15,6 +15,9 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+fun signingProperty(name: String, envName: String = name): String? =
+    (keystoreProperties[name] as String?) ?: System.getenv(envName)
+
 android {
     namespace = "com.remindme.app"
     compileSdk = 36
@@ -40,10 +43,10 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String?
-            keyPassword = keystoreProperties["keyPassword"] as String?
-            storeFile = keystoreProperties["storeFile"]?.let { file(it as String) }
-            storePassword = keystoreProperties["storePassword"] as String?
+            keyAlias = signingProperty("keyAlias", "ANDROID_KEY_ALIAS")
+            keyPassword = signingProperty("keyPassword", "ANDROID_KEY_PASSWORD")
+            storeFile = signingProperty("storeFile", "ANDROID_STORE_FILE")?.let { file(it) }
+            storePassword = signingProperty("storePassword", "ANDROID_KEYSTORE_PASSWORD")
         }
     }
 
@@ -51,7 +54,7 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            if (keystorePropertiesFile.exists()) {
+            if (signingProperty("storeFile", "ANDROID_STORE_FILE") != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
         }

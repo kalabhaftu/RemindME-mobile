@@ -18,7 +18,9 @@ import kotlinx.serialization.Serializable
 @Serializable data object AddPerson : NavKey
 @Serializable data class EditPerson(val personId: String) : NavKey
 @Serializable data object AddSubscription : NavKey
+@Serializable data class EditSubscription(val subscriptionId: String) : NavKey
 @Serializable data object AddTask : NavKey
+@Serializable data class EditTask(val taskId: String) : NavKey
 @Serializable data class EditReminder(val reminderId: String) : NavKey
 @Serializable data class ReminderPreview(val reminderId: String) : NavKey
 

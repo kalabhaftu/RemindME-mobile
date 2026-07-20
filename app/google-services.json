@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "811223410064-bjrg2moi1bs3rlj96bt538mll2eitkic.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.remindme.app",
+            "certificate_hash": "3cac5028980071344f5fa80c348f0ceb43b9f2c7"
+          }
+        },
+        {
           "client_id": "811223410064-rq3l5t0mmbj7s60c7f16asrh2818of2r.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

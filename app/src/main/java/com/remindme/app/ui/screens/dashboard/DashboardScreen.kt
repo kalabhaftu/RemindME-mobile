@@ -40,7 +40,7 @@ fun DashboardScreen(
     onNavigateToAddTask: () -> Unit,
     onNavigateToHolidays: () -> Unit,
     onNavigateToPreview: (String) -> Unit = {},
-    onNavigateToEdit: (String) -> Unit = {}
+    onNavigateToEdit: (ReminderItem) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val haptic = LocalHapticFeedback.current
@@ -107,7 +107,7 @@ fun DashboardScreen(
             },
             onSnooze = { id, date -> viewModel.snooze(id, date) },
             onPreview = { item -> onNavigateToPreview(item.id) },
-            onEdit = { item -> onNavigateToEdit(item.id) }
+            onEdit = { item -> onNavigateToEdit(item) }
         )
 
         uiState.selectedDate?.let { date ->

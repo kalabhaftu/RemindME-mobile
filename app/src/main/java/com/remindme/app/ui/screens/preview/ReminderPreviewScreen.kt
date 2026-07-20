@@ -2,6 +2,7 @@ package com.remindme.app.ui.screens.preview
 
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,8 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +30,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.components.AppScaffold
 import com.remindme.app.ui.components.CircledBackButton
 import com.remindme.app.ui.components.Spinner
@@ -33,9 +39,14 @@ import com.remindme.app.ui.components.TopBar
 import com.remindme.app.ui.screens.edit.EditReminderViewModel
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
+import com.remindme.app.domain.models.ReminderItem
 
 @Composable
-fun ReminderPreviewScreen(reminderId: String, onBack: () -> Unit) {
+fun ReminderPreviewScreen(
+    reminderId: String,
+    onBack: () -> Unit,
+    onEdit: (ReminderItem) -> Unit = {}
+) {
     val context = LocalContext.current
     val vm: EditReminderViewModel = viewModel(factory = object : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -47,16 +58,37 @@ fun ReminderPreviewScreen(reminderId: String, onBack: () -> Unit) {
 
     AppScaffold(appBar = {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp),
+            modifier = Modifier
+                .statusBarsPadding()
+                .fillMaxWidth()
+                .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             CircledBackButton(onClick = onBack)
-            Spacer(Modifier.padding(horizontal = 6.dp))
-            TopBar(title = "Reminder", statusBarsPadding = true, modifier = Modifier.weight(1f))
+            Spacer(Modifier.width(12.dp))
+            TopBar(
+                title = state.reminder?.name ?: "Reminder",
+                statusBarsPadding = false,
+                modifier = Modifier.weight(1f),
+                actions = {
+                    state.reminder?.let { reminder ->
+                        IconButton(onClick = { onEdit(reminder) }) {
+                            AppIcon(iconRes = AppIcons.Edit, color = TextSecondary)
+                        }
+                    }
+                }
+            )
         }
     }) { padding ->
         if (state.isLoading) {
-            Spinner()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Spinner()
+            }
         } else {
             Column(
                 modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),

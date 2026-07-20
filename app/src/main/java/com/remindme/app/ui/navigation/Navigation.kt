@@ -191,6 +191,18 @@ fun MainNavigation(
             entry<AddTask> {
                 AddTaskScreen(onBack = { popBack() })
             }
+            entry<EditSubscription> { key ->
+                AddSubscriptionScreen(
+                    subscriptionId = key.subscriptionId,
+                    onBack = { popBack() }
+                )
+            }
+            entry<EditTask> { key ->
+                AddTaskScreen(
+                    taskId = key.taskId,
+                    onBack = { popBack() }
+                )
+            }
             entry<EditReminder> { key ->
                 EditReminderScreen(
                     reminderId = key.reminderId,
@@ -200,7 +212,15 @@ fun MainNavigation(
             entry<ReminderPreview> { key ->
                 ReminderPreviewScreen(
                     reminderId = key.reminderId,
-                    onBack = { popBack() }
+                    onBack = { popBack() },
+                    onEdit = { item ->
+                        when (item.category) {
+                            CategoryType.PERSON -> backStack.add(EditPerson(item.id))
+                            CategoryType.SUBSCRIPTION -> backStack.add(EditSubscription(item.id))
+                            CategoryType.TASK -> backStack.add(EditTask(item.id))
+                            CategoryType.CUSTOM_HOLIDAY -> backStack.add(EditReminder(item.id))
+                        }
+                    }
                 )
             }
             entry<PersonDetail> { key ->
@@ -220,7 +240,11 @@ fun MainNavigation(
                 val context = LocalContext.current
                 SearchScreen(
                     onItemClick = { id, category ->
-                        backStack.add(ReminderPreview(id))
+                        if (category == CategoryType.PERSON) {
+                            backStack.add(PersonDetail(id))
+                        } else {
+                            backStack.add(ReminderPreview(id))
+                        }
                     },
                     onBack = { popBack() }
                 )

@@ -270,25 +270,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         try {
             val userId = supabase.auth.currentUserOrNull()?.id ?: throw Exception("Not logged in")
             val resolver = context.contentResolver
-            val birthdayByContactId = mutableMapOf<String, String>()
-            resolver.query(
-                ContactsContract.Data.CONTENT_URI,
-                arrayOf(ContactsContract.Data.CONTACT_ID, ContactsContract.CommonDataKinds.Event.START_DATE),
-                "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.CommonDataKinds.Event.TYPE} = ?",
-                arrayOf(
-                    ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE,
-                    ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY.toString()
-                ),
-                null
-            )?.use { cursor ->
-                val idIndex = cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID)
-                val dateIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Event.START_DATE)
-                while (cursor.moveToNext()) {
-                    val id = cursor.getString(idIndex).orEmpty()
-                    parseContactBirthday(cursor.getString(dateIndex))?.let { birthdayByContactId[id] = it }
-                }
-            }
-
             val existing = runCatching { repository.getReminders() }.getOrElse { repository.cachedSnapshot() }
                 .filter { it.category == CategoryType.PERSON }
                 .mapTo(mutableSetOf()) { it.name.trim().lowercase() }
@@ -297,27 +278,38 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             var skipped = 0
             var withBirthday = 0
             var withoutBirthday = 0
+            val seenContactIds = mutableSetOf<String>()
 
             resolver.query(
-                ContactsContract.Contacts.CONTENT_URI,
-                arrayOf(ContactsContract.Contacts._ID, ContactsContract.Contacts.DISPLAY_NAME),
-                null,
-                null,
-                "${ContactsContract.Contacts.DISPLAY_NAME} COLLATE NOCASE ASC"
+                ContactsContract.Data.CONTENT_URI,
+                arrayOf(
+                    ContactsContract.Data.CONTACT_ID,
+                    ContactsContract.Data.DISPLAY_NAME,
+                    ContactsContract.CommonDataKinds.Event.START_DATE
+                ),
+                "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.CommonDataKinds.Event.TYPE} = ?",
+                arrayOf(
+                    ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE,
+                    ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY.toString()
+                ),
+                "${ContactsContract.Data.DISPLAY_NAME} COLLATE NOCASE ASC"
             )?.use { cursor ->
-                val idIndex = cursor.getColumnIndex(ContactsContract.Contacts._ID)
-                val nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
+                val idIndex = cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID)
+                val nameIndex = cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)
+                val birthdayIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Event.START_DATE)
                 while (cursor.moveToNext()) {
+                    val contactId = cursor.getString(idIndex).orEmpty()
+                    if (!seenContactIds.add(contactId)) continue
                     val name = cursor.getString(nameIndex)?.trim().orEmpty()
                     if (name.isBlank()) continue
+                    val birthdate = parseContactBirthday(cursor.getString(birthdayIndex))
+                    if (birthdate == null) {
+                        withoutBirthday++
+                        continue
+                    }
                     val key = name.lowercase()
                     if (!existing.add(key)) {
                         skipped++
-                        continue
-                    }
-                    val birthdate = birthdayByContactId[cursor.getString(idIndex)]
-                    if (birthdate == null) {
-                        withoutBirthday++
                         continue
                     }
                     val now = LocalDateTime.now()

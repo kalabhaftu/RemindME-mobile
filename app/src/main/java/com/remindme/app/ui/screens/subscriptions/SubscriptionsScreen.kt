@@ -40,7 +40,7 @@ import java.time.temporal.ChronoUnit
 @Composable
 fun SubscriptionsScreen(
     viewModel: SubscriptionsViewModel = viewModel(),
-    onNavigateToEdit: (String) -> Unit = {}
+    onNavigateToPreview: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val subscriptions by viewModel.sortedSubscriptions.collectAsState()
@@ -100,7 +100,7 @@ fun SubscriptionsScreen(
                         )
                     },
                     content = {
-                        SubscriptionRow(item = sub, onClick = { onNavigateToEdit(sub.id) })
+                        SubscriptionRow(item = sub, onClick = { onNavigateToPreview(sub.id) })
                     }
                 )
             }

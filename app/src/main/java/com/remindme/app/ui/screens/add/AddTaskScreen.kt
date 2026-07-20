@@ -34,6 +34,7 @@ val TASK_ICONS = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTaskScreen(
+    taskId: String? = null,
     viewModel: AddTaskViewModel = viewModel(),
     onBack: () -> Unit = {}
 ) {
@@ -47,8 +48,12 @@ fun AddTaskScreen(
     }
     var showDatePicker by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        viewModel.resetForNewTask()
+    LaunchedEffect(taskId) {
+        if (taskId == null) {
+            viewModel.resetForNewTask()
+        } else {
+            viewModel.loadTask(taskId)
+        }
     }
 
     LaunchedEffect(uiState.error) {
@@ -85,7 +90,7 @@ fun AddTaskScreen(
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
                 TopBar(
-                    title = "Add Task",
+                    title = if (taskId == null) "Add Task" else "Edit Task",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f)
                 )
@@ -183,7 +188,7 @@ fun AddTaskScreen(
                 if (uiState.isLoading) {
                     Spinner(size = 20.dp)
                 } else {
-                    Text("Add Task", color = TextPrimary)
+                    Text(if (taskId == null) "Add Task" else "Save Task", color = TextPrimary)
                 }
             }
         }
