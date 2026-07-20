@@ -129,6 +129,10 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
+                        CalendarSubscriptionSection(uiState, viewModel)
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+                    item {
                         AppearanceSection(onNavigateToThemeSelector)
                         Spacer(modifier = Modifier.height(24.dp))
                     }
@@ -526,6 +530,106 @@ fun DeliveryLogSection(uiState: SettingsUiState) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
+    val context = LocalContext.current
+    val webcalUrl = uiState.calendarWebcalUrl
+
+    SettingsSection("Calendar subscription") {
+        Text(
+            "Subscribe once and birthdays you add in RemindME will appear in Google Calendar or Outlook.",
+            color = TextSecondary,
+            fontSize = 13.sp
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        if (webcalUrl == null) {
+            Text(
+                if (uiState.isLoadingCalendar) "Preparing your private calendar link…" else "Calendar link unavailable. Check your connection and retry.",
+                color = TextTertiary,
+                fontSize = 13.sp
+            )
+            if (!uiState.isLoadingCalendar) {
+                Spacer(modifier = Modifier.height(12.dp))
+                AppButton(
+                    onClick = { viewModel.loadCalendarFeed() },
+                    modifier = Modifier.fillMaxWidth().height(48.dp)
+                ) {
+                    AppIcon(Icons.Outlined.Refresh, color = TextPrimary, size = 18.dp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Retry", color = TextPrimary)
+                }
+            }
+        } else {
+            AppCard(borderRadius = 16.dp) {
+                Text(
+                    webcalUrl,
+                    color = TextSecondary,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(14.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            AppButton(
+                onClick = {
+                    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    clipboard.setPrimaryClip(android.content.ClipData.newPlainText("RemindME calendar", webcalUrl))
+                    viewModel.showMessage("Calendar link copied")
+                },
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                tint = Accent500
+            ) {
+                AppIcon(Icons.Outlined.ContentCopy, color = Accent500, size = 18.dp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Copy webcal link", color = TextPrimary)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            AppButton(
+                onClick = {
+                    val webcalIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(webcalUrl))
+                    runCatching { context.startActivity(webcalIntent) }.onFailure {
+                        uiState.calendarHttpsUrl?.let { httpsUrl ->
+                            context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(httpsUrl)))
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(48.dp)
+            ) {
+                AppIcon(Icons.AutoMirrored.Outlined.OpenInNew, color = TextPrimary, size = 18.dp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Open calendar app", color = TextPrimary)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(
+                onClick = { viewModel.rotateCalendarFeed() },
+                enabled = !uiState.isLoadingCalendar,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Regenerate private link", color = StateDanger)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider(color = BorderSubtle)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("Google Calendar", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(
+                "On desktop: Other calendars → + → From URL → paste the webcal link → Add calendar.",
+                color = TextSecondary,
+                fontSize = 12.sp,
+                lineHeight = 18.sp
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text("Outlook Calendar", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(
+                "Add calendar → Subscribe from web → paste the link → Import.",
+                color = TextSecondary,
+                fontSize = 12.sp,
+                lineHeight = 18.sp
+            )
         }
     }
 }

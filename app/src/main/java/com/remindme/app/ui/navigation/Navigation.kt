@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.remindme.app.data.remote.SupabaseManager
@@ -77,6 +78,25 @@ fun MainNavigation(
 
     val backStack = rememberNavBackStack(AuthCheck)
 
+    fun replaceRoot(destination: NavKey) {
+        if (backStack.isEmpty()) {
+            backStack.add(destination)
+            return
+        }
+        if (backStack.lastOrNull() != destination) {
+            backStack.add(destination)
+        }
+        while (backStack.size > 1) {
+            backStack.removeAt(0)
+        }
+    }
+
+    fun popBack() {
+        if (backStack.size > 1) {
+            backStack.removeLastOrNull()
+        }
+    }
+
     LaunchedEffect(sessionStatus) {
         val status = sessionStatus ?: return@LaunchedEffect
         when (status) {
@@ -88,15 +108,13 @@ fun MainNavigation(
                 kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launch {
                     runCatching { PushTokenRegistrar.registerCurrentToken() }
                 }
-                if (backStack.lastOrNull() == AuthCheck) {
-                    backStack.clear()
-                    backStack.add(Main)
+                if (backStack.lastOrNull() == AuthCheck || backStack.lastOrNull() == Login) {
+                    replaceRoot(Main)
                 }
             }
             else -> {
-                if (backStack.isNotEmpty() && (backStack.lastOrNull() == AuthCheck || backStack.lastOrNull() == Main)) {
-                    backStack.clear()
-                    backStack.add(Login)
+                if (backStack.lastOrNull() != Login) {
+                    replaceRoot(Login)
                 }
             }
         }
@@ -105,7 +123,7 @@ fun MainNavigation(
     LaunchedEffect(openReminderId, sessionStatus) {
         if (openReminderId != null && sessionStatus is io.github.jan.supabase.auth.status.SessionStatus.Authenticated) {
             if (backStack.lastOrNull() != EditReminder(openReminderId)) {
-                backStack.add(EditReminder(openReminderId))
+                replaceRoot(EditReminder(openReminderId))
             }
             onReminderOpened()
         }
@@ -116,7 +134,7 @@ fun MainNavigation(
     ) {
         NavDisplay(
             backStack = backStack,
-            onBack = { backStack.removeLastOrNull() },
+            onBack = { popBack() },
             entryProvider =
             entryProvider {
                 entry<AuthCheck> {
@@ -146,8 +164,7 @@ fun MainNavigation(
                 entry<Login> {
                     LoginScreen(
                         onNavigateHome = {
-                            backStack.clear()
-                            backStack.add(Main)
+                            replaceRoot(Main)
                         },
                         onNavigateToMagicLink = {
                             backStack.add(MagicLink)
@@ -158,31 +175,31 @@ fun MainNavigation(
                 MainScreen(onItemClick = { navKey -> backStack.add(navKey) }, modifier = Modifier.safeDrawingPadding().padding(16.dp))
             }
             entry<AddPerson> {
-                AddPersonScreen(onBack = { backStack.removeLastOrNull() })
+                AddPersonScreen(onBack = { popBack() })
             }
             entry<AddSubscription> {
-                AddSubscriptionScreen(onBack = { backStack.removeLastOrNull() })
+                AddSubscriptionScreen(onBack = { popBack() })
             }
             entry<AddTask> {
-                AddTaskScreen(onBack = { backStack.removeLastOrNull() })
+                AddTaskScreen(onBack = { popBack() })
             }
             entry<EditReminder> { key ->
                 EditReminderScreen(
                     reminderId = key.reminderId,
-                    onBack = { backStack.removeLastOrNull() }
+                    onBack = { popBack() }
                 )
             }
             entry<PersonDetail> { key ->
                 PersonDetailScreen(
                     personId = key.personId,
-                    onBack = { backStack.removeLastOrNull() },
+                    onBack = { popBack() },
                     onEdit = { backStack.add(EditPerson(key.personId)) }
                 )
             }
             entry<EditPerson> { key ->
                 AddPersonScreen(
                     personId = key.personId,
-                    onBack = { backStack.removeLastOrNull() }
+                    onBack = { popBack() }
                 )
             }
             entry<Search> {
@@ -191,14 +208,13 @@ fun MainNavigation(
                     onItemClick = { id, category ->
                         backStack.add(EditReminder(id))
                     },
-                    onBack = { backStack.removeLastOrNull() }
+                    onBack = { popBack() }
                 )
             }
             entry<Settings> {
-                SettingsScreen(
+                    SettingsScreen(
                     onNavigateHome = { 
-                        backStack.clear()
-                        backStack.add(Main) 
+                        replaceRoot(Main)
                     },
                     onNavigateToThemeSelector = {
                         backStack.add(ThemeSelector)
@@ -210,33 +226,32 @@ fun MainNavigation(
             }
             entry<ThemeSelector> {
                 com.remindme.app.ui.screens.settings.ThemeSelectorScreen(
-                    onBack = { backStack.removeLastOrNull() }
+                    onBack = { popBack() }
                 )
             }
             entry<MagicLink> {
                 MagicLinkScreen(
                     onNavigateHome = {
-                        backStack.clear()
-                        backStack.add(Main)
+                        replaceRoot(Main)
                     },
-                    onBack = { backStack.removeLastOrNull() }
+                    onBack = { popBack() }
                 )
             }
             entry<NotificationHelp> {
                 NotificationHelpScreen(
-                    onBack = { backStack.removeLastOrNull() }
+                    onBack = { popBack() }
                 )
             }
             entry<Templates> {
                 TemplatesScreen(
                     onApplyTemplate = { /* handle */ },
-                    onBack = { backStack.removeLastOrNull() }
+                    onBack = { popBack() }
                 )
             }
             entry<Notifications> {
                 com.remindme.app.ui.screens.notifications.NotificationsScreen(
                     onOpenReminder = { id -> backStack.add(EditReminder(id)) },
-                    onBack = { backStack.removeLastOrNull() }
+                    onBack = { popBack() }
                 )
             }
         },

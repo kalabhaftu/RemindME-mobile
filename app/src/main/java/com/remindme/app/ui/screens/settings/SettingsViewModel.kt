@@ -47,6 +47,10 @@ data class SettingsUiState(
 
     val deliveryLogs: List<DeliveryLog> = emptyList(),
 
+    val calendarWebcalUrl: String? = null,
+    val calendarHttpsUrl: String? = null,
+    val isLoadingCalendar: Boolean = false,
+
     val error: String? = null,
     val message: String? = null
 )
@@ -71,10 +75,15 @@ class SettingsViewModel : ViewModel() {
         loadPreferences()
         loadTelegramStatus()
         loadDeliveryLogs()
+        loadCalendarFeed()
     }
 
     fun clearMessage() {
         _uiState.update { it.copy(message = null, error = null) }
+    }
+
+    fun showMessage(message: String) {
+        _uiState.update { it.copy(message = message) }
     }
 
     private fun loadPreferences() = viewModelScope.launch(Dispatchers.IO) {
@@ -170,6 +179,61 @@ class SettingsViewModel : ViewModel() {
             _uiState.update { it.copy(deliveryLogs = logs) }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    fun loadCalendarFeed() = viewModelScope.launch(Dispatchers.IO) {
+        _uiState.update { it.copy(isLoadingCalendar = true) }
+        try {
+            val token = supabase.auth.currentSessionOrNull()?.accessToken ?: return@launch
+            val conn = (URL("$webApiUrl/api/calendar/feed-url").openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                setRequestProperty("Authorization", "Bearer $token")
+            }
+            val body = (if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream)
+                ?.bufferedReader()?.use { it.readText() }.orEmpty()
+            if (conn.responseCode !in 200..299) {
+                throw Exception(JSONObject(body).optString("error", "Calendar link unavailable"))
+            }
+            val json = JSONObject(body)
+            _uiState.update {
+                it.copy(
+                    calendarWebcalUrl = json.optString("webcalUrl").takeIf(String::isNotBlank),
+                    calendarHttpsUrl = json.optString("httpsUrl").takeIf(String::isNotBlank)
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = "Could not load calendar link") }
+        } finally {
+            _uiState.update { it.copy(isLoadingCalendar = false) }
+        }
+    }
+
+    fun rotateCalendarFeed() = viewModelScope.launch(Dispatchers.IO) {
+        _uiState.update { it.copy(isLoadingCalendar = true) }
+        try {
+            val token = supabase.auth.currentSessionOrNull()?.accessToken ?: return@launch
+            val conn = (URL("$webApiUrl/api/calendar/feed-url").openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                setRequestProperty("Authorization", "Bearer $token")
+            }
+            val body = (if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream)
+                ?.bufferedReader()?.use { it.readText() }.orEmpty()
+            if (conn.responseCode !in 200..299) {
+                throw Exception(JSONObject(body).optString("error", "Could not rotate calendar link"))
+            }
+            val json = JSONObject(body)
+            _uiState.update {
+                it.copy(
+                    calendarWebcalUrl = json.optString("webcalUrl").takeIf(String::isNotBlank),
+                    calendarHttpsUrl = json.optString("httpsUrl").takeIf(String::isNotBlank),
+                    message = "Calendar link regenerated"
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = "Could not regenerate calendar link") }
+        } finally {
+            _uiState.update { it.copy(isLoadingCalendar = false) }
         }
     }
 
