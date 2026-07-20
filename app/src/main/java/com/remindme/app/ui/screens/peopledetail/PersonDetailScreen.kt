@@ -83,10 +83,10 @@ fun PersonDetailScreen(
                     modifier = Modifier.weight(1f),
                     actions = {
                         IconButton(onClick = { onEdit(personId) }) {
-                            AppIcon(iconRes = PremiumIcons.Edit, color = TextSecondary)
+                            AppIcon(iconRes = AppIcons.Edit, color = TextSecondary)
                         }
                         IconButton(onClick = { showDeleteConfirm = true }) {
-                            AppIcon(iconRes = PremiumIcons.Delete, color = StateDanger)
+                            AppIcon(iconRes = AppIcons.Delete, color = StateDanger)
                         }
                     }
                 )

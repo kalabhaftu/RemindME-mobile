@@ -176,7 +176,7 @@ fun InAppTab(
     if (notifications.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                AppIcon(iconRes = PremiumIcons.Notifications, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
+                AppIcon(iconRes = AppIcons.Notifications, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("No in-app notifications yet.", color = TextSecondary, fontSize = 16.sp)
             }
@@ -238,7 +238,7 @@ fun MissedTab(occurrences: List<ReminderOccurrence>, onOpenReminder: (String) ->
     if (occurrences.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                AppIcon(iconRes = PremiumIcons.History, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
+                AppIcon(iconRes = AppIcons.History, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("No missed reminders.", color = TextSecondary, fontSize = 16.sp)
             }
@@ -271,7 +271,7 @@ fun OccurrenceTile(occ: ReminderOccurrence, isMissed: Boolean = false, onOpenRem
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
                     AppIcon(
-                        iconRes = if (isMissed) PremiumIcons.Warning else PremiumIcons.Notifications,
+                        iconRes = if (isMissed) AppIcons.Warning else AppIcons.Notifications,
                         size = 18.dp,
                         color = if (isMissed) StateWarning else Accent500
                     )

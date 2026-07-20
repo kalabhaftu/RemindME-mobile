@@ -79,7 +79,7 @@ fun UpcomingPanel(
             if (filtered.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        AppIcon(iconRes = PremiumIcons.Notifications, size = 32.dp, color = AppColors.textTertiary)
+                        AppIcon(iconRes = AppIcons.Notifications, size = 32.dp, color = AppColors.textTertiary)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("All caught up", color = AppColors.textSecondary, fontSize = 14.sp)
                     }
@@ -111,10 +111,10 @@ fun UpcomingItem(
     val isDone = occurrence.status == OccurrenceStatus.COMPLETED_PAST
 
     val iconRes = when (item.category) {
-        CategoryType.TASK -> PremiumIcons.Checklist
-        CategoryType.PERSON -> PremiumIcons.Person
-        CategoryType.SUBSCRIPTION -> PremiumIcons.CreditCard
-        CategoryType.CUSTOM_HOLIDAY -> PremiumIcons.Cake
+        CategoryType.TASK -> AppIcons.Checklist
+        CategoryType.PERSON -> AppIcons.Person
+        CategoryType.SUBSCRIPTION -> AppIcons.CreditCard
+        CategoryType.CUSTOM_HOLIDAY -> AppIcons.Cake
     }
 
     AppCard(
@@ -171,7 +171,7 @@ fun UpcomingItem(
                         padding = 8.dp,
                         modifier = Modifier.clickable { onSnooze() }
                     ) {
-                        AppIcon(iconRes = PremiumIcons.Snooze, size = 18.dp, color = AppColors.stateWarning)
+                        AppIcon(iconRes = AppIcons.Snooze, size = 18.dp, color = AppColors.stateWarning)
                     }
                     Spacer(modifier = Modifier.width(6.dp))
                     AppCard(
@@ -179,7 +179,7 @@ fun UpcomingItem(
                         padding = 8.dp,
                         modifier = Modifier.clickable { onMarkDone() }
                     ) {
-                        AppIcon(iconRes = PremiumIcons.CheckCircle, size = 18.dp, color = AppColors.stateSuccess)
+                        AppIcon(iconRes = AppIcons.CheckCircle, size = 18.dp, color = AppColors.stateSuccess)
                     }
                     Spacer(modifier = Modifier.width(6.dp))
                 }
@@ -189,7 +189,7 @@ fun UpcomingItem(
                         padding = 8.dp,
                         modifier = Modifier.clickable { onEdit() }
                     ) {
-                        AppIcon(iconRes = PremiumIcons.Edit, size = 18.dp, color = AppColors.textTertiary)
+                        AppIcon(iconRes = AppIcons.Edit, size = 18.dp, color = AppColors.textTertiary)
                     }
                 }
             }

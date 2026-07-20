@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
-import com.remindme.app.ui.components.PremiumIcons
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.SwipeDeleteBackground
 import com.remindme.app.ui.components.appScrimColor
@@ -92,7 +92,7 @@ fun HolidaysScreen(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                AppIcon(iconRes = PremiumIcons.CardGiftcard, size = 16.dp, color = TextPrimary)
+                                AppIcon(iconRes = AppIcons.CardGiftcard, size = 16.dp, color = TextPrimary)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = name,
@@ -100,7 +100,7 @@ fun HolidaysScreen(
                                     fontSize = 13.sp,
                                     modifier = Modifier.weight(1f)
                                 )
-                                AppIcon(iconRes = PremiumIcons.ArrowBack, size = 14.dp, color = TextPrimary)
+                                AppIcon(iconRes = AppIcons.ArrowBack, size = 14.dp, color = TextPrimary)
                             }
                         }
                     }
@@ -129,7 +129,7 @@ fun HolidaysScreen(
                         modifier = Modifier.wrapContentSize()
                     ) {
                         Box(modifier = Modifier.padding(8.dp)) {
-                            AppIcon(iconRes = PremiumIcons.Public, size = 18.dp, color = Accent500)
+                            AppIcon(iconRes = AppIcons.Public, size = 18.dp, color = Accent500)
                         }
                     }
                     Spacer(modifier = Modifier.width(12.dp))
@@ -141,7 +141,7 @@ fun HolidaysScreen(
                     if (uiState.isLoadingCountries) {
                         Spinner(modifier = Modifier.size(18.dp))
                     }
-                    AppIcon(iconRes = PremiumIcons.KeyboardArrowDown, size = 20.dp, color = TextTertiary)
+                    AppIcon(iconRes = AppIcons.KeyboardArrowDown, size = 20.dp, color = TextTertiary)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -173,7 +173,7 @@ fun HolidaysScreen(
                         ) {
                             Box(modifier = Modifier.padding(8.dp)) {
                                 AppIcon(
-                                    iconRes = PremiumIcons.CardGiftcard,
+                                    iconRes = AppIcons.CardGiftcard,
                                     size = 18.dp,
                                     color = if (active) Accent500 else TextTertiary
                                 )
@@ -200,7 +200,7 @@ fun HolidaysScreen(
                             Spinner(modifier = Modifier.size(24.dp))
                         } else {
                             AppIcon(
-                                iconRes = if (active) PremiumIcons.CheckCircle else PremiumIcons.AddCircle,
+                                iconRes = if (active) AppIcons.CheckCircle else AppIcons.AddCircle,
                                 color = if (active) Accent500 else TextTertiary,
                                 size = 24.dp
                             )
@@ -266,7 +266,7 @@ fun HolidaysScreen(
                                     modifier = Modifier.weight(1f)
                                 )
                                 if (isSelected) {
-                                    AppIcon(iconRes = PremiumIcons.Check, size = 18.dp, color = Accent500)
+                                    AppIcon(iconRes = AppIcons.Check, size = 18.dp, color = Accent500)
                                 }
                             }
                         }

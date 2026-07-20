@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.remindme.app.domain.models.CategoryType
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
-import com.remindme.app.ui.components.PremiumIcons
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.components.appSurfaceColor
 import com.remindme.app.ui.components.appScrimColor
 import com.remindme.app.domain.models.OccurrenceStatus
@@ -60,7 +60,7 @@ fun SelectedDaySheet(
                     color = AppColors.textPrimary
                 )
                 IconButton(onClick = onDismiss) {
-                    AppIcon(iconRes = PremiumIcons.Close, contentDescription = "Close", tint = AppColors.textSecondary)
+                    AppIcon(iconRes = AppIcons.Close, contentDescription = "Close", tint = AppColors.textSecondary)
                 }
             }
             
@@ -69,7 +69,7 @@ fun SelectedDaySheet(
             if (occurrences.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        AppIcon(iconRes = PremiumIcons.Event, contentDescription = null, tint = AppColors.textTertiary, modifier = Modifier.size(40.dp))
+                        AppIcon(iconRes = AppIcons.Event, contentDescription = null, tint = AppColors.textTertiary, modifier = Modifier.size(40.dp))
                         Spacer(modifier = Modifier.height(16.dp))
                         Text("No reminders on this day.", color = AppColors.textTertiary, fontSize = 14.sp)
                     }
@@ -95,10 +95,10 @@ fun SelectedDaySheet(
                                 ) {
                                     AppIcon(
                                         iconRes = when (item.category) {
-                                            CategoryType.TASK -> PremiumIcons.FormatListBulleted
-                                            CategoryType.PERSON -> PremiumIcons.Person
-                                            CategoryType.SUBSCRIPTION -> PremiumIcons.CreditCard
-                                            CategoryType.CUSTOM_HOLIDAY -> PremiumIcons.Event
+                                            CategoryType.TASK -> AppIcons.FormatListBulleted
+                                            CategoryType.PERSON -> AppIcons.Person
+                                            CategoryType.SUBSCRIPTION -> AppIcons.CreditCard
+                                            CategoryType.CUSTOM_HOLIDAY -> AppIcons.Event
                                         },
                                         tint = if (isDone) AppColors.textTertiary else AppColors.accent500,
                                         modifier = Modifier.size(18.dp)
@@ -130,7 +130,7 @@ fun SelectedDaySheet(
                                 
                                 if (item.category == CategoryType.TASK && !isDone) {
                                     IconButton(onClick = { onMarkDone(item.id, occ.date) }) {
-                                        AppIcon(iconRes = PremiumIcons.CheckCircle, tint = AppColors.stateSuccess, modifier = Modifier.size(24.dp))
+                                        AppIcon(iconRes = AppIcons.CheckCircle, tint = AppColors.stateSuccess, modifier = Modifier.size(24.dp))
                                     }
                                 }
                             }

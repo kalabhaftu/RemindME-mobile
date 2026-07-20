@@ -2,7 +2,7 @@ package com.remindme.app.ui.components
 
 import com.composables.icons.lucide.R as LucideR
 
-object PremiumIcons {
+object AppIcons {
     val AccessTime = LucideR.drawable.lucide_ic_clock_3
     val Add = LucideR.drawable.lucide_ic_plus
     val AddCircle = LucideR.drawable.lucide_ic_circle_plus

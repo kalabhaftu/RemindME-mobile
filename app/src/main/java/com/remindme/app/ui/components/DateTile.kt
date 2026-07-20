@@ -39,7 +39,7 @@ fun DateTile(
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
                     AppIcon(
-                        iconRes = PremiumIcons.CalendarToday,
+                        iconRes = AppIcons.CalendarToday,
                         tint = if (hasValue) Accent500 else TextTertiary,
                         modifier = Modifier.size(18.dp)
                     )
@@ -66,7 +66,7 @@ fun DateTile(
             }
             
             AppIcon(
-                iconRes = PremiumIcons.ChevronRight,
+                iconRes = AppIcons.ChevronRight,
                 tint = TextTertiary,
                 modifier = Modifier.size(18.dp)
             )

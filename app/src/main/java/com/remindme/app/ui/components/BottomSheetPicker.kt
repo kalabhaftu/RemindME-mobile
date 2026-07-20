@@ -69,7 +69,7 @@ fun PickerField(
             )
         }
         AppIcon(
-            iconRes = PremiumIcons.KeyboardArrowDown,
+            iconRes = AppIcons.KeyboardArrowDown,
             color = TextTertiary,
             size = 20.dp
         )
@@ -178,7 +178,7 @@ fun <T> BottomSheetPicker(
                                     )
                                     if (isSelected) {
                                         AppIcon(
-                                            iconRes = PremiumIcons.Check,
+                                            iconRes = AppIcons.Check,
                                             color = Accent500,
                                             size = 20.dp
                                         )

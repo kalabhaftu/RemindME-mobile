@@ -205,7 +205,7 @@ fun NotificationPrefsForm(
                                     ) {
                                         Box(modifier = Modifier.padding(7.dp)) {
                                             AppIcon(
-                                                iconRes = PremiumIcons.AccessTime,
+                                                iconRes = AppIcons.AccessTime,
                                                 tint = Accent500,
                                                 modifier = Modifier.size(16.dp)
                                             )
@@ -219,7 +219,7 @@ fun NotificationPrefsForm(
                                         modifier = Modifier.weight(1f)
                                     )
                                     AppIcon(
-                                        iconRes = PremiumIcons.ChevronRight,
+                                        iconRes = AppIcons.ChevronRight,
                                         tint = TextTertiary,
                                         modifier = Modifier.size(16.dp)
                                     )
@@ -268,11 +268,11 @@ fun NotificationPrefsForm(
 }
 
 private fun getChannelIcon(channel: String) = when(channel) {
-    "email" -> PremiumIcons.Email
-    "push" -> PremiumIcons.Notifications
-    "telegram" -> PremiumIcons.Send
-    "in_app" -> PremiumIcons.Smartphone
-    else -> PremiumIcons.Notifications
+    "email" -> AppIcons.Email
+    "push" -> AppIcons.Notifications
+    "telegram" -> AppIcons.Send
+    "in_app" -> AppIcons.Smartphone
+    else -> AppIcons.Notifications
 }
 
 private fun getChannelLabel(channel: String) = when(channel) {

@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.TopBar
 import com.remindme.app.ui.components.AppScaffold
-import com.remindme.app.ui.components.PremiumIcons
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.theme.*
 
 @Composable
@@ -30,7 +30,7 @@ fun NotificationHelpScreen(onBack: () -> Unit) {
                 leading = {
                     androidx.compose.material3.IconButton(onClick = onBack) {
                         com.remindme.app.ui.components.AppIcon(
-                            iconRes = PremiumIcons.ArrowBack,
+                            iconRes = AppIcons.ArrowBack,
                             color = TextPrimary
                         )
                     }
@@ -57,7 +57,7 @@ fun NotificationHelpScreen(onBack: () -> Unit) {
                     HelpCard(
                         title = "At time of event",
                         description = "The notification is sent exactly at the time the event happens.",
-                        icon = PremiumIcons.Timer
+                        icon = AppIcons.Timer
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -65,7 +65,7 @@ fun NotificationHelpScreen(onBack: () -> Unit) {
                     HelpCard(
                         title = "Morning of",
                         description = "The notification is sent in the morning on the day of the event. By default, this is 9:00 AM, but you can change it in Settings -> Custom Default Time.",
-                        icon = PremiumIcons.WbSunny
+                        icon = AppIcons.WbSunny
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -73,7 +73,7 @@ fun NotificationHelpScreen(onBack: () -> Unit) {
                     HelpCard(
                         title = "Same day",
                         description = "The notification is sent on the same day as the event, but you specify the exact time.",
-                        icon = PremiumIcons.CalendarToday
+                        icon = AppIcons.CalendarToday
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -81,7 +81,7 @@ fun NotificationHelpScreen(onBack: () -> Unit) {
                     HelpCard(
                         title = "1 day before",
                         description = "The notification is sent exactly 24 hours before the event.",
-                        icon = PremiumIcons.Event
+                        icon = AppIcons.Event
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -89,7 +89,7 @@ fun NotificationHelpScreen(onBack: () -> Unit) {
                     HelpCard(
                         title = "2 days before",
                         description = "The notification is sent exactly 48 hours before the event.",
-                        icon = PremiumIcons.DateRange
+                        icon = AppIcons.DateRange
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -97,7 +97,7 @@ fun NotificationHelpScreen(onBack: () -> Unit) {
                     HelpCard(
                         title = "1 week before",
                         description = "The notification is sent exactly 7 days before the event.",
-                        icon = PremiumIcons.CalendarViewWeek
+                        icon = AppIcons.CalendarViewWeek
                     )
             }
         }

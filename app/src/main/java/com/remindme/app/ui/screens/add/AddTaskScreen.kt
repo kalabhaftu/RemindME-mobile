@@ -16,12 +16,12 @@ import com.remindme.app.ui.theme.*
 import java.time.LocalDateTime
 
 val TASK_ICONS = listOf(
-    Triple("trash", PremiumIcons.Delete, "Take out trash"),
-    Triple("water", PremiumIcons.WaterDrop, "Drink water"),
-    Triple("fitness", PremiumIcons.Activity, "Exercise"),
-    Triple("study", PremiumIcons.Book, "Study"),
-    Triple("rent", PremiumIcons.Home, "Pay rent"),
-    Triple("medication", PremiumIcons.MedicalServices, "Medication")
+    Triple("trash", AppIcons.Delete, "Take out trash"),
+    Triple("water", AppIcons.WaterDrop, "Drink water"),
+    Triple("fitness", AppIcons.Activity, "Exercise"),
+    Triple("study", AppIcons.Book, "Study"),
+    Triple("rent", AppIcons.Home, "Pay rent"),
+    Triple("medication", AppIcons.MedicalServices, "Medication")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -26,7 +26,7 @@ fun CircledBackButton(
             contentAlignment = Alignment.Center
         ) {
             AppIcon(
-                iconRes = PremiumIcons.ArrowBack,
+                iconRes = AppIcons.ArrowBack,
                 color = AppColors.textPrimary,
                 size = 20.dp
             )

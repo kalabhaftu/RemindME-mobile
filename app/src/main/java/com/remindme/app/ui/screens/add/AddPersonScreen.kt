@@ -134,7 +134,7 @@ fun AddPersonScreen(
                         )
                     } else {
                         AppIcon(
-                            iconRes = PremiumIcons.CameraAlt,
+                            iconRes = AppIcons.CameraAlt,
                             color = TextTertiary,
                             size = 28.dp
                         )

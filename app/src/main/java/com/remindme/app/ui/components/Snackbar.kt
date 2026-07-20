@@ -30,7 +30,7 @@ fun Snackbar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (icon != null || isError) {
-                val displayIcon = icon ?: if (isError) PremiumIcons.Error else PremiumIcons.CheckCircle
+                val displayIcon = icon ?: if (isError) AppIcons.Error else AppIcons.CheckCircle
                 val iconColor = if (isError) StateDanger else AppColors.accent500
                 AppIcon(
                     iconRes = displayIcon,

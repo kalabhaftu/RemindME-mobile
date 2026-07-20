@@ -21,7 +21,7 @@ import androidx.navigation3.runtime.NavKey
 import com.remindme.app.ui.components.NavTab
 import com.remindme.app.ui.components.NavTabs
 import com.remindme.app.ui.components.AppIcon
-import com.remindme.app.ui.components.PremiumIcons
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.components.AppScaffold
 import com.remindme.app.ui.navigation.AddPerson
 import com.remindme.app.ui.navigation.AddSubscription
@@ -53,7 +53,7 @@ fun MainScreen(
                 actions = {
                     androidx.compose.foundation.layout.Box {
                         androidx.compose.material3.IconButton(onClick = { showMenu = true }) {
-                            AppIcon(iconRes = PremiumIcons.MoreVert, color = AppColors.textPrimary)
+                            AppIcon(iconRes = AppIcons.MoreVert, color = AppColors.textPrimary)
                         }
                         com.remindme.app.ui.components.PopupMenu(
                             expanded = showMenu,
@@ -63,22 +63,22 @@ fun MainScreen(
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Search",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Search) },
-                                icon = PremiumIcons.Search
+                                icon = AppIcons.Search
                             )
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Templates",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Templates) },
-                                icon = PremiumIcons.Book
+                                icon = AppIcons.Book
                             )
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Notifications",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Notifications) },
-                                icon = PremiumIcons.Notifications
+                                icon = AppIcons.Notifications
                             )
                             com.remindme.app.ui.components.PopupMenuItem(
                                 text = "Settings",
                                 onClick = { showMenu = false; onItemClick(com.remindme.app.ui.navigation.Settings) },
-                                icon = PremiumIcons.Settings
+                                icon = AppIcons.Settings
                             )
                         }
                     }
@@ -96,7 +96,7 @@ fun MainScreen(
                     selected = selectedTab == 0
                 ) {
                     AppIcon(
-                        iconRes = PremiumIcons.Home,
+                        iconRes = AppIcons.Home,
                         color = if (selectedTab == 0) Accent500 else TextPrimary
                     )
                 }
@@ -105,7 +105,7 @@ fun MainScreen(
                     selected = selectedTab == 1
                 ) {
                     AppIcon(
-                        iconRes = PremiumIcons.People,
+                        iconRes = AppIcons.People,
                         color = if (selectedTab == 1) Accent500 else TextPrimary
                     )
                 }
@@ -114,7 +114,7 @@ fun MainScreen(
                     selected = selectedTab == 2
                 ) {
                     AppIcon(
-                        iconRes = PremiumIcons.CreditCard,
+                        iconRes = AppIcons.CreditCard,
                         color = if (selectedTab == 2) Accent500 else TextPrimary
                     )
                 }
@@ -123,7 +123,7 @@ fun MainScreen(
                     selected = selectedTab == 3
                 ) {
                     AppIcon(
-                        iconRes = PremiumIcons.CheckCircle,
+                        iconRes = AppIcons.CheckCircle,
                         color = if (selectedTab == 3) Accent500 else TextPrimary
                     )
                 }
@@ -132,7 +132,7 @@ fun MainScreen(
                     selected = selectedTab == 4
                 ) {
                     AppIcon(
-                        iconRes = PremiumIcons.CalendarToday,
+                        iconRes = AppIcons.CalendarToday,
                         color = if (selectedTab == 4) Accent500 else TextPrimary
                     )
                 }
@@ -176,10 +176,10 @@ fun MainScreen(
                     ) {
                         // Contextually correct icon per tab
                         val fabIcon = when (selectedTab) {
-                            1 -> PremiumIcons.UserRoundPlus
-                            2 -> PremiumIcons.CreditCard
-                            3 -> PremiumIcons.NoteAdd
-                            else -> PremiumIcons.Add
+                            1 -> AppIcons.UserRoundPlus
+                            2 -> AppIcons.CreditCard
+                            3 -> AppIcons.NoteAdd
+                            else -> AppIcons.Add
                         }
                         Box(
                             modifier = Modifier.fillMaxSize(),

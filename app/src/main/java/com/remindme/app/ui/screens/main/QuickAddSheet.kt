@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
-import com.remindme.app.ui.components.PremiumIcons
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.components.appScrimColor
 import com.remindme.app.ui.components.appSurfaceColor
 import com.remindme.app.ui.theme.AppColors
@@ -69,7 +69,7 @@ fun QuickAddSheet(
                     color = AppColors.textPrimary
                 )
                 IconButton(onClick = onDismiss) {
-                    AppIcon(iconRes = PremiumIcons.Close, contentDescription = "Close", tint = AppColors.textSecondary)
+                    AppIcon(iconRes = AppIcons.Close, contentDescription = "Close", tint = AppColors.textSecondary)
                 }
             }
             
@@ -82,7 +82,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Person",
-                    iconRes = PremiumIcons.Person,
+                    iconRes = AppIcons.Person,
                     onClick = {
                         onDismiss()
                         onNavigateToAddPerson()
@@ -91,7 +91,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Subscription",
-                    iconRes = PremiumIcons.CreditCard,
+                    iconRes = AppIcons.CreditCard,
                     onClick = {
                         onDismiss()
                         onNavigateToAddSubscription()
@@ -106,7 +106,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Task",
-                    iconRes = PremiumIcons.List,
+                    iconRes = AppIcons.List,
                     onClick = {
                         onDismiss()
                         onNavigateToAddTask()
@@ -115,7 +115,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Holiday",
-                    iconRes = PremiumIcons.CalendarToday,
+                    iconRes = AppIcons.CalendarToday,
                     onClick = {
                         onDismiss()
                         onNavigateToAddHoliday()

@@ -128,7 +128,7 @@ private fun SentStep() {
         modifier = Modifier.padding(24.dp)
     ) {
         AppIcon(
-            iconRes = PremiumIcons.MailOutline,
+            iconRes = AppIcons.MailOutline,
             modifier = Modifier.size(56.dp),
             color = Accent500
         )
@@ -163,7 +163,7 @@ private fun NotFoundStep(uiState: MagicLinkUiState, viewModel: MagicLinkViewMode
         modifier = Modifier.padding(24.dp)
     ) {
         AppIcon(
-            iconRes = PremiumIcons.PersonSearch,
+            iconRes = AppIcons.PersonSearch,
             modifier = Modifier.size(56.dp),
             color = TextTertiary
         )
@@ -206,7 +206,7 @@ private fun ErrorStep(uiState: MagicLinkUiState, viewModel: MagicLinkViewModel) 
         modifier = Modifier.padding(24.dp)
     ) {
         AppIcon(
-            iconRes = PremiumIcons.Warning,
+            iconRes = AppIcons.Warning,
             modifier = Modifier.size(56.dp),
             color = MaterialTheme.colorScheme.error
         )

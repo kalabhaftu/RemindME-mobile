@@ -19,7 +19,7 @@ import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.AppScaffold
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
-import com.remindme.app.ui.components.PremiumIcons
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.AppTextField
 import com.remindme.app.ui.components.CircledBackButton
@@ -112,10 +112,10 @@ fun SearchResultItem(item: ReminderItem, onClick: () -> Unit) {
             ) {
                 Box(modifier = Modifier.padding(10.dp)) {
                     val icon = when (item.category) {
-                        CategoryType.PERSON -> PremiumIcons.Person
-                        CategoryType.SUBSCRIPTION -> PremiumIcons.CreditCard
-                        CategoryType.CUSTOM_HOLIDAY -> PremiumIcons.CardGiftcard
-                        CategoryType.TASK -> PremiumIcons.Checklist
+                        CategoryType.PERSON -> AppIcons.Person
+                        CategoryType.SUBSCRIPTION -> AppIcons.CreditCard
+                        CategoryType.CUSTOM_HOLIDAY -> AppIcons.CardGiftcard
+                        CategoryType.TASK -> AppIcons.Checklist
                     }
                     AppIcon(iconRes = icon, color = Accent500, size = 22.dp)
                 }
@@ -146,7 +146,7 @@ fun SearchResultItem(item: ReminderItem, onClick: () -> Unit) {
                     )
                 }
             }
-            AppIcon(iconRes = PremiumIcons.ChevronRight, size = 18.dp, color = TextTertiary)
+            AppIcon(iconRes = AppIcons.ChevronRight, size = 18.dp, color = TextTertiary)
         }
     }
 }

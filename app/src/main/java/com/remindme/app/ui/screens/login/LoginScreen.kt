@@ -23,7 +23,7 @@ import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.AppButton
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.AppTextField
-import com.remindme.app.ui.components.PremiumIcons
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.theme.*
 
 
@@ -84,7 +84,7 @@ fun LoginScreen(
                 suffixIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         AppIcon(
-                            iconRes = if (passwordVisible) PremiumIcons.Visibility else PremiumIcons.VisibilityOff,
+                            iconRes = if (passwordVisible) AppIcons.Visibility else AppIcons.VisibilityOff,
                             contentDescription = if (passwordVisible) "Hide password" else "Show password",
                             tint = TextTertiary
                         )

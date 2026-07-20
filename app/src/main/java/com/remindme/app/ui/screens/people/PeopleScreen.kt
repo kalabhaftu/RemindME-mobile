@@ -75,7 +75,7 @@ fun PeopleScreen(
                 value = uiState.searchQuery,
                 onValueChange = viewModel::updateSearchQuery,
                 placeholder = "Search people...",
-                prefixIcon = { AppIcon(iconRes = PremiumIcons.Search, tint = TextSecondary, size = 20.dp) },
+                prefixIcon = { AppIcon(iconRes = AppIcons.Search, tint = TextSecondary, size = 20.dp) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))

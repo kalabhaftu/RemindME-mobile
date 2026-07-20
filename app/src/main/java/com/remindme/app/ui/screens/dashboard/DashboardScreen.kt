@@ -20,7 +20,7 @@ import com.remindme.app.domain.models.CategoryType
 import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
-import com.remindme.app.ui.components.PremiumIcons
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.AppPullToRefresh
 import com.remindme.app.ui.theme.Accent500
@@ -73,16 +73,16 @@ fun DashboardScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Person", icon = PremiumIcons.Person, onTap = onNavigateToAddPerson)
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Subscription", icon = PremiumIcons.CreditCard, onTap = onNavigateToAddSubscription)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Person", icon = AppIcons.Person, onTap = onNavigateToAddPerson)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Subscription", icon = AppIcons.CreditCard, onTap = onNavigateToAddSubscription)
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Task", icon = PremiumIcons.Add, onTap = onNavigateToAddTask)
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Holiday", icon = PremiumIcons.Event, onTap = onNavigateToHolidays)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Task", icon = AppIcons.Add, onTap = onNavigateToAddTask)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Holiday", icon = AppIcons.Event, onTap = onNavigateToHolidays)
         }
 
         Spacer(modifier = Modifier.height(12.dp))

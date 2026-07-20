@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.ui.components.AppButton
 import com.remindme.app.ui.components.AppIcon
-import com.remindme.app.ui.components.PremiumIcons
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.components.AppScaffold
 import com.remindme.app.ui.components.AppTextField
 import com.remindme.app.ui.components.CircledBackButton
@@ -120,7 +120,7 @@ fun EditReminderScreen(
                     enabled = !uiState.isSaving,
                     surfaceColor = appSurfaceColor()
                 ) {
-                    AppIcon(iconRes = PremiumIcons.Delete, color = StateDanger)
+                    AppIcon(iconRes = AppIcons.Delete, color = StateDanger)
                     Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                     Text("Delete reminder", color = StateDanger)
                 }

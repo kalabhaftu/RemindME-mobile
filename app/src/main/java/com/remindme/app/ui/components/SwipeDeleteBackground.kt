@@ -41,7 +41,7 @@ fun SwipeDeleteBackground(
         contentAlignment = Alignment.CenterEnd
     ) {
         AppIcon(
-            iconRes = PremiumIcons.Delete,
+            iconRes = AppIcons.Delete,
             contentDescription = "Delete",
             size = 24.dp,
             tint = iconColor

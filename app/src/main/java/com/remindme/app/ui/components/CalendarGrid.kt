@@ -100,10 +100,10 @@ fun CalendarGrid(
                 }
 
                 IconButton(onClick = { navigate(-1) }, modifier = Modifier.size(32.dp)) {
-                    AppIcon(iconRes = PremiumIcons.KeyboardArrowLeft, contentDescription = "Prev", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
+                    AppIcon(iconRes = AppIcons.KeyboardArrowLeft, contentDescription = "Prev", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
                 }
                 IconButton(onClick = { navigate(1) }, modifier = Modifier.size(32.dp)) {
-                    AppIcon(iconRes = PremiumIcons.KeyboardArrowRight, contentDescription = "Next", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
+                    AppIcon(iconRes = AppIcons.KeyboardArrowRight, contentDescription = "Next", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
                 }
             }
 
@@ -346,7 +346,7 @@ private fun DayCell(
                         occurrences.take(3).forEach { occ ->
                             if (occ.status == OccurrenceStatus.COMPLETED_PAST) {
                                 AppIcon(
-                                    iconRes = PremiumIcons.Check,
+                                    iconRes = AppIcons.Check,
                                     contentDescription = null,
                                     tint = AppColors.stateSuccess.copy(alpha = 0.5f),
                                     modifier = Modifier.size(8.dp)

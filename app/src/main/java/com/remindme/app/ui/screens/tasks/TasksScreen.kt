@@ -24,7 +24,7 @@ import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.EmptyState
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
-import com.remindme.app.ui.components.PremiumIcons
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.SwipeDeleteBackground
 import com.remindme.app.ui.components.AppPullToRefresh
@@ -118,13 +118,13 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
 
     fun getIconForKey(key: String?): Int {
         return when (key) {
-            "water" -> PremiumIcons.WaterDrop
-            "trash" -> PremiumIcons.Delete
-            "fitness" -> PremiumIcons.FitnessCenter
-            "study" -> PremiumIcons.MenuBook
-            "rent" -> PremiumIcons.Home
-            "medication" -> PremiumIcons.Medication
-            else -> PremiumIcons.List
+            "water" -> AppIcons.WaterDrop
+            "trash" -> AppIcons.Delete
+            "fitness" -> AppIcons.FitnessCenter
+            "study" -> AppIcons.MenuBook
+            "rent" -> AppIcons.Home
+            "medication" -> AppIcons.Medication
+            else -> AppIcons.List
         }
     }
 
@@ -169,7 +169,7 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AppIcon(
-                            iconRes = PremiumIcons.AccessTime,
+                            iconRes = AppIcons.AccessTime,
                             color = TextTertiary,
                             size = 12.dp
                         )
@@ -200,7 +200,7 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
                     AppIcon(
-                        iconRes = PremiumIcons.CheckCircle,
+                        iconRes = AppIcons.CheckCircle,
                         color = StateSuccess,
                         size = 24.dp
                     )
