@@ -35,7 +35,7 @@ val TASK_ICONS = listOf(
 @Composable
 fun AddTaskScreen(
     taskId: String? = null,
-    viewModel: AddTaskViewModel = viewModel(),
+    viewModel: AddTaskViewModel = viewModel(key = taskId?.let { "edit-task-$it" } ?: "add-task"),
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()

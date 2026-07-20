@@ -33,7 +33,7 @@ class EditReminderViewModel(application: Application) : AndroidViewModel(applica
 
     fun loadReminder(reminderId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoading = true, isSuccess = false, error = null) }
             try {
                 val reminders = repository.getReminders()
                 val reminder = reminders.find { it.id == reminderId }

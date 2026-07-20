@@ -21,7 +21,7 @@ import java.time.LocalDateTime
 @Composable
 fun AddSubscriptionScreen(
     subscriptionId: String? = null,
-    viewModel: AddSubscriptionViewModel = viewModel(),
+    viewModel: AddSubscriptionViewModel = viewModel(key = subscriptionId?.let { "edit-subscription-$it" } ?: "add-subscription"),
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()

@@ -63,7 +63,7 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
 
     fun loadTask(taskId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, existingTaskId = taskId) }
+            _uiState.update { it.copy(isLoading = true, error = null, isSuccess = false, existingTaskId = taskId) }
             try {
                 val item = repository.getReminder(taskId)
                 if (item?.category != com.remindme.app.domain.models.CategoryType.TASK) {

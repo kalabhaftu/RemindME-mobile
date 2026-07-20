@@ -78,7 +78,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun loadPerson(personId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, existingPersonId = personId) }
+            _uiState.update { it.copy(isLoading = true, error = null, isSuccess = false, existingPersonId = personId) }
             try {
                 val item = repository.getReminder(personId)
                 if (item != null) {

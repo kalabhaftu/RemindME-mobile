@@ -44,7 +44,7 @@ import com.remindme.app.ui.theme.TextSecondary
 @Composable
 fun EditReminderScreen(
     reminderId: String,
-    viewModel: EditReminderViewModel = viewModel(),
+    viewModel: EditReminderViewModel = viewModel(key = "edit-reminder-$reminderId"),
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()

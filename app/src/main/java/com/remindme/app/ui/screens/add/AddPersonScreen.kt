@@ -31,7 +31,7 @@ import java.time.LocalDateTime
 @Composable
 fun AddPersonScreen(
     personId: String? = null,
-    viewModel: AddPersonViewModel = viewModel(),
+    viewModel: AddPersonViewModel = viewModel(key = personId?.let { "edit-person-$it" } ?: "add-person"),
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()

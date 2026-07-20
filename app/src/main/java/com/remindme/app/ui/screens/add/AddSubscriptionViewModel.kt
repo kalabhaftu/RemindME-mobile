@@ -89,7 +89,7 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
 
     fun loadSubscription(subscriptionId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, existingSubscriptionId = subscriptionId) }
+            _uiState.update { it.copy(isLoading = true, error = null, isSuccess = false, existingSubscriptionId = subscriptionId) }
             try {
                 val item = repository.getReminder(subscriptionId)
                 if (item?.category != com.remindme.app.domain.models.CategoryType.SUBSCRIPTION) {
