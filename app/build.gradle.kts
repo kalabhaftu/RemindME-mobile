@@ -25,16 +25,16 @@ android {
         applicationId = "com.remindme.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.0.3"
+        versionCode = 5
+        versionName = "1.0.4"
         
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
             localProperties.load(FileInputStream(localPropertiesFile))
         }
-        versionCode = localProperties.getProperty("VERSION_CODE", System.getenv("VERSION_CODE") ?: "4").toIntOrNull() ?: 4
-        versionName = localProperties.getProperty("VERSION_NAME", System.getenv("VERSION_NAME") ?: "1.0.3")
+        versionCode = localProperties.getProperty("VERSION_CODE", System.getenv("VERSION_CODE") ?: "5").toIntOrNull() ?: 5
+        versionName = localProperties.getProperty("VERSION_NAME", System.getenv("VERSION_NAME") ?: "1.0.4")
         buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL", "")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY", "")}\"")
         buildConfigField("String", "WEB_API_URL", "\"${localProperties.getProperty("WEB_API_URL", "https://remind-me-web-roan.vercel.app")}\"")
