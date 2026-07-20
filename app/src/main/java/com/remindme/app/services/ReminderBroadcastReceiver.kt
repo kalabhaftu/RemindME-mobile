@@ -31,7 +31,7 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
             )
         }
 
-        val notification = NotificationCompat.Builder(context, "reminders")
+        val notification = NotificationCompat.Builder(context, NotificationChannels.reminders)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle(reminderName)
             .setContentText("Time for your ${category.lowercase()} reminder")

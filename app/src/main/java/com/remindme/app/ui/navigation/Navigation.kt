@@ -30,6 +30,7 @@ import com.remindme.app.ui.screens.peopledetail.PersonDetailScreen
 import com.remindme.app.ui.screens.search.SearchScreen
 import com.remindme.app.ui.screens.settings.SettingsScreen
 import com.remindme.app.ui.screens.edit.EditReminderScreen
+import com.remindme.app.ui.screens.preview.ReminderPreviewScreen
 import com.remindme.app.ui.screens.notifications.NotificationHelpScreen
 import com.remindme.app.ui.screens.templates.TemplatesScreen
 import io.github.jan.supabase.auth.auth
@@ -126,10 +127,11 @@ fun MainNavigation(
             val destination: NavKey = if (openReminderCategory?.lowercase() == "person") {
                 PersonDetail(openReminderId)
             } else {
-                EditReminder(openReminderId)
+                ReminderPreview(openReminderId)
             }
             if (backStack.lastOrNull() != destination) {
-                replaceRoot(destination)
+                if (backStack.lastOrNull() == AuthCheck || backStack.lastOrNull() == Login) replaceRoot(Main)
+                backStack.add(destination)
             }
             onReminderOpened()
         }
@@ -195,6 +197,12 @@ fun MainNavigation(
                     onBack = { popBack() }
                 )
             }
+            entry<ReminderPreview> { key ->
+                ReminderPreviewScreen(
+                    reminderId = key.reminderId,
+                    onBack = { popBack() }
+                )
+            }
             entry<PersonDetail> { key ->
                 PersonDetailScreen(
                     personId = key.personId,
@@ -212,7 +220,7 @@ fun MainNavigation(
                 val context = LocalContext.current
                 SearchScreen(
                     onItemClick = { id, category ->
-                        backStack.add(EditReminder(id))
+                        backStack.add(ReminderPreview(id))
                     },
                     onBack = { popBack() }
                 )
@@ -256,7 +264,7 @@ fun MainNavigation(
             }
             entry<Notifications> {
                 com.remindme.app.ui.screens.notifications.NotificationsScreen(
-                    onOpenReminder = { id -> backStack.add(EditReminder(id)) },
+                    onOpenReminder = { id -> backStack.add(ReminderPreview(id)) },
                     onBack = { popBack() }
                 )
             }

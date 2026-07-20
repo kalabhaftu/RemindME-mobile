@@ -120,24 +120,6 @@ fun PeopleScreen(
                 }
             }
         } else {
-            item {
-                AppCard(
-                    borderRadius = 12.dp,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                    ) {
-                        Text("NAME", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = TextTertiary, letterSpacing = 0.5.sp), modifier = Modifier.weight(3f))
-                        Text("AGE", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = TextTertiary, letterSpacing = 0.5.sp), modifier = Modifier.weight(1f))
-                        Text("DAYS", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = TextTertiary, letterSpacing = 0.5.sp), modifier = Modifier.weight(1f))
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
             items(items = people, key = { it.id }) { person ->
                 val dismissState = rememberSwipeToDismissBoxState(
                     confirmValueChange = { value ->
@@ -150,9 +132,6 @@ fun PeopleScreen(
                         }
                     }
                 )
-                val isSwiping = dismissState.currentValue != SwipeToDismissBoxValue.Settled ||
-                    dismissState.targetValue != SwipeToDismissBoxValue.Settled
-
                 SwipeToDismissBox(
                     state = dismissState,
                     enableDismissFromStartToEnd = false,
@@ -190,10 +169,8 @@ fun PersonRow(person: ReminderItem, onClick: () -> Unit) {
     val age = birthdate?.let { ComputedFields.calculateAge(it) } ?: 0
     val days = birthdate?.let { ComputedFields.calculateDaysToBirthday(it) } ?: 9999
     val zodiac = birthdate?.let { ComputedFields.getZodiacSign(it) } ?: "Unknown"
-    val gender = person.person?.gender ?: "unspecified"
     val relationship = person.person?.relationship ?: "other"
     val relPair = AppConstants.RELATIONSHIP_LABELS[relationship]
-    val glyph = AppConstants.ZODIAC_GLYPHS[zodiac] ?: "★"
 
     AppCard(
         borderRadius = 16.dp,
@@ -208,38 +185,26 @@ fun PersonRow(person: ReminderItem, onClick: () -> Unit) {
                 .padding(12.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Row(modifier = Modifier.weight(3f), verticalAlignment = Alignment.CenterVertically) {
+                Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                     PersonAvatar(person.name, person.person?.avatarUrl)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = person.name,
-                        color = TextPrimary,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Column(modifier = Modifier.padding(start = 10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(person.name, color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(relPair?.first ?: "Other", color = TextSecondary, fontSize = 12.sp)
+                    }
                 }
-                Text(
-                    text = if (birthdate != null) "$age" else "—",
-                    color = TextPrimary,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 13.sp,
-                    modifier = Modifier.weight(1f)
-                )
-                Box(modifier = Modifier.weight(1f)) {
+                Box {
                     Box(
                         modifier = Modifier
                             .wrapContentSize()
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(BgSurface3)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Accent500.copy(alpha = 0.16f))
                     ) {
                         Text(
-                            text = if (birthdate != null) "${days} d" else "—",
-                            color = TextPrimary,
-                            fontFamily = FontFamily.Monospace,
+                            text = if (birthdate != null) "$days days" else "No date",
+                            color = Accent400,
                             fontSize = 11.sp,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp)
                         )
                     }
                 }
@@ -251,12 +216,11 @@ fun PersonRow(person: ReminderItem, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Pill(AppConstants.GENDER_LABELS[gender] ?: gender)
-                Pill("$glyph $zodiac")
-                Pill("${relPair?.second ?: ""} ${relPair?.first ?: relationship}")
                 if (birthdate != null) {
                     val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
                     Pill(birthdate.format(formatter))
+                    Pill("Age $age")
+                    Pill(zodiac)
                 } else {
                     Pill("No birthdate")
                 }
@@ -264,16 +228,6 @@ fun PersonRow(person: ReminderItem, onClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(6.dp))
             
-            val progress = (age / 100f).coerceIn(0f, 1f)
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                color = Accent500,
-                trackColor = BgSurface1
-            )
         }
     }
 }

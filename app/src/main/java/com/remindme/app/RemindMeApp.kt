@@ -7,6 +7,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import com.remindme.app.services.OfflineSyncScheduler
+import com.remindme.app.services.NotificationChannels
 
 class RemindMeApp : Application() {
     override fun onCreate() {
@@ -22,11 +23,14 @@ class RemindMeApp : Application() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "reminders",
+                NotificationChannels.reminders,
                 "Reminders",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Scheduled reminder notifications"
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 260, 120, 420)
+                enableLights(true)
             }
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }

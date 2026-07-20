@@ -41,16 +41,11 @@ class RemindMeMessagingService : FirebaseMessagingService() {
     }
 
     private fun showNotification(title: String, message: String, reminderId: String?, category: String) {
-        val channelId = "remindme_channel"
+        val channelId = NotificationChannels.reminders
         val notificationManager = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            val channel = android.app.NotificationChannel(
-                channelId,
-                "RemindME Notifications",
-                android.app.NotificationManager.IMPORTANCE_DEFAULT
-            )
-            notificationManager.createNotificationChannel(channel)
+            // The application creates the high-priority channel with vibration settings.
         }
 
         val contentIntent = TaskStackBuilder.create(this).run {
@@ -74,7 +69,7 @@ class RemindMeMessagingService : FirebaseMessagingService() {
             .setContentText(message)
             .setAutoCancel(true)
             .setContentIntent(contentIntent)
-            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
 
         // System.currentTimeMillis().toInt() truncates a 64-bit timestamp to
         // 32 bits and can produce the same ID for notifications dispatched

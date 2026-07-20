@@ -76,6 +76,8 @@ data class DeliveryLog(
 )
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+    private val settingsPrefs = application.getSharedPreferences("remindme_settings_cache", Context.MODE_PRIVATE)
+    private val telegramCacheTtlMs = 5 * 60 * 1000L
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
@@ -150,8 +152,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    private fun loadTelegramStatus() = viewModelScope.launch(Dispatchers.IO) {
-        _uiState.update { it.copy(isLoadingTelegram = true) }
+    private fun loadTelegramStatus(force: Boolean = false) = viewModelScope.launch(Dispatchers.IO) {
+        val cachedAt = settingsPrefs.getLong("telegram_cached_at", 0L)
+        val cached = settingsPrefs.getString("telegram_status", null)
+        if (!force && cached != null) {
+            applyTelegramStatus(JSONObject(cached))
+            if (System.currentTimeMillis() - cachedAt < telegramCacheTtlMs) return@launch
+        }
+        _uiState.update { it.copy(isLoadingTelegram = cached == null) }
         try {
             val token = supabase.auth.currentSessionOrNull()?.accessToken ?: return@launch
             val url = URL("$webApiUrl/api/settings/telegram")
@@ -162,17 +170,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             if (conn.responseCode == 200) {
                 val responseBody = conn.inputStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(responseBody)
-                if (json.optBoolean("hasToken", false)) {
-                    _uiState.update {
-                        it.copy(
-                            hasTelegramToken = true,
-                            maskedTelegramToken = json.optString("maskedToken"),
-                            botUsername = json.optString("botUsername").takeIf { u -> u.isNotEmpty() },
-                            hasChatId = json.optBoolean("hasChatId", false),
-                            maskedChatId = json.optString("maskedChatId")
-                        )
-                    }
-                }
+                settingsPrefs.edit().putString("telegram_status", json.toString()).putLong("telegram_cached_at", System.currentTimeMillis()).apply()
+                applyTelegramStatus(json)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -180,6 +179,20 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             _uiState.update { it.copy(isLoadingTelegram = false) }
         }
     }
+
+    private fun applyTelegramStatus(json: JSONObject) {
+        _uiState.update {
+            it.copy(
+                hasTelegramToken = json.optBoolean("hasToken", false),
+                maskedTelegramToken = json.optString("maskedToken"),
+                botUsername = json.optString("botUsername").takeIf(String::isNotEmpty),
+                hasChatId = json.optBoolean("hasChatId", false),
+                maskedChatId = json.optString("maskedChatId")
+            )
+        }
+    }
+
+    fun refreshTelegramStatus() { loadTelegramStatus(force = true) }
 
     private fun loadDeliveryLogs() = viewModelScope.launch(Dispatchers.IO) {
         try {
@@ -434,6 +447,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                         message = "Telegram token saved"
                     )
                 }
+                settingsPrefs.edit().remove("telegram_status").remove("telegram_cached_at").apply()
             } else {
                 _uiState.update { it.copy(error = "Failed to save token") }
             }
@@ -461,6 +475,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                         message = "Telegram token deleted"
                     )
                 }
+                settingsPrefs.edit().remove("telegram_status").remove("telegram_cached_at").apply()
             }
         } catch (e: Exception) {
             _uiState.update { it.copy(error = "Failed to delete Telegram token") }
