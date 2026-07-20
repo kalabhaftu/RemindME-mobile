@@ -48,6 +48,8 @@ class OfflineReminderRepository(
     private val _cachedReminders = MutableStateFlow<List<ReminderItem>>(emptyList())
     val cachedReminders: Flow<List<ReminderItem>> = _cachedReminders.asStateFlow()
 
+    fun cachedSnapshot(): List<ReminderItem> = _cachedReminders.value
+
     init {
         currentUserId()?.let { _cachedReminders.value = readCache(it) }
     }

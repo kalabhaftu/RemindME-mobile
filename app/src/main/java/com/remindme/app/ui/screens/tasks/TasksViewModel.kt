@@ -88,6 +88,9 @@ class TasksViewModel(application: Application) : AndroidViewModel(application) {
             if (showLoading) {
                 _uiState.update { it.copy(isLoading = true, error = null) }
             }
+            if (_allTasks.value.isEmpty()) {
+                _allTasks.value = repository.cachedSnapshot().filter { it.category == CategoryType.TASK }
+            }
             try {
                 val all = repository.getReminders()
                 val tasks = all.filter { it.category == CategoryType.TASK }

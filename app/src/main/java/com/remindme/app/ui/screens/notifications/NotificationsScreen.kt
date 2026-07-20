@@ -197,8 +197,8 @@ fun InAppTab(
                     borderRadius = 16.dp,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                         .clickable {
+                            n.reminder_item_id?.let { onOpenReminder(it) }
                             if (isUnread) onMarkRead(n.id)
-                            n.reminder_item_id?.let(onOpenReminder)
                         }
                 ) {
                     Row(

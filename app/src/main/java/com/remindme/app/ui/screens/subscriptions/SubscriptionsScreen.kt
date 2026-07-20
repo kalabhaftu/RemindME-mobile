@@ -15,17 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
-import com.remindme.app.R
 import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.EmptyState
 import com.remindme.app.ui.components.AppCard
@@ -33,7 +29,9 @@ import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.SwipeDeleteBackground
 import com.remindme.app.ui.components.AppPullToRefresh
+import com.remindme.app.ui.components.ResilientBrandImage
 import com.remindme.app.ui.theme.*
+import com.remindme.app.R
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -159,25 +157,7 @@ fun SubscriptionRow(item: ReminderItem, onClick: () -> Unit) {
                     .size(44.dp)
                     .clip(RoundedCornerShape(12.dp))
             ) {
-                if (!logo.isNullOrBlank()) {
-                    AsyncImage(
-                        model = logo,
-                        contentDescription = item.name,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxSize(),
-                        error = painterResource(id = R.drawable.ic_launcher_foreground) // Placeholder
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(BgSurface3),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("💳", fontSize = 22.sp)
-                    }
-                }
+                ResilientBrandImage(name = item.name, imageUrl = logo, modifier = Modifier.fillMaxSize())
             }
             
             Spacer(modifier = Modifier.width(12.dp))

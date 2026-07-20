@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SwipeToDismissBoxState
@@ -19,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.remindme.app.ui.theme.StateDanger
+import com.composables.icons.lucide.R as LucideR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +43,7 @@ fun SwipeDeleteBackground(
         contentAlignment = Alignment.CenterEnd
     ) {
         Icon(
-            imageVector = Icons.Outlined.Delete,
+            painter = androidx.compose.ui.res.painterResource(LucideR.drawable.lucide_ic_trash_2),
             contentDescription = "Delete",
             tint = iconColor
         )

@@ -116,6 +116,9 @@ class PeopleViewModel(application: Application) : AndroidViewModel(application) 
             if (showLoading) {
                 _uiState.update { it.copy(isLoading = true, error = null) }
             }
+            if (_allPeople.value.isEmpty()) {
+                _allPeople.value = repository.cachedSnapshot().filter { it.category == CategoryType.PERSON }
+            }
             try {
                 val all = repository.getReminders()
                 val people = all.filter { it.category == CategoryType.PERSON }

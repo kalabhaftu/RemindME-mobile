@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
 import com.remindme.app.ui.components.BottomSheetPicker
 import com.remindme.app.ui.components.*
 import com.remindme.app.ui.components.AppIcon
@@ -138,6 +139,10 @@ fun SettingsScreen(
                     }
                     item {
                         AccountSection(viewModel, onNavigateHome)
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+                    item {
+                        AboutSupportSection()
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
@@ -528,6 +533,14 @@ fun DeliveryLogSection(uiState: SettingsUiState) {
                             Text(log.scheduled_for.take(10), fontSize = 11.sp, color = TextTertiary, fontFamily = FontFamily.Monospace)
                         }
                     }
+                    if (!log.error_message.isNullOrBlank()) {
+                        Text(
+                            log.error_message,
+                            color = StateDanger.copy(alpha = 0.82f),
+                            fontSize = 11.sp,
+                            modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
+                        )
+                    }
                 }
             }
         }
@@ -538,6 +551,7 @@ fun DeliveryLogSection(uiState: SettingsUiState) {
 fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
     val context = LocalContext.current
     val webcalUrl = uiState.calendarWebcalUrl
+    var showManualGuide by remember { mutableStateOf(false) }
 
     SettingsSection("Calendar subscription") {
         Text(
@@ -592,9 +606,22 @@ fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsVie
             AppButton(
                 onClick = {
                     val webcalIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(webcalUrl))
-                    runCatching { context.startActivity(webcalIntent) }.onFailure {
-                        uiState.calendarHttpsUrl?.let { httpsUrl ->
-                            context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(httpsUrl)))
+                    val calendarHandler = context.packageManager.queryIntentActivities(
+                        webcalIntent,
+                        android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
+                    ).firstOrNull { info ->
+                        val packageName = info.activityInfo.packageName.lowercase()
+                        packageName.contains("calendar") || packageName.contains("outlook")
+                    }
+                    if (calendarHandler == null) {
+                        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("RemindME calendar", webcalUrl))
+                        viewModel.showMessage("No calendar app accepted webcal; link copied")
+                        showManualGuide = true
+                    } else {
+                        webcalIntent.setPackage(calendarHandler.activityInfo.packageName)
+                        runCatching { context.startActivity(webcalIntent) }.onFailure {
+                            showManualGuide = true
                         }
                     }
                 },
@@ -631,6 +658,26 @@ fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsVie
                 lineHeight = 18.sp
             )
         }
+    }
+
+    if (showManualGuide) {
+        AlertDialog(
+            onDismissRequest = { showManualGuide = false },
+            containerColor = appSurfaceColor(elevated = true),
+            titleContentColor = TextPrimary,
+            textContentColor = TextSecondary,
+            title = { Text("Connect your calendar", color = TextPrimary) },
+            text = {
+                Text(
+                    "The installed calendar app does not accept webcal links automatically. The private link is already copied.\n\nGoogle Calendar: Other calendars → + → From URL → paste the link → Add calendar.\n\nOutlook: Add calendar → Subscribe from web → paste the link → Import."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { showManualGuide = false }) {
+                    Text("Got it", color = Accent500)
+                }
+            }
+        )
     }
 }
 
@@ -696,6 +743,76 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             AppIcon(Icons.Outlined.PhonelinkErase, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sign Out All Devices", color = TextPrimary)
+        }
+    }
+}
+
+@Composable
+fun AboutSupportSection() {
+    val context = LocalContext.current
+    val webBase = com.remindme.app.BuildConfig.WEB_API_URL.trimEnd('/')
+
+    fun openUrl(url: String) {
+        runCatching {
+            context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)))
+        }.onFailure {
+            Toast.makeText(context, "Unable to open link", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    SettingsSection("About & support") {
+        Text(
+            "RemindME keeps important dates close without making them noisy.",
+            color = TextSecondary,
+            fontSize = 13.sp,
+            lineHeight = 19.sp
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text("Version ${com.remindme.app.BuildConfig.VERSION_NAME}", color = TextTertiary, fontSize = 12.sp)
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+            AppButton(
+                onClick = {
+                    runCatching {
+                        context.startActivity(android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(android.content.Intent.EXTRA_TEXT, "RemindME — reminders that stay close. $webBase")
+                        }.let { android.content.Intent.createChooser(it, "Share RemindME") })
+                    }.onFailure {
+                        Toast.makeText(context, "Unable to share RemindME", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = Modifier.weight(1f).height(46.dp)
+            ) {
+                AppIcon(Icons.Outlined.Share, color = TextPrimary, size = 17.dp)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Share", color = TextPrimary)
+            }
+            AppButton(
+                onClick = {
+                    runCatching {
+                        context.startActivity(android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
+                            data = android.net.Uri.parse("mailto:?subject=RemindME feedback")
+                        })
+                    }.onFailure {
+                        Toast.makeText(context, "No email app available", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = Modifier.weight(1f).height(46.dp)
+            ) {
+                AppIcon(Icons.Outlined.MailOutline, color = TextPrimary, size = 17.dp)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Feedback", color = TextPrimary)
+            }
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+            TextButton(onClick = { openUrl("$webBase/terms") }, modifier = Modifier.weight(1f)) {
+                Text("Terms of Service", color = Accent500, fontSize = 12.sp)
+            }
+            TextButton(onClick = { openUrl("$webBase/privacy") }, modifier = Modifier.weight(1f)) {
+                Text("Privacy Policy", color = Accent500, fontSize = 12.sp)
+            }
         }
     }
 }

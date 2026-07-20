@@ -75,6 +75,18 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             if (showLoading) {
                 _uiState.update { it.copy(isLoading = true, error = null) }
             }
+            val cached = repository.cachedSnapshot()
+            if (cached.isNotEmpty() && _uiState.value.reminders.isEmpty()) {
+                val today = LocalDate.now()
+                val startPeriod = _uiState.value.currentMonth
+                val endPeriod = _uiState.value.currentMonth.plusMonths(1).minusDays(1)
+                _uiState.update {
+                    it.copy(
+                        reminders = cached,
+                        occurrences = OccurrenceCalculator.generateOccurrences(cached, startPeriod, endPeriod, today)
+                    )
+                }
+            }
             try {
                 val parsed = repository.getReminders()
                 val today = LocalDate.now()

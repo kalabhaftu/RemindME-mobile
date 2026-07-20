@@ -48,6 +48,7 @@ import com.remindme.app.ui.screens.people.PeopleScreen
 import com.remindme.app.ui.screens.subscriptions.SubscriptionsScreen
 import com.remindme.app.ui.screens.tasks.TasksScreen
 import com.remindme.app.ui.theme.*
+import com.composables.icons.lucide.R as LucideR
 
 @Composable
 fun MainScreen(
@@ -110,7 +111,7 @@ fun MainScreen(
                     selected = selectedTab == 0
                 ) {
                     AppIcon(
-                        imageVector = Icons.Outlined.Home,
+                        iconRes = LucideR.drawable.lucide_ic_house,
                         color = if (selectedTab == 0) Accent500 else TextPrimary
                     )
                 }
@@ -119,7 +120,7 @@ fun MainScreen(
                     selected = selectedTab == 1
                 ) {
                     AppIcon(
-                        imageVector = Icons.Outlined.People,
+                        iconRes = LucideR.drawable.lucide_ic_users_round,
                         color = if (selectedTab == 1) Accent500 else TextPrimary
                     )
                 }
@@ -128,7 +129,7 @@ fun MainScreen(
                     selected = selectedTab == 2
                 ) {
                     AppIcon(
-                        imageVector = Icons.Outlined.CreditCard,
+                        iconRes = LucideR.drawable.lucide_ic_credit_card,
                         color = if (selectedTab == 2) Accent500 else TextPrimary
                     )
                 }
@@ -137,7 +138,7 @@ fun MainScreen(
                     selected = selectedTab == 3
                 ) {
                     AppIcon(
-                        imageVector = Icons.Outlined.CheckCircle,
+                        iconRes = LucideR.drawable.lucide_ic_circle_check,
                         color = if (selectedTab == 3) Accent500 else TextPrimary
                     )
                 }
@@ -146,7 +147,7 @@ fun MainScreen(
                     selected = selectedTab == 4
                 ) {
                     AppIcon(
-                        imageVector = Icons.Outlined.Event,
+                        iconRes = LucideR.drawable.lucide_ic_calendar_days,
                         color = if (selectedTab == 4) Accent500 else TextPrimary
                     )
                 }
@@ -190,17 +191,17 @@ fun MainScreen(
                     ) {
                         // Contextually correct icon per tab
                         val fabIcon = when (selectedTab) {
-                            1 -> Icons.Outlined.PersonAdd      // People → add person
-                            2 -> Icons.Outlined.AddCard        // Subscriptions → add card/subscription
-                            3 -> Icons.Outlined.NoteAdd        // Tasks → add note/task
-                            else -> Icons.Outlined.Add          // Home → QuickAdd
+                            1 -> LucideR.drawable.lucide_ic_user_round_plus
+                            2 -> LucideR.drawable.lucide_ic_credit_card
+                            3 -> LucideR.drawable.lucide_ic_list_plus
+                            else -> LucideR.drawable.lucide_ic_plus
                         }
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
                             AppIcon(
-                                imageVector = fabIcon,
+                                iconRes = fabIcon,
                                 color = Color.White,
                                 size = 26.dp
                             )

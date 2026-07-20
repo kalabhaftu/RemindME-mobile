@@ -61,7 +61,8 @@ data class DeliveryLog(
     val user_id: String? = null,
     val channel: String? = null,
     val status: String? = null,
-    val scheduled_for: String? = null
+    val scheduled_for: String? = null,
+    val error_message: String? = null
 )
 
 class SettingsViewModel : ViewModel() {

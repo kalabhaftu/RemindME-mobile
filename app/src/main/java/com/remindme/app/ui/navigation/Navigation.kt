@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainNavigation(
     openReminderId: String? = null,
+    openReminderCategory: String? = null,
     onReminderOpened: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -122,8 +123,13 @@ fun MainNavigation(
 
     LaunchedEffect(openReminderId, sessionStatus) {
         if (openReminderId != null && sessionStatus is io.github.jan.supabase.auth.status.SessionStatus.Authenticated) {
-            if (backStack.lastOrNull() != EditReminder(openReminderId)) {
-                replaceRoot(EditReminder(openReminderId))
+            val destination: NavKey = if (openReminderCategory?.lowercase() == "person") {
+                PersonDetail(openReminderId)
+            } else {
+                EditReminder(openReminderId)
+            }
+            if (backStack.lastOrNull() != destination) {
+                replaceRoot(destination)
             }
             onReminderOpened()
         }

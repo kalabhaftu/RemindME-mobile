@@ -12,15 +12,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Event
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.CreditCard
-import androidx.compose.material.icons.outlined.FormatListBulleted
 import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.appScrimColor
 import com.remindme.app.ui.components.appSurfaceColor
 import com.remindme.app.ui.theme.AppColors
+import com.composables.icons.lucide.R as LucideR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,7 +84,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Person",
-                    icon = Icons.Outlined.Person,
+                    iconRes = LucideR.drawable.lucide_ic_user_round,
                     onClick = {
                         onDismiss()
                         onNavigateToAddPerson()
@@ -96,7 +93,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Subscription",
-                    icon = Icons.Outlined.CreditCard,
+                    iconRes = LucideR.drawable.lucide_ic_credit_card,
                     onClick = {
                         onDismiss()
                         onNavigateToAddSubscription()
@@ -111,7 +108,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Task",
-                    icon = Icons.Outlined.FormatListBulleted,
+                    iconRes = LucideR.drawable.lucide_ic_list_todo,
                     onClick = {
                         onDismiss()
                         onNavigateToAddTask()
@@ -120,7 +117,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Holiday",
-                    icon = Icons.Outlined.Event,
+                    iconRes = LucideR.drawable.lucide_ic_calendar_days,
                     onClick = {
                         onDismiss()
                         onNavigateToAddHoliday()
@@ -137,7 +134,7 @@ fun QuickAddSheet(
 fun QuickAddOption(
     modifier: Modifier = Modifier,
     label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconRes: Int,
     onClick: () -> Unit
 ) {
     AppCard(
@@ -150,7 +147,7 @@ fun QuickAddOption(
                 .padding(vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AppIcon(imageVector = icon, tint = AppColors.accent500, modifier = Modifier.size(28.dp))
+            AppIcon(iconRes = iconRes, tint = AppColors.accent500, modifier = Modifier.size(28.dp))
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = label,

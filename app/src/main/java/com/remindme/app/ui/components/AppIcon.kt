@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.annotation.DrawableRes
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -20,6 +22,23 @@ fun AppIcon(
     val resolvedTint = if (tint != Color.Unspecified) tint else color
     Icon(
         imageVector = imageVector,
+        contentDescription = null,
+        modifier = modifier.size(size),
+        tint = resolvedTint
+    )
+}
+
+@Composable
+fun AppIcon(
+    @DrawableRes iconRes: Int,
+    modifier: Modifier = Modifier,
+    size: Dp = 24.dp,
+    color: Color = Color.Unspecified,
+    tint: Color = Color.Unspecified
+) {
+    val resolvedTint = if (tint != Color.Unspecified) tint else color
+    androidx.compose.material3.Icon(
+        painter = painterResource(iconRes),
         contentDescription = null,
         modifier = modifier.size(size),
         tint = resolvedTint

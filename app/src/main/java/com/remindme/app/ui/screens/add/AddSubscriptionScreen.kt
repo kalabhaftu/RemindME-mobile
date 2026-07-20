@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.remindme.app.ui.components.BottomSheetPickerItem
 import com.remindme.app.ui.components.PickerField
 import com.remindme.app.ui.components.*
@@ -93,16 +92,15 @@ fun AddSubscriptionScreen(
                     modifier = Modifier.padding(top = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AsyncImage(
-                        model = uiState.logoUrl,
-                        contentDescription = "Logo",
+                    ResilientBrandImage(
+                        name = uiState.name,
+                        imageUrl = uiState.logoUrl,
                         modifier = Modifier.size(40.dp),
-                        onSuccess = { viewModel.markLogoLoaded() },
-                        onError = { viewModel.markLogoFailed() }
+                        cornerRadius = 10.dp
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (uiState.logoLoaded) "Logo ready" else "Loading logo…",
+                        text = "Logo preview",
                         style = MaterialTheme.typography.bodySmall,
                         color = TextTertiary
                     )

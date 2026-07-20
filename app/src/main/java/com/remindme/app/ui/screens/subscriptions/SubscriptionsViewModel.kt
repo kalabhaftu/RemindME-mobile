@@ -90,6 +90,9 @@ class SubscriptionsViewModel(application: Application) : AndroidViewModel(applic
             if (showLoading) {
                 _uiState.update { it.copy(isLoading = true, error = null) }
             }
+            if (_allSubscriptions.value.isEmpty()) {
+                _allSubscriptions.value = repository.cachedSnapshot().filter { it.category == CategoryType.SUBSCRIPTION }
+            }
             try {
                 val all = repository.getReminders()
                 val subscriptions = all.filter { it.category == CategoryType.SUBSCRIPTION }
