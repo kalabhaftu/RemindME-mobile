@@ -32,6 +32,9 @@ import com.remindme.app.ui.components.*
 import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.SnackbarHost
 import com.remindme.app.ui.theme.*
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -517,6 +520,17 @@ fun TestButton(label: String, icon: Int, modifier: Modifier = Modifier, onClick:
 
 @Composable
 fun DeliveryLogSection(uiState: SettingsUiState) {
+    fun formatDeliveryTime(value: String?): String {
+        if (value.isNullOrBlank()) return ""
+        return runCatching {
+            val instant = Instant.parse(value)
+            val zone = runCatching { ZoneId.of(uiState.timezone) }.getOrDefault(ZoneId.systemDefault())
+            DateTimeFormatter.ofPattern("MMM d, HH:mm").withZone(zone).format(instant)
+        }.getOrElse {
+            value.replace("T", " ").take(16)
+        }
+    }
+
     SettingsSection("Recent Deliveries") {
         if (uiState.deliveryLogs.isEmpty()) {
             Text("No delivery history yet.", color = TextSecondary, fontSize = 13.sp)
@@ -535,8 +549,9 @@ fun DeliveryLogSection(uiState: SettingsUiState) {
                         Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("${log.channel} · ${log.status}", modifier = Modifier.weight(1f), fontSize = 13.sp, color = TextPrimary)
-                        if (log.scheduled_for != null) {
-                            Text(log.scheduled_for.take(10), fontSize = 11.sp, color = TextTertiary, fontFamily = FontFamily.Monospace)
+                        val displayTime = formatDeliveryTime(log.sent_at ?: log.scheduled_for)
+                        if (displayTime.isNotBlank()) {
+                            Text(displayTime, fontSize = 11.sp, color = TextTertiary, fontFamily = FontFamily.Monospace)
                         }
                     }
                     if (!log.error_message.isNullOrBlank()) {

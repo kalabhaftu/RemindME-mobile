@@ -72,6 +72,7 @@ data class DeliveryLog(
     val channel: String? = null,
     val status: String? = null,
     val scheduled_for: String? = null,
+    val sent_at: String? = null,
     val error_message: String? = null
 )
 
