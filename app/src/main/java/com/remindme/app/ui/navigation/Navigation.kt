@@ -35,6 +35,7 @@ import com.remindme.app.ui.screens.notifications.NotificationHelpScreen
 import com.remindme.app.ui.screens.templates.TemplatesScreen
 import io.github.jan.supabase.auth.auth
 import com.remindme.app.domain.models.CategoryType
+import com.remindme.app.ui.navigation.editDestinationFor
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -214,12 +215,7 @@ fun MainNavigation(
                     reminderId = key.reminderId,
                     onBack = { popBack() },
                     onEdit = { item ->
-                        when (item.category) {
-                            CategoryType.PERSON -> backStack.add(EditPerson(item.id))
-                            CategoryType.SUBSCRIPTION -> backStack.add(EditSubscription(item.id))
-                            CategoryType.TASK -> backStack.add(EditTask(item.id))
-                            CategoryType.CUSTOM_HOLIDAY -> backStack.add(EditReminder(item.id))
-                        }
+                        backStack.add(editDestinationFor(item))
                     }
                 )
             }
