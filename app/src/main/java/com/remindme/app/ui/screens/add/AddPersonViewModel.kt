@@ -53,6 +53,24 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
     fun updateCustomRelationship(rel: String) = _uiState.update { it.copy(customRelationship = rel) }
     fun updateAvatarUrl(url: String?) = _uiState.update { it.copy(avatarUrl = url) }
     fun updateNotificationPrefs(prefs: Map<String, ChannelPref>) = _uiState.update { it.copy(notificationPrefs = prefs) }
+
+    fun resetForNewPerson() {
+        _uiState.update {
+            it.copy(
+                name = "",
+                notes = "",
+                birthdate = null,
+                gender = "unspecified",
+                relationship = "friend",
+                customRelationship = "",
+                avatarUrl = null,
+                isLoading = false,
+                error = null,
+                isSuccess = false,
+                existingPersonId = null
+            )
+        }
+    }
     
     fun setAvatarUploading(uploading: Boolean) = _uiState.update { it.copy(isUploadingAvatar = uploading) }
     fun clearError() = _uiState.update { it.copy(error = null) }
@@ -69,12 +87,12 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                         state.copy(
                             name = item.name,
                             notes = item.notes ?: "",
-                            birthdate = personDetails?.birthdate?.let { 
-                                try { LocalDateTime.parse(it) } catch (e: Exception) { null }
+                            birthdate = personDetails?.birthdate?.let {
+                                runCatching { java.time.LocalDate.parse(it.take(10)).atStartOfDay() }.getOrNull()
                             },
                             gender = personDetails?.gender ?: "unspecified",
                             relationship = personDetails?.relationship ?: "friend",
-                            avatarUrl = item.iconKey,
+                            avatarUrl = personDetails?.avatarUrl,
                             isLoading = false
                         )
                     }
@@ -82,7 +100,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                     _uiState.update { it.copy(isLoading = false, error = "Person not found") }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = "Failed to load person") }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load person: ${e.message ?: "Unknown error"}") }
             }
         }
     }
@@ -105,7 +123,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                 val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
                 val id = _uiState.value.existingPersonId ?: java.util.UUID.randomUUID().toString()
                 val now = LocalDateTime.now()
-                val birthdateStr = currentBirthdate.toString()
+                val birthdateStr = currentBirthdate.toLocalDate().toString()
                 
                 val nextOccurrence = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
                     category = "person",
@@ -116,7 +134,8 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                     birthdate = birthdateStr,
                     gender = _uiState.value.gender,
                     relationship = _uiState.value.relationship,
-                    customRelationship = _uiState.value.customRelationship
+                    customRelationship = _uiState.value.customRelationship,
+                    avatarUrl = _uiState.value.avatarUrl
                 )
                 
                 val recurrenceRules = com.remindme.app.domain.models.RecurrenceRules(
@@ -141,7 +160,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                     category = com.remindme.app.domain.models.CategoryType.PERSON,
                     name = currentName,
                     notes = _uiState.value.notes,
-                    iconKey = _uiState.value.avatarUrl,
+                    iconKey = null,
                     createdAt = now,
                     updatedAt = now,
                     personDetails = personDetails,
@@ -157,7 +176,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                 NotificationPrefsStore.save(getApplication(), _uiState.value.notificationPrefs)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = "Failed to save person") }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to save person: ${e.message ?: "Unknown error"}") }
             }
         }
     }

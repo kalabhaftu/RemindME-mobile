@@ -208,7 +208,7 @@ fun LoginScreen(
                         Text("Set Password", color = Accent500)
                     }
                 },
-                containerColor = BgSurface2,
+                containerColor = BgElevated,
                 titleContentColor = TextPrimary,
                 textContentColor = TextSecondary
             )
@@ -257,7 +257,7 @@ fun LoginScreen(
                         Text("Cancel", color = TextSecondary)
                     }
                 },
-                containerColor = BgSurface2,
+                containerColor = BgElevated,
                 titleContentColor = TextPrimary,
                 textContentColor = TextSecondary
             )

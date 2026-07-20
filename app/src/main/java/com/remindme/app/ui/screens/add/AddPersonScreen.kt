@@ -45,6 +45,8 @@ fun AddPersonScreen(
     LaunchedEffect(personId) {
         if (personId != null) {
             viewModel.loadPerson(personId)
+        } else {
+            viewModel.resetForNewPerson()
         }
     }
 

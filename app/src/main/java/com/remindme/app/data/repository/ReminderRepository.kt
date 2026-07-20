@@ -164,27 +164,62 @@ class ReminderRepository(private val supabase: SupabaseClient, private val conte
             if (isUpdate) recurrenceTable.upsert(payload) else recurrenceTable.insert(payload)
         }
 
+        if (isUpdate) {
+            notificationPrefsTable.delete { filter { eq("reminder_item_id", item.id) } }
+        }
         item.notificationPreferences?.forEach { pref ->
             val payload = buildJsonObject {
                 put("reminder_item_id", item.id)
                 put("channel", pref.channel)
                 put("enabled", pref.enabled)
                 put("lead_time", pref.leadTime)
-                put("custom_time", pref.customTime)
+                if (pref.customTime.isNotBlank()) put("custom_time", pref.customTime)
                 put("offset_days", pref.offsetDays)
             }
-            if (isUpdate) notificationPrefsTable.upsert(payload) else notificationPrefsTable.insert(payload)
+            notificationPrefsTable.insert(payload)
         }
     }
 
+    private fun basePayload(item: ReminderItem) = buildJsonObject {
+        put("id", item.id)
+        put("user_id", item.userId)
+        put("category", when (item.category) {
+            com.remindme.app.domain.models.CategoryType.PERSON -> "person"
+            com.remindme.app.domain.models.CategoryType.SUBSCRIPTION -> "subscription"
+            com.remindme.app.domain.models.CategoryType.TASK -> "task"
+            com.remindme.app.domain.models.CategoryType.CUSTOM_HOLIDAY -> "custom_holiday"
+        })
+        put("name", item.name)
+        item.iconKey?.let { put("icon_key", it) }
+        item.colorAccent?.let { put("color_accent", it) }
+        item.notes?.let { put("notes", it) }
+    }
+
+    private fun updatePayload(item: ReminderItem) = buildJsonObject {
+        put("name", item.name)
+        item.iconKey?.let { put("icon_key", it) }
+        item.colorAccent?.let { put("color_accent", it) }
+        item.notes?.let { put("notes", it) }
+        put("updated_at", Instant.now().toString())
+    }
+
     suspend fun addReminder(item: ReminderItem) = withContext(Dispatchers.IO) {
-        supabase.postgrest["reminder_items"].insert(item)
-        insertOrUpsertDetails(item, isUpdate = false)
-        notificationScheduler?.scheduleReminder(item)
+        try {
+            supabase.postgrest["reminder_items"].insert(basePayload(item))
+            insertOrUpsertDetails(item, isUpdate = false)
+            notificationScheduler?.scheduleReminder(item)
+        } catch (error: Exception) {
+            runCatching {
+                supabase.postgrest["reminder_items"].delete {
+                    filter { eq("id", item.id) }
+                }
+            }
+            throw error
+        }
     }
 
     suspend fun updateReminder(item: ReminderItem) = withContext(Dispatchers.IO) {
-        supabase.postgrest["reminder_items"].update(item) {
+        supabase.postgrest["reminder_items"].update(updatePayload(item)) {
             filter { eq("id", item.id) }
         }
         insertOrUpsertDetails(item, isUpdate = true)

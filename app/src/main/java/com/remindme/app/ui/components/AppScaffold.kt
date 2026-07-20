@@ -51,10 +51,10 @@ fun AppScaffold(
 
             // Content — padded by real measured heights
             val topPadding = if (appBar != null) {
-                if (appBarHeightPx > 0) with(density) { appBarHeightPx.toDp() } else 90.dp
+                if (appBarHeightPx > 0) with(density) { appBarHeightPx.toDp() } else 96.dp
             } else 0.dp
             val bottomPadding = if (bottomBar != null) {
-                if (bottomBarHeightPx > 0) with(density) { bottomBarHeightPx.toDp() + 24.dp } else 90.dp
+                if (bottomBarHeightPx > 0) with(density) { bottomBarHeightPx.toDp() + 24.dp } else 96.dp
             } else 0.dp
             content(PaddingValues(top = topPadding, bottom = bottomPadding))
 

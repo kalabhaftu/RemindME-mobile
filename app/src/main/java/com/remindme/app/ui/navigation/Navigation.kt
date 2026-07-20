@@ -39,6 +39,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.background
+import com.remindme.app.services.OfflineSyncScheduler
+import com.remindme.app.services.PushTokenRegistrar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainNavigation() {
@@ -77,6 +81,10 @@ fun MainNavigation() {
                 // Stay on AuthCheck / splash
             }
             is io.github.jan.supabase.auth.status.SessionStatus.Authenticated -> {
+                OfflineSyncScheduler.runNow(context)
+                kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launch {
+                    runCatching { PushTokenRegistrar.registerCurrentToken() }
+                }
                 if (backStack.lastOrNull() == AuthCheck) {
                     backStack.clear()
                     backStack.add(Main)

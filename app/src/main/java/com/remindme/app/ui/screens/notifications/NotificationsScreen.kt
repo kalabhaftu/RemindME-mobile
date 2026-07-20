@@ -104,11 +104,8 @@ fun NotificationsScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            if (uiState.isLoading && uiState.inAppNotifications.isEmpty() && uiState.allOccurrences.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Spinner()
-                }
-            } else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                if (uiState.isLoading) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 when (selectedTab) {
                     0 -> UpcomingTab(upcoming, onOpenReminder)
                     1 -> InAppTab(uiState.inAppNotifications, viewModel::markRead)

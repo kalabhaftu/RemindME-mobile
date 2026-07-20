@@ -45,6 +45,20 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
     fun updateDueAt(date: LocalDateTime?) = _uiState.update { it.copy(dueAt = date) }
     fun updateIconKey(key: String) = _uiState.update { it.copy(iconKey = key) }
     fun updateNotificationPrefs(prefs: Map<String, ChannelPref>) = _uiState.update { it.copy(notificationPrefs = prefs) }
+
+    fun resetForNewTask() {
+        _uiState.update {
+            it.copy(
+                name = "",
+                notes = "",
+                dueAt = null,
+                iconKey = "trash",
+                isLoading = false,
+                error = null,
+                isSuccess = false
+            )
+        }
+    }
     
     fun clearError() = _uiState.update { it.copy(error = null) }
     fun setError(error: String) = _uiState.update { it.copy(error = error) }
@@ -112,7 +126,7 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
                 NotificationPrefsStore.save(getApplication(), _uiState.value.notificationPrefs)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = "Failed to save task") }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to save task: ${e.message ?: "Unknown error"}") }
             }
         }
     }

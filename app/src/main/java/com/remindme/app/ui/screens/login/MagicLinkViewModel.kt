@@ -56,7 +56,7 @@ class MagicLinkViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(step = MagicLinkStep.SENDING, error = null) }
             try {
-                SupabaseManager.client.auth.signInWith(OTP) {
+                SupabaseManager.client.auth.signInWith(OTP, redirectUrl = SupabaseManager.magicLinkRedirectUrl) {
                     this.email = email
                     createUser = true
                 }

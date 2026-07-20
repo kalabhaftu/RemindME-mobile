@@ -48,13 +48,6 @@ fun SubscriptionsScreen(
     val subscriptions by viewModel.sortedSubscriptions.collectAsState()
     val haptic = LocalHapticFeedback.current
 
-    if (uiState.isLoading && subscriptions.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Spinner()
-        }
-        return
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         uiState.error?.let { error ->
             Snackbar(
@@ -67,6 +60,9 @@ fun SubscriptionsScreen(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
     ) {
+        if (uiState.isLoading) {
+            item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = Accent500) }
+        }
         if (subscriptions.isEmpty() && !uiState.isLoading) {
             item {
                 Box(modifier = Modifier.padding(top = 120.dp)) {

@@ -54,19 +54,16 @@ fun PeopleScreen(
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
 
-    if (uiState.isLoading && people.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Spinner()
-        }
-        return
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
     ) {
         item {
+            if (uiState.isLoading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = Accent500)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
             Spacer(modifier = Modifier.height(4.dp))
             AppTextField(
                 value = uiState.searchQuery,

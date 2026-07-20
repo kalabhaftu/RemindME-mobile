@@ -67,30 +67,29 @@ fun TemplatesScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Spinner()
-                }
-            } else if (uiState.templates.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Rounded.ViewList, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("No templates yet", color = TextSecondary, fontSize = 16.sp)
+            LazyColumn(
+                contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp, start = 16.dp, end = 16.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (uiState.isLoading) item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+                if (!uiState.isLoading && uiState.templates.isEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(Icons.Rounded.ViewList, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("No templates yet", color = TextSecondary, fontSize = 16.sp)
+                        }
                     }
                 }
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp, start = 16.dp, end = 16.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(uiState.templates, key = { it.id }) { template ->
-                        TemplateItem(
-                            template = template,
-                            onApply = { onApplyTemplate(template.category) },
-                            onDelete = { viewModel.deleteTemplate(template.id) }
-                        )
-                    }
+                items(uiState.templates, key = { it.id }) { template ->
+                    TemplateItem(
+                        template = template,
+                        onApply = { onApplyTemplate(template.category) },
+                        onDelete = { viewModel.deleteTemplate(template.id) }
+                    )
                 }
             }
         }

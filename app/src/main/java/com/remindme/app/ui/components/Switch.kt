@@ -19,9 +19,9 @@ fun AppSwitch(
             checkedThumbColor = Color.White,
             checkedTrackColor = Accent500,
             uncheckedThumbColor = AppColors.textSecondary,
-            uncheckedTrackColor = AppColors.bgSurface1,
-            uncheckedBorderColor = Color.Transparent,
-            checkedBorderColor = Color.Transparent
+            uncheckedTrackColor = appControlColor(),
+            uncheckedBorderColor = appBorderColor(),
+            checkedBorderColor = appBorderColor()
         )
     )
 }

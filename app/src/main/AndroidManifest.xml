@@ -29,6 +29,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="remindme" android:host="login-callback" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="remindamie" android:host="fallback" />
+            </intent-filter>
         </activity>
 
         <service

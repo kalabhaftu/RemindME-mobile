@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 val BgCanvas = Color(0xFF06070A)
 val BgSurface1 = Color(0x08FFFFFF)
-val BgSurface2 = Color(0x0FFFFFFF)
+val BgSurface2 = Color(0xCC18263B)
 val BgSurface3 = Color(0x19FFFFFF)
 val BgElevated = Color(0xFF1E2029)
 

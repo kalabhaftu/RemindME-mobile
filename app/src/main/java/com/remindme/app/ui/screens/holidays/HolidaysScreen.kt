@@ -44,13 +44,6 @@ fun HolidaysScreen(
     val haptic = LocalHapticFeedback.current
     var showCountryPicker by remember { mutableStateOf(false) }
 
-    if (uiState.isLoadingCountries) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Spinner()
-        }
-        return
-    }
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
@@ -140,6 +133,9 @@ fun HolidaysScreen(
                         Text(text = "Country", fontSize = 11.sp, color = TextTertiary)
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(text = selectedName, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                    }
+                    if (uiState.isLoadingCountries) {
+                        Spinner(modifier = Modifier.size(18.dp))
                     }
                     AppIcon(imageVector = Icons.Rounded.KeyboardArrowDown, size = 20.dp, color = TextTertiary)
                 }

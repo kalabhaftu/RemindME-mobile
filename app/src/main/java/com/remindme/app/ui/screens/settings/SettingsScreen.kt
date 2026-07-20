@@ -94,12 +94,7 @@ fun SettingsScreen(
             }
         ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Spinner()
-                }
-            } else {
-                LazyColumn(
+            LazyColumn(
                     contentPadding = PaddingValues(
                         top = paddingValues.calculateTopPadding() + 16.dp,
                         bottom = paddingValues.calculateBottomPadding() + 32.dp,
@@ -108,6 +103,9 @@ fun SettingsScreen(
                     ),
                     modifier = Modifier.fillMaxSize()
                 ) {
+                    if (uiState.isLoading) {
+                        item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+                    }
                     item {
                         TelegramSection(uiState, viewModel)
                         Spacer(modifier = Modifier.height(24.dp))
@@ -140,7 +138,6 @@ fun SettingsScreen(
                         DangerZoneSection(viewModel, onNavigateHome)
                         Spacer(modifier = Modifier.height(32.dp))
                     }
-                }
             }
         }
     }

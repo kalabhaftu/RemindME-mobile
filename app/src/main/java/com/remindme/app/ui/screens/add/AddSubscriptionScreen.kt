@@ -29,6 +29,10 @@ fun AddSubscriptionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showDatePicker by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        viewModel.resetForNewSubscription()
+    }
+
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
@@ -92,11 +96,13 @@ fun AddSubscriptionScreen(
                     AsyncImage(
                         model = uiState.logoUrl,
                         contentDescription = "Logo",
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(40.dp),
+                        onSuccess = { viewModel.markLogoLoaded() },
+                        onError = { viewModel.markLogoFailed() }
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Logo auto-fetched",
+                        text = if (uiState.logoLoaded) "Logo ready" else "Loading logo…",
                         style = MaterialTheme.typography.bodySmall,
                         color = TextTertiary
                     )

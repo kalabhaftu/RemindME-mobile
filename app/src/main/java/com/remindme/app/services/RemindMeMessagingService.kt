@@ -3,14 +3,9 @@ package com.remindme.app.services
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import android.util.Log
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.JsonPrimitive
 
 class RemindMeMessagingService : FirebaseMessagingService() {
 
@@ -18,18 +13,9 @@ class RemindMeMessagingService : FirebaseMessagingService() {
         super.onNewToken(token)
         Log.d("FCM", "New Token: $token")
         
-        // Sync token to Supabase
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val user = com.remindme.app.data.remote.SupabaseManager.client.auth.currentUserOrNull()
-                if (user != null) {
-                    val payload = buildJsonObject {
-                        put("user_id", JsonPrimitive(user.id))
-                        put("channel", JsonPrimitive("push"))
-                        put("encrypted_token", JsonPrimitive(token))
-                    }
-                    com.remindme.app.data.remote.SupabaseManager.client.postgrest["notification_channels"].upsert(payload)
-                }
+                PushTokenRegistrar.register(token)
             } catch (e: Exception) {
                 Log.e("FCM", "Failed to sync token to Supabase", e)
             }

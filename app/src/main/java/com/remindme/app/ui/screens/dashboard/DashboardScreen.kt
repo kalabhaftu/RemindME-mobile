@@ -48,13 +48,6 @@ fun DashboardScreen(
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
 
-    if (uiState.isLoading && uiState.reminders.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-            Spinner()
-        }
-        return
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         val peopleCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.PERSON } }
         val subsCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.SUBSCRIPTION } }

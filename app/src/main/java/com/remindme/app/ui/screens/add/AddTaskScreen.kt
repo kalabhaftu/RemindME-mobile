@@ -37,6 +37,10 @@ fun AddTaskScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showDatePicker by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        viewModel.resetForNewTask()
+    }
+
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)

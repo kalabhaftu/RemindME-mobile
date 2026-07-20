@@ -6,6 +6,7 @@ import com.google.firebase.FirebaseApp
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import com.remindme.app.services.OfflineSyncScheduler
 
 class RemindMeApp : Application() {
     override fun onCreate() {
@@ -16,6 +17,8 @@ class RemindMeApp : Application() {
             url = BuildConfig.SUPABASE_URL,
             key = BuildConfig.SUPABASE_ANON_KEY
         )
+
+        OfflineSyncScheduler.schedule(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(

@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import com.remindme.app.services.LogoResolver
 
 data class AddSubscriptionUiState(
     val name: String = "",
@@ -33,6 +34,7 @@ data class AddSubscriptionUiState(
     val notes: String = "",
     val logoUrl: String? = null,
     val logoDomain: String? = null,
+    val logoLoaded: Boolean = false,
     val isResolvingLogo: Boolean = false,
     val notificationPrefs: Map<String, ChannelPref> = emptyMap(),
     val isLoading: Boolean = false,
@@ -52,7 +54,7 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
     }
 
     fun updateName(name: String) {
-        _uiState.update { it.copy(name = name) }
+        _uiState.update { it.copy(name = name, logoUrl = null, logoDomain = null, logoLoaded = false) }
         resolveLogoJob?.cancel()
         resolveLogoJob = viewModelScope.launch {
             delay(800)
@@ -66,6 +68,26 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
     fun updateRenewalDate(date: LocalDateTime?) = _uiState.update { it.copy(renewalDate = date) }
     fun updateNotes(notes: String) = _uiState.update { it.copy(notes = notes) }
     fun updateNotificationPrefs(prefs: Map<String, ChannelPref>) = _uiState.update { it.copy(notificationPrefs = prefs) }
+
+    fun resetForNewSubscription() {
+        _uiState.update {
+            it.copy(
+                name = "",
+                amount = "",
+                currency = "USD",
+                cycle = "monthly",
+                renewalDate = null,
+                notes = "",
+                logoUrl = null,
+                logoDomain = null,
+                logoLoaded = false,
+                isResolvingLogo = false,
+                isLoading = false,
+                error = null,
+                isSuccess = false
+            )
+        }
+    }
     
     fun clearError() = _uiState.update { it.copy(error = null) }
     fun setError(error: String) = _uiState.update { it.copy(error = error) }
@@ -74,27 +96,9 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
         if (query.isBlank()) return
         _uiState.update { it.copy(isResolvingLogo = true) }
         try {
-            val resolvedDomain = withContext(Dispatchers.IO) {
-                try {
-                    val url = "https://autocomplete.clearbit.com/v1/companies/suggest?query=${java.net.URLEncoder.encode(query, "UTF-8")}"
-                    val response = java.net.URL(url).readText()
-                    val jsonArray = JSONArray(response)
-                    if (jsonArray.length() > 0) {
-                        jsonArray.getJSONObject(0).optString("domain")
-                    } else {
-                        null
-                    }
-                } catch (e: Exception) {
-                    null
-                }
-            } ?: run {
-                val clean = query.lowercase().replace(Regex("[^a-z0-9]"), "")
-                if (clean.isNotEmpty()) "$clean.com" else null
-            }
-
-            if (resolvedDomain != null) {
-                val logoUrl = resolveLogoUrl(resolvedDomain)
-                _uiState.update { it.copy(logoUrl = logoUrl, logoDomain = resolvedDomain, isResolvingLogo = false) }
+            val resolution = LogoResolver.resolve(query)
+            if (resolution != null) {
+                _uiState.update { it.copy(logoUrl = resolution.logoUrl, logoDomain = resolution.domain, logoLoaded = false, isResolvingLogo = false) }
             } else {
                 _uiState.update { it.copy(isResolvingLogo = false) }
             }
@@ -103,28 +107,9 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    private suspend fun resolveLogoUrl(domain: String): String {
-        val urls = listOf(
-            "https://icon.horse/icon/$domain",
-            "https://www.google.com/s2/favicons?domain=$domain&sz=128"
-        )
-        for (url in urls) {
-            try {
-                val conn = withContext(Dispatchers.IO) {
-                    val u = java.net.URL(url)
-                    val c = u.openConnection() as java.net.HttpURLConnection
-                    c.connectTimeout = 3000
-                    c.readTimeout = 3000
-                    c.requestMethod = "HEAD"
-                    c
-                }
-                val contentType = conn.contentType
-                conn.disconnect()
-                if (contentType != null && contentType.startsWith("image")) return url
-            } catch (_: Exception) {}
-        }
-        return urls.last()
-    }
+    fun markLogoLoaded() = _uiState.update { it.copy(logoLoaded = true) }
+
+    fun markLogoFailed() = _uiState.update { it.copy(logoUrl = null, logoLoaded = false) }
 
     fun saveSubscription() {
         val currentName = _uiState.value.name
@@ -144,7 +129,7 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
                 val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
                 val id = java.util.UUID.randomUUID().toString()
                 val now = LocalDateTime.now()
-                val renewalDateStr = currentRenewalDate.toString()
+                val renewalDateStr = currentRenewalDate.toLocalDate().toString()
                 
                 val nextOccurrence = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
                     category = "subscription",
@@ -157,7 +142,8 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
                     billingCurrency = _uiState.value.currency,
                     cycle = _uiState.value.cycle,
                     renewalDate = renewalDateStr,
-                    logoUrl = _uiState.value.logoUrl
+                    logoUrl = _uiState.value.logoUrl,
+                    logoDomain = _uiState.value.logoDomain
                 )
                 
                 val recurrenceRules = com.remindme.app.domain.models.RecurrenceRules(
@@ -194,7 +180,7 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
                 NotificationPrefsStore.save(getApplication(), _uiState.value.notificationPrefs)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = "Failed to save subscription") }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to save subscription: ${e.message ?: "Unknown error"}") }
             }
         }
     }

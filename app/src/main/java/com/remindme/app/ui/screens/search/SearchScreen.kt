@@ -59,10 +59,9 @@ fun SearchScreen(
             }
 
             if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Spinner()
-                }
-            } else if (uiState.results.isEmpty()) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = Accent500)
+            }
+            if (!uiState.isLoading && uiState.results.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
