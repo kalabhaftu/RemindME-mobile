@@ -14,7 +14,7 @@ data class UpdateInfo(
 )
 
 object UpdateService {
-    private const val REPO = "kalabhaftu/RemindME-releases"
+    private const val REPO = "kalabhaftu/RemindME-mobile"
     private const val API_URL = "https://api.github.com/repos/$REPO/releases/latest"
     private const val TAG = "UpdateService"
 

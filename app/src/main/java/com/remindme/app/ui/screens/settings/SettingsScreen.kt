@@ -27,6 +27,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.widget.Toast
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import com.remindme.app.ui.components.BottomSheetPicker
 import com.remindme.app.ui.components.*
 import com.remindme.app.ui.components.AppIcon
@@ -644,7 +647,7 @@ fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsVie
             Spacer(modifier = Modifier.height(12.dp))
             Text("Google Calendar", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             Text(
-                "On desktop: Other calendars → + → From URL → paste the webcal link → Add calendar.",
+                "1. Open Google Calendar. 2. Open Other calendars and choose Add by URL. 3. Paste the webcal link and add the calendar.",
                 color = TextSecondary,
                 fontSize = 12.sp,
                 lineHeight = 18.sp
@@ -652,7 +655,7 @@ fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsVie
             Spacer(modifier = Modifier.height(10.dp))
             Text("Outlook Calendar", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             Text(
-                "Add calendar → Subscribe from web → paste the link → Import.",
+                "1. Open Outlook Calendar. 2. Choose Add calendar and Subscribe from web. 3. Paste the webcal link and subscribe.",
                 color = TextSecondary,
                 fontSize = 12.sp,
                 lineHeight = 18.sp
@@ -669,7 +672,7 @@ fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsVie
             title = { Text("Connect your calendar", color = TextPrimary) },
             text = {
                 Text(
-                    "The installed calendar app does not accept webcal links automatically. The private link is already copied.\n\nGoogle Calendar: Other calendars → + → From URL → paste the link → Add calendar.\n\nOutlook: Add calendar → Subscribe from web → paste the link → Import."
+                    "The installed calendar app does not accept webcal links automatically. The private link is already copied.\n\nGoogle Calendar\n1. Open Google Calendar.\n2. Open Other calendars and choose Add by URL.\n3. Paste the link and add the calendar.\n\nOutlook Calendar\n1. Open Outlook Calendar.\n2. Choose Add calendar and Subscribe from web.\n3. Paste the link and subscribe."
                 )
             },
             confirmButton = {
@@ -684,12 +687,16 @@ fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsVie
 @Composable
 fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri -> uri?.let { viewModel.exportData(context, it) } }
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri -> uri?.let { viewModel.importData(context, it) } }
+    val contactsPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> if (granted) viewModel.importAllContacts(context) }
     SettingsSection("Account") {
         Text("Export your data or sign out on all devices.", color = TextSecondary, fontSize = 13.sp)
         Spacer(modifier = Modifier.height(16.dp))
@@ -722,6 +729,36 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
             Spacer(modifier = Modifier.width(8.dp))
             Text("Import JSON", color = TextPrimary)
         }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        AppButton(
+            onClick = {
+                if (!uiState.isImportingContacts) {
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+                        viewModel.importAllContacts(context)
+                    } else {
+                        contactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                    }
+                }
+            },
+            enabled = !uiState.isImportingContacts,
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) {
+            if (uiState.isImportingContacts) {
+                Spinner(size = 18.dp)
+            } else {
+                AppIcon(Icons.Outlined.People, modifier = Modifier.size(18.dp), color = TextPrimary)
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(if (uiState.isImportingContacts) "Importing contacts…" else "Import All Contacts", color = TextPrimary)
+        }
+        Text(
+            "Imports every device contact in one run. Contacts without a birthday are added without a birthday notification; duplicates are skipped.",
+            color = TextTertiary,
+            fontSize = 11.sp,
+            lineHeight = 16.sp,
+            modifier = Modifier.padding(top = 8.dp)
+        )
         Spacer(modifier = Modifier.height(12.dp))
 
         Text("RemindME v${com.remindme.app.BuildConfig.VERSION_NAME}", color = TextTertiary, fontSize = 12.sp)

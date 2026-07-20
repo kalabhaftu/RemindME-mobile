@@ -52,9 +52,6 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
     fun updateRelationship(rel: String) = _uiState.update { it.copy(relationship = rel) }
     fun updateCustomRelationship(rel: String) = _uiState.update { it.copy(customRelationship = rel) }
     fun updateAvatarUrl(url: String?) = _uiState.update { it.copy(avatarUrl = url) }
-    fun importContact(name: String, birthdate: java.time.LocalDate?) = _uiState.update {
-        it.copy(name = name, birthdate = birthdate?.atStartOfDay())
-    }
     fun updateNotificationPrefs(prefs: Map<String, ChannelPref>) = _uiState.update { it.copy(notificationPrefs = prefs) }
 
     fun resetForNewPerson() {

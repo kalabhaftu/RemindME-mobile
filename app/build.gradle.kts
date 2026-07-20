@@ -30,6 +30,8 @@ android {
         if (localPropertiesFile.exists()) {
             localProperties.load(FileInputStream(localPropertiesFile))
         }
+        versionCode = localProperties.getProperty("VERSION_CODE", System.getenv("VERSION_CODE") ?: "1").toIntOrNull() ?: 1
+        versionName = localProperties.getProperty("VERSION_NAME", System.getenv("VERSION_NAME") ?: "1.0")
         buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL", "")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY", "")}\"")
         buildConfigField("String", "WEB_API_URL", "\"${localProperties.getProperty("WEB_API_URL", "https://remind-me-web-roan.vercel.app")}\"")
@@ -49,7 +51,9 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("release")
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
@@ -86,6 +90,7 @@ dependencies {
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
+  implementation("androidx.fragment:fragment-ktx:1.8.9")
 
   // Arch Components
   implementation(libs.androidx.lifecycle.runtime.compose)

@@ -1,12 +1,17 @@
 package com.remindme.app.ui.screens.settings
 
 import android.content.Context
+import android.provider.ContactsContract
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.BuildConfig
 import com.remindme.app.data.remote.SupabaseManager
+import com.remindme.app.data.repository.OfflineReminderRepository
+import com.remindme.app.data.repository.ReminderRepository
+import com.remindme.app.domain.models.CategoryType
+import com.remindme.app.ui.components.NotificationPrefsStore
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
@@ -25,6 +30,10 @@ import org.json.JSONObject
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 data class SettingsUiState(
     val isLoading: Boolean = false,
@@ -50,6 +59,7 @@ data class SettingsUiState(
     val calendarWebcalUrl: String? = null,
     val calendarHttpsUrl: String? = null,
     val isLoadingCalendar: Boolean = false,
+    val isImportingContacts: Boolean = false,
 
     val error: String? = null,
     val message: String? = null
@@ -65,12 +75,16 @@ data class DeliveryLog(
     val error_message: String? = null
 )
 
-class SettingsViewModel : ViewModel() {
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     private val supabase = SupabaseManager.client
     private val webApiUrl = BuildConfig.WEB_API_URL
+    private val repository = OfflineReminderRepository(
+        ReminderRepository(SupabaseManager.client, application.applicationContext),
+        application.applicationContext
+    )
 
     init {
         loadPreferences()
@@ -236,6 +250,121 @@ class SettingsViewModel : ViewModel() {
         } finally {
             _uiState.update { it.copy(isLoadingCalendar = false) }
         }
+    }
+
+    fun importAllContacts(context: Context) = viewModelScope.launch(Dispatchers.IO) {
+        _uiState.update { it.copy(isImportingContacts = true, error = null) }
+        try {
+            val userId = supabase.auth.currentUserOrNull()?.id ?: throw Exception("Not logged in")
+            val resolver = context.contentResolver
+            val birthdayByContactId = mutableMapOf<String, String>()
+            resolver.query(
+                ContactsContract.Data.CONTENT_URI,
+                arrayOf(ContactsContract.Data.CONTACT_ID, ContactsContract.CommonDataKinds.Event.START_DATE),
+                "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.CommonDataKinds.Event.TYPE} = ?",
+                arrayOf(
+                    ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE,
+                    ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY.toString()
+                ),
+                null
+            )?.use { cursor ->
+                val idIndex = cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID)
+                val dateIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Event.START_DATE)
+                while (cursor.moveToNext()) {
+                    val id = cursor.getString(idIndex).orEmpty()
+                    parseContactBirthday(cursor.getString(dateIndex))?.let { birthdayByContactId[id] = it }
+                }
+            }
+
+            val existing = runCatching { repository.getReminders() }.getOrElse { repository.cachedSnapshot() }
+                .filter { it.category == CategoryType.PERSON }
+                .mapTo(mutableSetOf()) { it.name.trim().lowercase() }
+            val defaults = NotificationPrefsStore.load(context)
+            var imported = 0
+            var skipped = 0
+            var withBirthday = 0
+            var withoutBirthday = 0
+
+            resolver.query(
+                ContactsContract.Contacts.CONTENT_URI,
+                arrayOf(ContactsContract.Contacts._ID, ContactsContract.Contacts.DISPLAY_NAME),
+                null,
+                null,
+                "${ContactsContract.Contacts.DISPLAY_NAME} COLLATE NOCASE ASC"
+            )?.use { cursor ->
+                val idIndex = cursor.getColumnIndex(ContactsContract.Contacts._ID)
+                val nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
+                while (cursor.moveToNext()) {
+                    val name = cursor.getString(nameIndex)?.trim().orEmpty()
+                    if (name.isBlank()) continue
+                    val key = name.lowercase()
+                    if (!existing.add(key)) {
+                        skipped++
+                        continue
+                    }
+                    val birthdate = birthdayByContactId[cursor.getString(idIndex)]
+                    val now = LocalDateTime.now()
+                    val item = com.remindme.app.domain.models.ReminderItem(
+                        id = UUID.randomUUID().toString(),
+                        userId = userId,
+                        category = CategoryType.PERSON,
+                        name = name,
+                        createdAt = now,
+                        updatedAt = now,
+                        personDetails = com.remindme.app.domain.models.PersonDetails(
+                            birthdate = birthdate,
+                            relationship = "friend",
+                            gender = "unspecified"
+                        ),
+                        recurrenceRules = birthdate?.let {
+                            com.remindme.app.domain.models.RecurrenceRules(
+                                frequency = "yearly",
+                                ends = "never",
+                                nextOccurrenceAt = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
+                                    category = "person",
+                                    birthdate = it
+                                )
+                            )
+                        },
+                        notificationPreferences = birthdate?.let {
+                            defaults.map { (channel, pref) ->
+                                com.remindme.app.domain.models.NotificationPreference(
+                                    channel = channel,
+                                    enabled = pref.enabled,
+                                    leadTime = pref.leadTime,
+                                    customTime = pref.customTime,
+                                    offsetDays = pref.offsetDays
+                                )
+                            }
+                        }
+                    )
+                    repository.addReminder(item)
+                    imported++
+                    if (birthdate == null) withoutBirthday++ else withBirthday++
+                }
+            } ?: throw Exception("Unable to read contacts")
+
+            _uiState.update {
+                it.copy(
+                    message = "Imported $imported contacts. Birthdays found: $withBirthday; missing: $withoutBirthday; duplicates skipped: $skipped",
+                    isImportingContacts = false
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = e.message ?: "Contact import failed", isImportingContacts = false) }
+        }
+    }
+
+    private fun parseContactBirthday(raw: String?): String? {
+        val value = raw?.trim().orEmpty()
+        if (value.isBlank() || value.startsWith("--")) return null
+        return runCatching {
+            when {
+                value.matches(Regex("\\d{8}")) -> LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE).toString()
+                value.length >= 10 -> LocalDate.parse(value.take(10), DateTimeFormatter.ISO_LOCAL_DATE).toString()
+                else -> null
+            }
+        }.getOrNull()
     }
 
     fun updatePreference(key: String, value: Any) {
@@ -468,6 +597,10 @@ class SettingsViewModel : ViewModel() {
 
             if (conn.responseCode == 200) {
                 val json = conn.inputStream.bufferedReader().use { it.readText() }
+                if (JSONObject(json).optJSONArray("reminders")?.length() != null && JSONObject(json).optJSONArray("reminders")?.length() == 0) {
+                    withContext(Dispatchers.Main) { _uiState.update { it.copy(message = "There are no reminders to export yet") } }
+                    return@launch
+                }
                 context.contentResolver.openOutputStream(destination)?.use { it.write(json.toByteArray()) }
                     ?: throw Exception("Unable to open export destination")
                 withContext(Dispatchers.Main) {
@@ -498,7 +631,15 @@ class SettingsViewModel : ViewModel() {
                 .bufferedReader().use { it.readText() }
             if (conn.responseCode !in 200..299) throw Exception(JSONObject(body).optString("error", "Import failed"))
             val result = JSONObject(body)
-            _uiState.update { it.copy(message = "Imported ${result.optInt("imported")} reminders; skipped ${result.optInt("skipped")} duplicates") }
+            val imported = result.optInt("imported")
+            val skipped = result.optInt("skipped")
+            _uiState.update {
+                it.copy(message = if (imported == 0 && skipped == 0) {
+                    "This JSON file contains no reminders"
+                } else {
+                    "Imported $imported reminders; skipped $skipped duplicates"
+                })
+            }
         } catch (e: Exception) {
             _uiState.update { it.copy(error = e.message ?: "Failed to import data") }
         }
