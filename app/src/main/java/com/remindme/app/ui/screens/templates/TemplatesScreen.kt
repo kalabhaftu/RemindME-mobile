@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,8 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.ui.components.BottomSheetPicker
-import com.remindme.app.ui.components.liquid.*
-import com.remindme.app.ui.components.liquid.LiquidSnackbarHost
+import com.remindme.app.ui.components.*
+import com.remindme.app.ui.components.SnackbarHost
 import com.remindme.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,8 +39,8 @@ fun TemplatesScreen(
         }
     }
 
-    LiquidScaffold(
-        snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
+    AppScaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         appBar = {
             Row(
                 modifier = Modifier
@@ -53,13 +51,13 @@ fun TemplatesScreen(
             ) {
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
+                TopBar(
                     title = "Templates",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f),
                     actions = {
                         IconButton(onClick = { showCreate = true }) {
-                            LiquidIcon(imageVector = Icons.Rounded.Add, color = TextPrimary)
+                            AppIcon(iconRes = AppIcons.Add, color = TextPrimary)
                         }
                     }
                 )
@@ -67,31 +65,35 @@ fun TemplatesScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    LiquidSpinner()
-                }
-            } else if (uiState.templates.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Rounded.ViewList, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("No templates yet", color = TextSecondary, fontSize = 16.sp)
+            AppPullToRefresh(
+                isRefreshing = uiState.isLoading,
+                onRefresh = { viewModel.loadTemplates() }
+            ) {
+            LazyColumn(
+                contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp, start = 16.dp, end = 16.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (uiState.isLoading) item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+                if (!uiState.isLoading && uiState.templates.isEmpty()) {
+                    item {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            AppIcon(iconRes = AppIcons.ViewList, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("No templates yet", color = TextSecondary, fontSize = 16.sp)
+                        }
                     }
                 }
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp, start = 16.dp, end = 16.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(uiState.templates, key = { it.id }) { template ->
-                        TemplateItem(
-                            template = template,
-                            onApply = { onApplyTemplate(template.category) },
-                            onDelete = { viewModel.deleteTemplate(template.id) }
-                        )
-                    }
+                items(uiState.templates, key = { it.id }) { template ->
+                    TemplateItem(
+                        template = template,
+                        onApply = { onApplyTemplate(template.category) },
+                        onDelete = { viewModel.deleteTemplate(template.id) }
+                    )
                 }
+            }
             }
         }
     }
@@ -100,7 +102,9 @@ fun TemplatesScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.2f))
+                    .background(
+                        appScrimColor()
+                    )
                     .clickable { showCreate = false }
             ) {
                 Box(
@@ -122,7 +126,7 @@ fun TemplatesScreen(
 
 @Composable
 fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -> Unit) {
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).clickable(onClick = onApply)
     ) {
@@ -130,18 +134,18 @@ fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 12.dp,
                 modifier = Modifier.wrapContentSize()
             ) {
                 Box(modifier = Modifier.padding(10.dp)) {
                     val icon = when (template.category) {
-                        "person" -> Icons.Rounded.Person
-                        "subscription" -> Icons.Rounded.CreditCard
-                        "custom_holiday" -> Icons.Rounded.CardGiftcard
-                        else -> Icons.Rounded.Checklist
+                        "person" -> AppIcons.Person
+                        "subscription" -> AppIcons.CreditCard
+                        "custom_holiday" -> AppIcons.CardGiftcard
+                        else -> AppIcons.Checklist
                     }
-                    LiquidIcon(imageVector = icon, color = Accent500, size = 22.dp)
+                    AppIcon(iconRes = icon, color = Accent500, size = 22.dp)
                 }
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -161,7 +165,7 @@ fun TemplateItem(template: ReminderTemplate, onApply: () -> Unit, onDelete: () -
                 )
             }
             IconButton(onClick = onDelete) {
-                LiquidIcon(imageVector = Icons.Rounded.Delete, color = StateDanger, size = 20.dp)
+                AppIcon(iconRes = AppIcons.Delete, color = StateDanger, size = 20.dp)
             }
         }
     }
@@ -176,15 +180,16 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
 
     val catLabels = mapOf("task" to "Task", "person" to "Person", "subscription" to "Subscription", "custom_holiday" to "Event")
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 24.dp,
+        elevated = true,
         modifier = Modifier.fillMaxWidth().padding(bottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding() + 20.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp).fillMaxWidth()) {
             Text("New Template", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
             Spacer(modifier = Modifier.height(16.dp))
             
-            LiquidTextField(
+            AppTextField(
                 value = name,
                 onValueChange = { name = it },
                 placeholder = "e.g. Monthly Bills",
@@ -193,7 +198,7 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
             Spacer(modifier = Modifier.height(12.dp))
             
             Text("Category", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(bottom = 8.dp, start = 4.dp))
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 16.dp,
                 modifier = Modifier.fillMaxWidth().clickable { showCategoryPicker = true }
             ) {
@@ -208,7 +213,7 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
             }
             Spacer(modifier = Modifier.height(12.dp))
             
-            LiquidTextField(
+            AppTextField(
                 value = notes,
                 onValueChange = { notes = it },
                 placeholder = "Add a note...",
@@ -217,24 +222,21 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
             Spacer(modifier = Modifier.height(20.dp))
             
             Row {
-                OutlinedButton(
+                AppButton(
                     onClick = onClose,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary),
-                    shape = RoundedCornerShape(16.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder)
+                    modifier = Modifier.weight(1f).height(48.dp)
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(modifier = Modifier.width(12.dp))
-                Button(
+                AppButton(
                     onClick = { onCreate(name, category, notes.takeIf { it.isNotBlank() }) },
-                    enabled = name.isNotBlank(),
                     modifier = Modifier.weight(1f).height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Accent500, contentColor = Color.White),
-                    shape = RoundedCornerShape(16.dp)
+                    tint = Accent500
                 ) {
-                    Text("Create", fontWeight = FontWeight.SemiBold)
+                    AppIcon(iconRes = AppIcons.Add, color = Accent500, size = 18.dp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Create", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

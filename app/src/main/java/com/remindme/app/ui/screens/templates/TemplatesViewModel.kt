@@ -60,7 +60,7 @@ class TemplatesViewModel : ViewModel() {
                 .decodeList<ReminderTemplate>()
             _uiState.update { it.copy(templates = list, isLoading = false) }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message, isLoading = false) }
+            _uiState.update { it.copy(error = "Failed to load templates", isLoading = false) }
         }
     }
 
@@ -80,7 +80,7 @@ class TemplatesViewModel : ViewModel() {
             supabase.postgrest["reminder_templates"].insert(obj)
             loadTemplates()
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to create template") }
         }
     }
 
@@ -91,7 +91,7 @@ class TemplatesViewModel : ViewModel() {
             }
             loadTemplates()
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to delete template") }
         }
     }
 }

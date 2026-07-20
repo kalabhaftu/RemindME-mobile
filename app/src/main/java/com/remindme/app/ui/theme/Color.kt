@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 val BgCanvas = Color(0xFF06070A)
 val BgSurface1 = Color(0x08FFFFFF)
-val BgSurface2 = Color(0x0FFFFFFF)
+val BgSurface2 = Color(0xCC18263B)
 val BgSurface3 = Color(0x19FFFFFF)
 val BgElevated = Color(0xFF1E2029)
 
@@ -19,7 +19,7 @@ val TextTertiary = Color(0x61FFFFFF)
 val StateSuccess = Color(0xFF34D399)
 val StateWarning = Color(0xFFF59E0B)
 val StateDanger = Color(0xFFEF4444)
-val GlassBorder = Color(0x14FFFFFF)
+val BorderSubtle = Color(0x14FFFFFF)
 
 // Backward compatibility alias — all screens can use AppColors.xxx
 object AppColors {
@@ -37,5 +37,5 @@ object AppColors {
     val stateSuccess get() = com.remindme.app.ui.theme.StateSuccess
     val stateWarning get() = com.remindme.app.ui.theme.StateWarning
     val stateDanger get() = com.remindme.app.ui.theme.StateDanger
-    val glassBorder get() = com.remindme.app.ui.theme.GlassBorder
+    val glassBorder get() = com.remindme.app.ui.theme.BorderSubtle
 }

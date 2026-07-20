@@ -3,14 +3,13 @@ package com.remindme.app.services
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import android.util.Log
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.JsonPrimitive
+import android.app.PendingIntent
+import android.content.Intent
+import androidx.core.app.TaskStackBuilder
+import com.remindme.app.MainActivity
 
 class RemindMeMessagingService : FirebaseMessagingService() {
 
@@ -18,18 +17,9 @@ class RemindMeMessagingService : FirebaseMessagingService() {
         super.onNewToken(token)
         Log.d("FCM", "New Token: $token")
         
-        // Sync token to Supabase
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val user = com.remindme.app.data.remote.SupabaseManager.client.auth.currentUserOrNull()
-                if (user != null) {
-                    val payload = buildJsonObject {
-                        put("user_id", JsonPrimitive(user.id))
-                        put("channel", JsonPrimitive("push"))
-                        put("encrypted_token", JsonPrimitive(token))
-                    }
-                    com.remindme.app.data.remote.SupabaseManager.client.postgrest["notification_channels"].upsert(payload)
-                }
+                PushTokenRegistrar.register(token)
             } catch (e: Exception) {
                 Log.e("FCM", "Failed to sync token to Supabase", e)
             }
@@ -42,23 +32,35 @@ class RemindMeMessagingService : FirebaseMessagingService() {
         
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "RemindME"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
+        val reminderId = remoteMessage.data["reminder_item_id"]
+        val category = remoteMessage.data["category"] ?: "reminder"
 
         if (body.isNotEmpty()) {
-            showNotification(title, body)
+            showNotification(title, body, reminderId, category)
         }
     }
 
-    private fun showNotification(title: String, message: String) {
-        val channelId = "remindme_channel"
+    private fun showNotification(title: String, message: String, reminderId: String?, category: String) {
+        val channelId = NotificationChannels.reminders
         val notificationManager = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            val channel = android.app.NotificationChannel(
-                channelId,
-                "RemindME Notifications",
-                android.app.NotificationManager.IMPORTANCE_DEFAULT
+            // The application creates the high-priority channel with vibration settings.
+        }
+
+        val contentIntent = TaskStackBuilder.create(this).run {
+            val intent = Intent(this@RemindMeMessagingService, MainActivity::class.java).apply {
+                if (!reminderId.isNullOrBlank()) {
+                    putExtra("open_reminder_id", reminderId)
+                    putExtra("open_reminder_category", category)
+                }
+                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
+            addNextIntentWithParentStack(intent)
+            getPendingIntent(
+                (reminderId ?: "$title:$message").hashCode(),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            notificationManager.createNotificationChannel(channel)
         }
 
         val builder = androidx.core.app.NotificationCompat.Builder(this, channelId)
@@ -66,7 +68,8 @@ class RemindMeMessagingService : FirebaseMessagingService() {
             .setContentTitle(title)
             .setContentText(message)
             .setAutoCancel(true)
-            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(contentIntent)
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
 
         // System.currentTimeMillis().toInt() truncates a 64-bit timestamp to
         // 32 bits and can produce the same ID for notifications dispatched

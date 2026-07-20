@@ -75,11 +75,11 @@ data class TaskDetails(
 @Serializable
 data class HolidayDetails(
     @SerialName("country_code")
-    val countryCode: String,
+    val countryCode: String = "US",
     @SerialName("holiday_key")
-    val holidayKey: String,
+    val holidayKey: String? = null,
     @SerialName("holiday_date")
-    val holidayDate: String,
+    val holidayDate: String? = null,
     @SerialName("is_custom")
     val isCustom: Boolean? = null
 )
@@ -121,7 +121,7 @@ data class NotificationPreference(
     @SerialName("lead_time")
     val leadTime: String = "morning_of",
     @SerialName("custom_time")
-    val customTime: String = "09:00",
+    val customTime: String = "",
     @SerialName("offset_days")
     val offsetDays: Int = 0
 )
@@ -145,25 +145,24 @@ data class ReminderItem(
     @SerialName("updated_at")
     val updatedAt: LocalDateTime,
     
-    // Details using list representations matching Postgrest array outputs
     @SerialName("person_details")
-    val personDetails: List<PersonDetails>? = null,
+    val personDetails: PersonDetails? = null,
     @SerialName("subscription_details")
-    val subscriptionDetails: List<SubscriptionDetails>? = null,
+    val subscriptionDetails: SubscriptionDetails? = null,
     @SerialName("task_details")
-    val taskDetails: List<TaskDetails>? = null,
+    val taskDetails: TaskDetails? = null,
     @SerialName("holiday_details")
-    val holidayDetails: List<HolidayDetails>? = null,
+    val holidayDetails: HolidayDetails? = null,
     @SerialName("recurrence_rules")
-    val recurrenceRules: List<RecurrenceRules>? = null,
+    val recurrenceRules: RecurrenceRules? = null,
     @SerialName("escalation_state")
     val escalationState: List<EscalationState>? = null,
     @SerialName("notification_preferences")
     val notificationPreferences: List<NotificationPreference>? = null
 ) {
-    val person: PersonDetails? get() = personDetails?.firstOrNull()
-    val subscription: SubscriptionDetails? get() = subscriptionDetails?.firstOrNull()
-    val task: TaskDetails? get() = taskDetails?.firstOrNull()
-    val holiday: HolidayDetails? get() = holidayDetails?.firstOrNull()
-    val recurrence: RecurrenceRules? get() = recurrenceRules?.firstOrNull()
+    val person: PersonDetails? get() = personDetails
+    val subscription: SubscriptionDetails? get() = subscriptionDetails
+    val task: TaskDetails? get() = taskDetails
+    val holiday: HolidayDetails? get() = holidayDetails
+    val recurrence: RecurrenceRules? get() = recurrenceRules
 }

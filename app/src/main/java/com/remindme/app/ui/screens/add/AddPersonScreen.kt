@@ -5,9 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,7 +20,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
-import com.remindme.app.ui.components.liquid.*
+import com.remindme.app.ui.components.BottomSheetPickerItem
+import com.remindme.app.ui.components.PickerField
+import com.remindme.app.ui.components.*
 import com.remindme.app.ui.theme.*
 import com.remindme.app.utils.AppConstants
 import java.time.LocalDateTime
@@ -32,7 +31,7 @@ import java.time.LocalDateTime
 @Composable
 fun AddPersonScreen(
     personId: String? = null,
-    viewModel: AddPersonViewModel = viewModel(),
+    viewModel: AddPersonViewModel = viewModel(key = personId?.let { "edit-person-$it" } ?: "add-person"),
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -43,6 +42,8 @@ fun AddPersonScreen(
     LaunchedEffect(personId) {
         if (personId != null) {
             viewModel.loadPerson(personId)
+        } else {
+            viewModel.resetForNewPerson()
         }
     }
 
@@ -76,7 +77,7 @@ fun AddPersonScreen(
         }
     }
 
-    LiquidScaffold(
+    AppScaffold(
         appBar = {
             Row(
                 modifier = Modifier
@@ -87,15 +88,15 @@ fun AddPersonScreen(
             ) {
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
+                TopBar(
                     title = if (personId != null) "Edit Person" else "Add Person",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f)
-                )
+    )
             }
         },
         snackbarHost = {
-            LiquidSnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) { paddingValues ->
         Column(
@@ -107,7 +108,7 @@ fun AddPersonScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Avatar Placeholder
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 40.dp,
                 padding = 4.dp
             ) {
@@ -123,7 +124,7 @@ fun AddPersonScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     if (uiState.isUploadingAvatar) {
-                        LiquidSpinner(size = 28.dp)
+                        Spinner(size = 28.dp)
                     } else if (uiState.avatarUrl != null) {
                         AsyncImage(
                             model = uiState.avatarUrl,
@@ -132,8 +133,8 @@ fun AddPersonScreen(
                             contentScale = androidx.compose.ui.layout.ContentScale.Crop
                         )
                     } else {
-                        LiquidIcon(
-                            imageVector = Icons.Default.CameraAlt,
+                        AppIcon(
+                            iconRes = AppIcons.CameraAlt,
                             color = TextTertiary,
                             size = 28.dp
                         )
@@ -143,18 +144,19 @@ fun AddPersonScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            LiquidTextField(
+            AppTextField(
                 value = uiState.name,
                 onValueChange = { viewModel.updateName(it) },
                 placeholder = "Full name *"
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
             
-            LiquidDateTile(
-                label = "Birthdate & Time *",
+            DateTile(
+                label = "Birthdate *",
                 value = uiState.birthdate,
-                placeholder = "Select date and time",
+                placeholder = "Select birthdate",
+                formatter = { it.format(java.time.format.DateTimeFormatter.ofPattern("MMM d, yyyy")) },
                 onTap = {
                     showDatePicker = true
                 }
@@ -162,31 +164,35 @@ fun AddPersonScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            PickerField(
-                label = "Gender",
-                value = uiState.gender,
-                displayValue = { AppConstants.GENDER_LABELS[it] ?: it },
-                title = "Select gender",
-                items = AppConstants.GENDER_LABELS.map { BottomSheetPickerItem(it.key, it.value) },
-                onChanged = { viewModel.updateGender(it) }
-            )
+            AppCard(borderRadius = 16.dp) {
+                PickerField(
+                    label = "Gender",
+                    value = uiState.gender,
+                    displayValue = { AppConstants.GENDER_LABELS[it] ?: it },
+                    title = "Select gender",
+                    items = AppConstants.GENDER_LABELS.map { BottomSheetPickerItem(it.key, it.value) },
+                    onChanged = { viewModel.updateGender(it) }
+                )
+            }
             
-            PickerField(
-                label = "Relationship",
-                value = uiState.relationship,
-                displayValue = {
-                    val entry = AppConstants.RELATIONSHIP_LABELS[it]
-                    if (entry != null) "${entry.second} ${entry.first}" else it
-                },
-                title = "Select relationship",
-                items = AppConstants.RELATIONSHIP_LABELS.map { 
-                    BottomSheetPickerItem(it.key, "${it.value.second} ${it.value.first}")
-                },
-                onChanged = { viewModel.updateRelationship(it) }
-            )
+            AppCard(borderRadius = 16.dp) {
+                PickerField(
+                    label = "Relationship",
+                    value = uiState.relationship,
+                    displayValue = {
+                        val entry = AppConstants.RELATIONSHIP_LABELS[it]
+                        if (entry != null) "${entry.second} ${entry.first}" else it
+                    },
+                    title = "Select relationship",
+                    items = AppConstants.RELATIONSHIP_LABELS.map { 
+                        BottomSheetPickerItem(it.key, "${it.value.second} ${it.value.first}")
+                    },
+                    onChanged = { viewModel.updateRelationship(it) }
+                )
+            }
             
             if (uiState.relationship == "other") {
-                LiquidTextField(
+                AppTextField(
                     value = uiState.customRelationship,
                     onValueChange = { viewModel.updateCustomRelationship(it) },
                     placeholder = "Custom relationship (e.g. Mentor)"
@@ -194,11 +200,11 @@ fun AddPersonScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            LiquidTextField(
+            AppTextField(
                 value = uiState.notes,
                 onValueChange = { viewModel.updateNotes(it) },
                 placeholder = "Notes"
-                // maxLines = 3 // To be supported by LiquidTextField
+                // maxLines = 3 // To be supported by AppTextField
             )
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -218,7 +224,7 @@ fun AddPersonScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            LiquidButton(
+            AppButton(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     viewModel.savePerson()
@@ -226,7 +232,7 @@ fun AddPersonScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (uiState.isLoading) {
-                    LiquidSpinner(size = 20.dp)
+                    Spinner(size = 20.dp)
                 } else {
                     Text("Add Person", color = TextPrimary)
                 }
@@ -234,13 +240,14 @@ fun AddPersonScreen(
         }
         
         if (showDatePicker) {
-            LiquidDateTimePickerDialog(
+            DateTimePickerDialog(
                 initialDate = uiState.birthdate,
                 onDismissRequest = { showDatePicker = false },
                 onDateTimeSelected = {
                     viewModel.updateBirthdate(it)
                     showDatePicker = false
-                }
+                },
+                dateOnly = true
             )
         }
     }

@@ -1,4 +1,5 @@
 package com.remindme.app.ui.screens.subscriptions
+import com.remindme.app.domain.models.CategoryType
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
@@ -6,7 +7,7 @@ import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
-import com.remindme.app.domain.models.CategoryType
+import com.remindme.app.data.repository.OfflineReminderRepository
 import com.remindme.app.domain.models.ReminderItem
 import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.RealtimeChannel
@@ -31,7 +32,7 @@ data class SubscriptionsUiState(
 )
 
 class SubscriptionsViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
+    private val repository = OfflineReminderRepository(ReminderRepository(SupabaseManager.client, application.applicationContext), application.applicationContext)
     private val _uiState = MutableStateFlow(SubscriptionsUiState())
     val uiState: StateFlow<SubscriptionsUiState> = _uiState.asStateFlow()
 
@@ -65,10 +66,12 @@ class SubscriptionsViewModel(application: Application) : AndroidViewModel(applic
             val tables = listOf("reminder_items", "subscription_details")
             
             tables.forEach { table ->
-                realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
-                    this.table = table
-                }?.collect {
-                    fetchSubscriptions(showLoading = false)
+                launch {
+                    realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
+                        this.table = table
+                    }?.collect {
+                        fetchSubscriptions(showLoading = false)
+                    }
                 }
             }
             realtimeChannel?.subscribe()
@@ -87,13 +90,16 @@ class SubscriptionsViewModel(application: Application) : AndroidViewModel(applic
             if (showLoading) {
                 _uiState.update { it.copy(isLoading = true, error = null) }
             }
+            if (_allSubscriptions.value.isEmpty()) {
+                _allSubscriptions.value = repository.cachedSnapshot().filter { it.category == CategoryType.SUBSCRIPTION }
+            }
             try {
                 val all = repository.getReminders()
                 val subscriptions = all.filter { it.category == CategoryType.SUBSCRIPTION }
                 _allSubscriptions.value = subscriptions
                 _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load subscriptions") }
             }
         }
     }
@@ -104,7 +110,7 @@ class SubscriptionsViewModel(application: Application) : AndroidViewModel(applic
                 _allSubscriptions.update { list -> list.filter { it.id != id } }
                 repository.deleteReminder(id)
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = "Failed to delete subscription") }
                 fetchSubscriptions(showLoading = false)
             }
         }

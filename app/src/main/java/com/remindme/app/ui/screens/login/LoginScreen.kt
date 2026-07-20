@@ -18,20 +18,31 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
 import com.remindme.app.ui.components.GoogleLogo
-import com.remindme.app.ui.components.liquid.LiquidButton
-import com.remindme.app.ui.components.liquid.LiquidSpinner
-import com.remindme.app.ui.components.liquid.LiquidTextField
+import com.remindme.app.ui.components.AppScaffold
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.AppButton
+import com.remindme.app.ui.components.Spinner
+import com.remindme.app.ui.components.AppTextField
+import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.theme.*
-import com.remindme.app.ui.components.liquid.LocalBackdrop
+
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = viewModel(),
-    onNavigateHome: () -> Unit
+    onNavigateHome: () -> Unit,
+    onNavigateToMagicLink: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    com.remindme.app.ui.components.liquid.LiquidScaffold { paddingValues ->
+
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    remember(Unit) { viewModel.resetDialogs() }
+
+    LaunchedEffect(Unit) { viewModel.navigateHome.collect { onNavigateHome() } }
+
+    AppScaffold { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             Column(
                 modifier = Modifier
@@ -55,7 +66,7 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(48.dp))
 
-            LiquidTextField(
+            AppTextField(
                 value = uiState.email,
                 onValueChange = viewModel::updateEmail,
                 label = "Email",
@@ -64,23 +75,32 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            LiquidTextField(
+            AppTextField(
                 value = uiState.password,
                 onValueChange = viewModel::updatePassword,
                 label = "Password",
-                obscureText = true,
-                visualTransformation = PasswordVisualTransformation(),
+                obscureText = !passwordVisible,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                suffixIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        AppIcon(
+                            iconRes = if (passwordVisible) AppIcons.Visibility else AppIcons.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            tint = TextTertiary
+                        )
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            LiquidButton(
+            AppButton(
                 onClick = viewModel::submit,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading
             ) {
                 if (uiState.isLoading) {
-                    LiquidSpinner(size = 20.dp, color = Color.White)
+                    Spinner(size = 20.dp, color = Color.White)
                 } else {
                     Text(
                         text = if (uiState.isSignUpMode) "Create Account" else "Sign In",
@@ -103,18 +123,18 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                HorizontalDivider(modifier = Modifier.weight(1f), color = GlassBorder)
+                HorizontalDivider(modifier = Modifier.weight(1f), color = BorderSubtle)
                 Text(
                     text = "OR",
                     color = TextTertiary,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                HorizontalDivider(modifier = Modifier.weight(1f), color = GlassBorder)
+                HorizontalDivider(modifier = Modifier.weight(1f), color = BorderSubtle)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            LiquidButton(
+            AppButton(
                 onClick = { viewModel.googleSignIn(context) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading
@@ -131,8 +151,8 @@ fun LoginScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
 
-            LiquidButton(
-                onClick = viewModel::sendMagicLink,
+            AppButton(
+                onClick = onNavigateToMagicLink,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading
             ) {
@@ -140,10 +160,24 @@ fun LoginScreen(
             }
         }
         
-        if (uiState.toastMessage != null) {
-            LaunchedEffect(uiState.toastMessage) {
-                android.widget.Toast.makeText(context, uiState.toastMessage, android.widget.Toast.LENGTH_LONG).show()
-                viewModel.clearToast()
+        if (uiState.message != null) {
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = uiState.message!!,
+                        color = if (uiState.messageIsError) MaterialTheme.colorScheme.error else Color(0xFF22C55E),
+                        fontSize = 13.sp
+                    )
+                    if (uiState.unverifiedEmail != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextButton(onClick = viewModel::resendVerification) {
+                            Text("Resend verification email", color = Accent500, fontSize = 13.sp)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
 
@@ -173,7 +207,7 @@ fun LoginScreen(
                         Text("Set Password", color = Accent500)
                     }
                 },
-                containerColor = BgSurface2,
+                containerColor = BgElevated,
                 titleContentColor = TextPrimary,
                 textContentColor = TextSecondary
             )
@@ -189,7 +223,7 @@ fun LoginScreen(
                     Column {
                         Text("You signed in with Google. Set a password to also sign in with email.", color = TextSecondary)
                         Spacer(modifier = Modifier.height(16.dp))
-                        LiquidTextField(
+                        AppTextField(
                             value = password,
                             onValueChange = { password = it },
                             label = "New Password",
@@ -198,7 +232,7 @@ fun LoginScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        LiquidTextField(
+                        AppTextField(
                             value = confirm,
                             onValueChange = { confirm = it },
                             label = "Confirm Password",
@@ -222,7 +256,7 @@ fun LoginScreen(
                         Text("Cancel", color = TextSecondary)
                     }
                 },
-                containerColor = BgSurface2,
+                containerColor = BgElevated,
                 titleContentColor = TextPrimary,
                 textContentColor = TextSecondary
             )

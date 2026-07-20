@@ -3,6 +3,7 @@ package com.remindme.app.data.remote
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.FlowType
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
 import io.github.jan.supabase.storage.Storage
@@ -12,6 +13,8 @@ import kotlinx.serialization.json.Json
 object SupabaseManager {
     lateinit var client: SupabaseClient
         private set
+
+    const val magicLinkRedirectUrl = "remindme://login-callback"
 
     fun initialize(url: String, key: String) {
         client = createSupabaseClient(supabaseUrl = url, supabaseKey = key) {
@@ -23,11 +26,16 @@ object SupabaseManager {
             defaultSerializer = KotlinXSerializer(
                 Json {
                     ignoreUnknownKeys = true
+                    coerceInputValues = true
                     encodeDefaults = true
                 }
             )
             install(Postgrest)
-            install(Auth)
+            install(Auth) {
+                scheme = "remindme"
+                host = "login-callback"
+                flowType = FlowType.PKCE
+            }
             install(Realtime)
             install(Storage)
         }

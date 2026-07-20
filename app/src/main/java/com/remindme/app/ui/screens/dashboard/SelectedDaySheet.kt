@@ -11,20 +11,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import com.remindme.app.domain.models.CategoryType
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.AppIcons
+import com.remindme.app.ui.components.appSurfaceColor
+import com.remindme.app.ui.components.appScrimColor
 import com.remindme.app.domain.models.OccurrenceStatus
 import com.remindme.app.domain.models.ReminderOccurrence
+import com.remindme.app.ui.components.LocalThemeStyle
+import com.remindme.app.ui.components.ThemeStyle
+import androidx.compose.ui.graphics.Color
 import com.remindme.app.ui.theme.AppColors
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.FormatListBulleted
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,10 +35,12 @@ fun SelectedDaySheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val sheetBg = appSurfaceColor(elevated = true)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = AppColors.bgElevated,
+        containerColor = sheetBg,
+        scrimColor = appScrimColor(),
         dragHandle = { BottomSheetDefaults.DragHandle(color = AppColors.textSecondary.copy(alpha = 0.5f)) }
     ) {
         Column(
@@ -59,7 +60,7 @@ fun SelectedDaySheet(
                     color = AppColors.textPrimary
                 )
                 IconButton(onClick = onDismiss) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = AppColors.textSecondary)
+                    AppIcon(iconRes = AppIcons.Close, contentDescription = "Close", tint = AppColors.textSecondary)
                 }
             }
             
@@ -68,7 +69,7 @@ fun SelectedDaySheet(
             if (occurrences.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(imageVector = Icons.Default.Event, contentDescription = null, tint = AppColors.textTertiary, modifier = Modifier.size(40.dp))
+                        AppIcon(iconRes = AppIcons.Event, contentDescription = null, tint = AppColors.textTertiary, modifier = Modifier.size(40.dp))
                         Spacer(modifier = Modifier.height(16.dp))
                         Text("No reminders on this day.", color = AppColors.textTertiary, fontSize = 14.sp)
                     }
@@ -79,7 +80,7 @@ fun SelectedDaySheet(
                         val item = occ.item
                         val isDone = occ.status == OccurrenceStatus.COMPLETED_PAST
                         
-                        FloatingGlassContainer(
+                        AppCard(
                             borderRadius = 16.dp,
                         ) {
                             Row(
@@ -88,16 +89,16 @@ fun SelectedDaySheet(
                                     .padding(horizontal = 14.dp, vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                FloatingGlassContainer(
+                                AppCard(
                                     borderRadius = 10.dp,
                                     modifier = Modifier.padding(9.dp)
                                 ) {
-                                    LiquidIcon(
-                                        imageVector = when (item.category) {
-                                            CategoryType.TASK -> Icons.Default.FormatListBulleted
-                                            CategoryType.PERSON -> Icons.Default.Person
-                                            CategoryType.SUBSCRIPTION -> Icons.Default.CreditCard
-                                            CategoryType.CUSTOM_HOLIDAY -> Icons.Default.Event
+                                    AppIcon(
+                                        iconRes = when (item.category) {
+                                            CategoryType.TASK -> AppIcons.FormatListBulleted
+                                            CategoryType.PERSON -> AppIcons.Person
+                                            CategoryType.SUBSCRIPTION -> AppIcons.CreditCard
+                                            CategoryType.CUSTOM_HOLIDAY -> AppIcons.Event
                                         },
                                         tint = if (isDone) AppColors.textTertiary else AppColors.accent500,
                                         modifier = Modifier.size(18.dp)
@@ -129,7 +130,7 @@ fun SelectedDaySheet(
                                 
                                 if (item.category == CategoryType.TASK && !isDone) {
                                     IconButton(onClick = { onMarkDone(item.id, occ.date) }) {
-                                        LiquidIcon(imageVector = Icons.Default.CheckCircle, tint = AppColors.stateSuccess, modifier = Modifier.size(24.dp))
+                                        AppIcon(iconRes = AppIcons.CheckCircle, tint = AppColors.stateSuccess, modifier = Modifier.size(24.dp))
                                     }
                                 }
                             }

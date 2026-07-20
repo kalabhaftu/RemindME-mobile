@@ -1,4 +1,5 @@
 package com.remindme.app.ui.screens.people
+import com.remindme.app.domain.models.CategoryType
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
@@ -6,7 +7,7 @@ import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
-import com.remindme.app.domain.models.CategoryType
+import com.remindme.app.data.repository.OfflineReminderRepository
 import com.remindme.app.domain.models.ReminderItem
 import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.RealtimeChannel
@@ -37,7 +38,7 @@ data class PeopleUiState(
 )
 
 class PeopleViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
+    private val repository = OfflineReminderRepository(ReminderRepository(SupabaseManager.client, application.applicationContext), application.applicationContext)
     private val _uiState = MutableStateFlow(PeopleUiState())
     val uiState: StateFlow<PeopleUiState> = _uiState.asStateFlow()
 
@@ -91,10 +92,12 @@ class PeopleViewModel(application: Application) : AndroidViewModel(application) 
             val tables = listOf("reminder_items", "person_details")
             
             tables.forEach { table ->
-                realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
-                    this.table = table
-                }?.collect {
-                    fetchPeople(showLoading = false)
+                launch {
+                    realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
+                        this.table = table
+                    }?.collect {
+                        fetchPeople(showLoading = false)
+                    }
                 }
             }
             realtimeChannel?.subscribe()
@@ -113,13 +116,16 @@ class PeopleViewModel(application: Application) : AndroidViewModel(application) 
             if (showLoading) {
                 _uiState.update { it.copy(isLoading = true, error = null) }
             }
+            if (_allPeople.value.isEmpty()) {
+                _allPeople.value = repository.cachedSnapshot().filter { it.category == CategoryType.PERSON }
+            }
             try {
                 val all = repository.getReminders()
                 val people = all.filter { it.category == CategoryType.PERSON }
                 _allPeople.value = people
                 _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load people") }
             }
         }
     }
@@ -139,7 +145,7 @@ class PeopleViewModel(application: Application) : AndroidViewModel(application) 
                 _allPeople.update { list -> list.filter { it.id != id } }
                 repository.deleteReminder(id)
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = "Failed to delete person") }
                 // Refetch on error
                 fetchPeople(showLoading = false)
             }

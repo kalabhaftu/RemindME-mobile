@@ -1,4 +1,5 @@
 package com.remindme.app.ui.screens.dashboard
+import com.remindme.app.domain.models.ReminderItem
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
@@ -6,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import android.app.Application
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
-import com.remindme.app.domain.models.ReminderItem
+import com.remindme.app.data.repository.OfflineReminderRepository
 import com.remindme.app.domain.models.ReminderOccurrence
 import com.remindme.app.utils.OccurrenceCalculator
 import io.github.jan.supabase.realtime.PostgresAction
@@ -30,7 +31,7 @@ data class DashboardUiState(
 )
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
+    private val repository = OfflineReminderRepository(ReminderRepository(SupabaseManager.client, application.applicationContext), application.applicationContext)
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
@@ -50,10 +51,12 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             )
             
             tables.forEach { table ->
-                realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
-                    this.table = table
-                }?.collect {
-                    fetchReminders(showLoading = false)
+                launch {
+                    realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
+                        this.table = table
+                    }?.collect {
+                        fetchReminders(showLoading = false)
+                    }
                 }
             }
             realtimeChannel?.subscribe()
@@ -71,6 +74,18 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             if (showLoading) {
                 _uiState.update { it.copy(isLoading = true, error = null) }
+            }
+            val cached = repository.cachedSnapshot()
+            if (cached.isNotEmpty() && _uiState.value.reminders.isEmpty()) {
+                val today = LocalDate.now()
+                val startPeriod = _uiState.value.currentMonth
+                val endPeriod = _uiState.value.currentMonth.plusMonths(1).minusDays(1)
+                _uiState.update {
+                    it.copy(
+                        reminders = cached,
+                        occurrences = OccurrenceCalculator.generateOccurrences(cached, startPeriod, endPeriod, today)
+                    )
+                }
             }
             try {
                 val parsed = repository.getReminders()
@@ -91,7 +106,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isLoading = false, error = e.message)
+                    it.copy(isLoading = false, error = "Failed to load reminders")
                 }
             }
         }
@@ -117,7 +132,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 repository.markTaskDone(id, dateStr)
                 fetchReminders(showLoading = false)
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = "Failed to mark as done") }
             }
         }
     }
@@ -129,7 +144,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 repository.snoozeReminder(id, dateStr)
                 fetchReminders(showLoading = false)
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = "Failed to snooze reminder") }
             }
         }
     }

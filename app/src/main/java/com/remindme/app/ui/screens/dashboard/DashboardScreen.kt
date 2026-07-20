@@ -4,11 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,15 +12,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.domain.models.CategoryType
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
-import com.remindme.app.ui.components.liquid.LiquidSpinner
+import com.remindme.app.domain.models.ReminderItem
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.AppIcons
+import com.remindme.app.ui.components.Spinner
+import com.remindme.app.ui.components.AppPullToRefresh
 import com.remindme.app.ui.theme.Accent500
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
@@ -41,24 +38,22 @@ fun DashboardScreen(
     onNavigateToAddPerson: () -> Unit,
     onNavigateToAddSubscription: () -> Unit,
     onNavigateToAddTask: () -> Unit,
-    onNavigateToHolidays: () -> Unit
+    onNavigateToHolidays: () -> Unit,
+    onNavigateToPreview: (String) -> Unit = {},
+    onNavigateToEdit: (ReminderItem) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
 
-    if (uiState.isLoading && uiState.reminders.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-            LiquidSpinner()
-        }
-        return
-    }
-
-    val peopleCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.PERSON } }
-    val subsCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.SUBSCRIPTION } }
-    val tasksCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.TASK } }
-
     Box(modifier = Modifier.fillMaxSize()) {
+        val peopleCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.PERSON } }
+        val subsCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.SUBSCRIPTION } }
+        val tasksCount = remember(uiState.reminders) { uiState.reminders.count { it.category == CategoryType.TASK } }
+        AppPullToRefresh(
+            isRefreshing = uiState.isLoading,
+            onRefresh = { viewModel.fetchReminders() }
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -80,16 +75,16 @@ fun DashboardScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Person", icon = Icons.Default.Person, onTap = onNavigateToAddPerson)
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Subscription", icon = Icons.Default.CreditCard, onTap = onNavigateToAddSubscription)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Person", icon = AppIcons.Person, onTap = onNavigateToAddPerson)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Subscription", icon = AppIcons.CreditCard, onTap = onNavigateToAddSubscription)
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Task", icon = Icons.Default.Add, onTap = onNavigateToAddTask)
-            QuickAddTile(modifier = Modifier.weight(1f), label = "Holiday", icon = Icons.Default.Event, onTap = onNavigateToHolidays)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Task", icon = AppIcons.Add, onTap = onNavigateToAddTask)
+            QuickAddTile(modifier = Modifier.weight(1f), label = "Holiday", icon = AppIcons.Event, onTap = onNavigateToHolidays)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -111,7 +106,8 @@ fun DashboardScreen(
                 viewModel.markDone(id, date)
             },
             onSnooze = { id, date -> viewModel.snooze(id, date) },
-            onEdit = { /* TODO */ }
+            onPreview = { item -> onNavigateToPreview(item.id) },
+            onEdit = { item -> onNavigateToEdit(item) }
         )
 
         uiState.selectedDate?.let { date ->
@@ -128,13 +124,26 @@ fun DashboardScreen(
                 onDismiss = { viewModel.clearSelectedDate() }
             )
         }
+        }
     }
+    uiState.error?.let { error ->
+        androidx.compose.material3.Snackbar(
+            modifier = Modifier.padding(16.dp),
+            action = {
+                androidx.compose.material3.TextButton(onClick = { viewModel.fetchReminders() }) {
+                    androidx.compose.material3.Text("Retry")
+                }
+            }
+        ) {
+            androidx.compose.material3.Text(error)
+        }
     }
+}
 }
 
 @Composable
 fun StatCard(modifier: Modifier = Modifier, label: String, count: Int) {
-    FloatingGlassContainer(
+    AppCard(
         modifier = modifier,
         borderRadius = 16.dp,
     ) {
@@ -160,8 +169,8 @@ fun StatCard(modifier: Modifier = Modifier, label: String, count: Int) {
 }
 
 @Composable
-fun QuickAddTile(modifier: Modifier = Modifier, label: String, icon: ImageVector, onTap: () -> Unit) {
-    FloatingGlassContainer(
+fun QuickAddTile(modifier: Modifier = Modifier, label: String, icon: Int, onTap: () -> Unit) {
+    AppCard(
         modifier = modifier.clickable { onTap() },
         borderRadius = 16.dp
     ) {
@@ -171,7 +180,7 @@ fun QuickAddTile(modifier: Modifier = Modifier, label: String, icon: ImageVector
                 .fillMaxWidth(),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
-            LiquidIcon(imageVector = icon, size = 20.dp, color = TextPrimary)
+            AppIcon(iconRes = icon, size = 20.dp, color = TextPrimary)
             Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = label,

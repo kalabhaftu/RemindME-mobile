@@ -9,9 +9,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.*
-import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,39 +21,49 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import com.remindme.app.ui.components.BottomSheetPicker
-import com.remindme.app.ui.components.liquid.*
-import com.remindme.app.ui.components.liquid.LiquidIcon
-import com.remindme.app.ui.components.liquid.LiquidSnackbarHost
+import com.remindme.app.ui.components.*
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.SnackbarHost
 import com.remindme.app.ui.theme.*
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
     onNavigateHome: () -> Unit,
-    onNavigateToThemeSelector: () -> Unit
+    onNavigateToThemeSelector: () -> Unit,
+    onNavigateToNotificationHelp: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    var glassStyle by remember { mutableStateOf(LiquidGlassPrefs.getStyle(context)) }
+    var glassStyle by remember { mutableStateOf(ThemePrefs.getStyle(context)) }
 
     val listener = remember {
         android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == "glass_style") {
-                glassStyle = LiquidGlassPrefs.getStyle(context)
+            if (key == "theme_style") {
+                glassStyle = ThemePrefs.getStyle(context)
             }
         }
     }
 
     androidx.compose.runtime.DisposableEffect(context) {
-        val prefs = context.getSharedPreferences("liquid_glass_prefs", android.content.Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("remindme_prefs", android.content.Context.MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose {
             prefs.unregisterOnSharedPreferenceChangeListener(listener)
         }
     }
 
-    CompositionLocalProvider(LocalLiquidGlassStyle provides glassStyle) {
+    CompositionLocalProvider(LocalThemeStyle provides glassStyle) {
         val uiState by viewModel.uiState.collectAsState()
 
         val snackbarHostState = remember { SnackbarHostState() }
@@ -72,8 +79,8 @@ fun SettingsScreen(
             }
         }
 
-        LiquidScaffold(
-            snackbarHost = { LiquidSnackbarHost(snackbarHostState) },
+        AppScaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             appBar = {
                 Row(
                     modifier = Modifier
@@ -84,7 +91,7 @@ fun SettingsScreen(
                 ) {
                     CircledBackButton(onClick = onNavigateHome)
                     Spacer(modifier = Modifier.width(12.dp))
-                    LiquidAppBar(
+                    TopBar(
                         title = "Settings",
                         statusBarsPadding = false,
                         modifier = Modifier.weight(1f)
@@ -92,14 +99,14 @@ fun SettingsScreen(
                 }
             }
         ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    LiquidSpinner()
-                }
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp, start = 16.dp, end = 16.dp),
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                    contentPadding = PaddingValues(
+                        top = paddingValues.calculateTopPadding() + 16.dp,
+                        bottom = paddingValues.calculateBottomPadding() + 32.dp,
+                        start = 16.dp,
+                        end = 16.dp
+                    ),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     item {
@@ -111,7 +118,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
-                        NotificationDefaultsSection(uiState, viewModel)
+                        NotificationDefaultsSection(uiState, viewModel, onNavigateToNotificationHelp)
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
@@ -123,6 +130,10 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
+                        CalendarSubscriptionSection(uiState, viewModel)
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+                    item {
                         AppearanceSection(onNavigateToThemeSelector)
                         Spacer(modifier = Modifier.height(24.dp))
                     }
@@ -131,10 +142,13 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
+                        AboutSupportSection()
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+                    item {
                         DangerZoneSection(viewModel, onNavigateHome)
                         Spacer(modifier = Modifier.height(32.dp))
                     }
-                }
             }
         }
     }
@@ -143,7 +157,7 @@ fun SettingsScreen(
 
 @Composable
 fun SettingsSection(title: String, content: @Composable () -> Unit) {
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 24.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -157,14 +171,14 @@ fun SettingsSection(title: String, content: @Composable () -> Unit) {
 
 @Composable
 fun AppearanceSection(onNavigateToThemeSelector: () -> Unit) {
-    val currentStyle = LocalLiquidGlassStyle.current
+    val currentStyle = LocalThemeStyle.current
     val label = when (currentStyle) {
-        LiquidGlassStyle.Frosted -> "Colored Glass"
-        LiquidGlassStyle.Clear -> "Clear Glass"
+        ThemeStyle.Glass -> "Default Glass"
+        ThemeStyle.Solid -> "Flat Solid"
     }
 
     SettingsSection(title = "Appearance") {
-        FloatingGlassContainer(
+        AppCard(
             borderRadius = 16.dp,
             modifier = Modifier
                 .fillMaxWidth()
@@ -176,13 +190,13 @@ fun AppearanceSection(onNavigateToThemeSelector: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Liquid Glass Style", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                    Text("Choose between transparent and colored glass", color = TextSecondary, fontSize = 12.sp)
+                    Text("Theme Appearance", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text("Glass: blurred backgrounds | Solid: flat colors", color = TextSecondary, fontSize = 12.sp)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(label, color = Accent500, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                     Spacer(modifier = Modifier.width(8.dp))
-                    LiquidIcon(Icons.Rounded.ChevronRight, color = TextTertiary, size = 18.dp)
+                    AppIcon(iconRes = AppIcons.ChevronRight, color = TextTertiary, size = 18.dp)
                 }
             }
         }
@@ -201,10 +215,10 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
 
         if (uiState.isLoadingTelegram) {
             Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                LiquidSpinner()
+                Spinner()
             }
         } else if (uiState.hasTelegramToken) {
-            FloatingGlassContainer(borderRadius = 16.dp) {
+            AppCard(borderRadius = 16.dp) {
                 Row(
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -219,14 +233,14 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                         }
                     }
                     IconButton(onClick = { viewModel.deleteTelegramToken() }) {
-                        Icon(Icons.Rounded.Delete, contentDescription = "Delete", tint = Color.Red)
+                        AppIcon(iconRes = AppIcons.Delete, contentDescription = "Delete", tint = StateDanger)
                     }
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text("To update your token, delete the existing one first.", color = TextTertiary, fontSize = 12.sp)
             Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = GlassBorder)
+            HorizontalDivider(color = BorderSubtle)
             Spacer(modifier = Modifier.height(16.dp))
             Text("Chat ID", style = MaterialTheme.typography.titleSmall, color = TextPrimary)
             Spacer(modifier = Modifier.height(8.dp))
@@ -238,7 +252,7 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
             Spacer(modifier = Modifier.height(12.dp))
 
             if (uiState.hasChatId) {
-                FloatingGlassContainer(borderRadius = 16.dp) {
+                AppCard(borderRadius = 16.dp) {
                     Row(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -248,12 +262,12 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(uiState.maskedChatId, fontFamily = FontFamily.Monospace, fontSize = 13.sp, color = TextPrimary)
                         }
-                        Icon(Icons.Rounded.CheckCircle, contentDescription = "Checked", tint = StateSuccess)
+                        AppIcon(iconRes = AppIcons.CheckCircle, contentDescription = "Checked", tint = StateSuccess)
                     }
                 }
             } else {
                 var chatId by remember { mutableStateOf("") }
-                LiquidTextField(
+                AppTextField(
                     value = chatId,
                     onValueChange = { chatId = it },
                     placeholder = "e.g. 123456789",
@@ -261,49 +275,43 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Row {
-                    Button(
+                    AppButton(
                         onClick = { viewModel.detectChatId() },
-                        modifier = Modifier.weight(1f).height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = BgSurface3, contentColor = TextPrimary),
-                        shape = RoundedCornerShape(16.dp)
+                        modifier = Modifier.weight(1f).height(48.dp)
                     ) {
-                        Icon(Icons.Rounded.WifiTethering, contentDescription = null, modifier = Modifier.size(18.dp))
+                        AppIcon(iconRes = AppIcons.WifiTethering, color = TextPrimary, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Detect Chat ID")
+                        Text("Detect Chat ID", fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
-                    Button(
+                    AppButton(
                         onClick = { viewModel.saveChatId(chatId) },
-                        enabled = chatId.isNotEmpty(),
                         modifier = Modifier.weight(1f).height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Accent500, contentColor = Color.White),
-                        shape = RoundedCornerShape(16.dp)
+                        tint = Accent500
                     ) {
-                        Icon(Icons.Rounded.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                        AppIcon(iconRes = AppIcons.Save, color = Accent500, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Save")
+                        Text("Save", fontSize = 14.sp)
                     }
                 }
             }
         } else {
             var token by remember { mutableStateOf("") }
-            LiquidTextField(
+            AppTextField(
                 value = token,
                 onValueChange = { token = it },
                 placeholder = "123456789:ABCdefGHIjklmNOPqrstUVwxyZ",
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
-            Button(
+            AppButton(
                 onClick = { viewModel.saveTelegramToken(token) },
-                enabled = token.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth().height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Accent500, contentColor = Color.White),
-                shape = RoundedCornerShape(16.dp)
+                tint = Accent500
             ) {
-                Icon(Icons.Rounded.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                AppIcon(iconRes = AppIcons.Save, color = Accent500, size = 18.dp)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Save Token")
+                Text("Save Token", fontSize = 14.sp)
             }
         }
     }
@@ -323,7 +331,7 @@ fun TimezoneSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
             "Australia/Sydney", "Pacific/Auckland"
         )
         
-        FloatingGlassContainer(
+        AppCard(
             borderRadius = 16.dp,
             modifier = Modifier.fillMaxWidth().clickable { showPicker = true }
         ) {
@@ -350,7 +358,7 @@ fun TimezoneSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
 }
 
 @Composable
-fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
+fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsViewModel, onNavigateToNotificationHelp: () -> Unit = {}) {
     SettingsSection("Global Notification Defaults") {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -360,10 +368,10 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
             Text("These settings will be inherited by new reminders unless you override them per-item.", color = TextSecondary, fontSize = 13.sp, modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.width(8.dp))
             TextButton(
-                onClick = { /* NotificationHelpScreen is shown as overlay via NavKey */ },
+                onClick = onNavigateToNotificationHelp,
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
             ) {
-                LiquidIcon(Icons.AutoMirrored.Rounded.HelpOutline, modifier = Modifier.size(16.dp), color = Accent500)
+                AppIcon(iconRes = AppIcons.HelpOutline, modifier = Modifier.size(16.dp), color = Accent500)
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Help", color = Accent500, fontSize = 13.sp)
             }
@@ -386,7 +394,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
         var showTimingPicker by remember { mutableStateOf(false) }
         val timings = listOf("at_time" to "At time of event", "morning_of" to "Morning of", "noon_of" to "Noon of", "evening_of" to "Evening of", "custom" to "Custom Time")
         
-        FloatingGlassContainer(
+        AppCard(
             borderRadius = 16.dp,
             modifier = Modifier.fillMaxWidth().clickable { showTimingPicker = true }
         ) {
@@ -414,7 +422,7 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
         Text("Escalation Nudge Delay (Hours)", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
         Spacer(modifier = Modifier.height(8.dp))
         var nudgeVal by remember(uiState.nudgeDelayHours) { mutableStateOf(uiState.nudgeDelayHours.toString()) }
-        LiquidTextField(
+        AppTextField(
             value = nudgeVal,
             onValueChange = { 
                 nudgeVal = it
@@ -432,24 +440,21 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
 
 @Composable
 fun GlassSwitch(title: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    FloatingGlassContainer(borderRadius = 16.dp, modifier = Modifier.fillMaxWidth()) {
+    AppCard(borderRadius = 16.dp, modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(title, fontWeight = FontWeight.Medium, color = TextPrimary)
-            LiquidToggle(
-                selected = { checked },
-                onSelect = onCheckedChange
-            )
+            AppSwitch(checked = checked, onCheckedChange = onCheckedChange)
         }
     }
 }
 
 @Composable
 fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
-    FloatingGlassContainer(borderRadius = 16.dp, modifier = Modifier.fillMaxWidth()) {
+    AppCard(borderRadius = 16.dp, modifier = Modifier.fillMaxWidth()) {
         Column {
             rows.forEachIndexed { index, (title, checked, onCheckedChange) ->
                 Row(
@@ -460,16 +465,13 @@ fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(title, fontWeight = FontWeight.Medium, color = TextPrimary)
-                    LiquidToggle(
-                        selected = { checked },
-                        onSelect = onCheckedChange
-                    )
+                    AppSwitch(checked = checked, onCheckedChange = onCheckedChange)
                 }
                 if (index != rows.lastIndex) {
                     androidx.compose.material3.HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         thickness = 1.dp,
-                        color = GlassBorder
+                        color = BorderSubtle
                     )
                 }
             }
@@ -479,34 +481,56 @@ fun GlassSwitchGroup(rows: List<Triple<String, Boolean, (Boolean) -> Unit>>) {
 
 @Composable
 fun TestNotificationsSection(viewModel: SettingsViewModel) {
+    val context = LocalContext.current
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (!granted) Toast.makeText(context, "Allow notifications in Android Settings to receive push reminders.", Toast.LENGTH_LONG).show()
+    }
+    fun testPush() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            viewModel.testChannel("push")
+        }
+    }
     SettingsSection("Test Notifications") {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            TestButton("Email", Icons.Rounded.Email, Modifier.weight(1f)) { viewModel.testChannel("email") }
-            TestButton("Push", Icons.Rounded.Notifications, Modifier.weight(1f)) { viewModel.testChannel("push") }
-            TestButton("Telegram", Icons.AutoMirrored.Rounded.Send, Modifier.weight(1f)) { viewModel.testChannel("telegram") }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TestButton("Email", AppIcons.Email, Modifier.weight(1f)) { viewModel.testChannel("email") }
+            TestButton("Push", AppIcons.Notifications, Modifier.weight(1f)) { testPush() }
+            TestButton("Telegram", AppIcons.Send, Modifier.weight(1f)) { viewModel.testChannel("telegram") }
         }
     }
 }
 
 @Composable
-fun TestButton(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Button(
+fun TestButton(label: String, icon: Int, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    AppButton(
         onClick = onClick,
         modifier = modifier.height(48.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = BgSurface3, contentColor = TextPrimary),
-        shape = RoundedCornerShape(16.dp),
-        contentPadding = PaddingValues(0.dp)
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp, vertical = 8.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(label, fontSize = 13.sp)
-        }
+        AppIcon(iconRes = icon, color = TextPrimary, size = 16.dp)
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(label, fontSize = 12.sp, maxLines = 1)
     }
 }
 
 @Composable
 fun DeliveryLogSection(uiState: SettingsUiState) {
+    fun formatDeliveryTime(value: String?): String {
+        if (value.isNullOrBlank()) return ""
+        return runCatching {
+            val instant = Instant.parse(value)
+            val zone = runCatching { ZoneId.of(uiState.timezone) }.getOrDefault(ZoneId.systemDefault())
+            DateTimeFormatter.ofPattern("MMM d, HH:mm").withZone(zone).format(instant)
+        }.getOrElse {
+            value.replace("T", " ").take(16)
+        }
+    }
+
     SettingsSection("Recent Deliveries") {
         if (uiState.deliveryLogs.isEmpty()) {
             Text("No delivery history yet.", color = TextSecondary, fontSize = 13.sp)
@@ -515,7 +539,7 @@ fun DeliveryLogSection(uiState: SettingsUiState) {
                 uiState.deliveryLogs.forEach { log ->
                     val color = when (log.status) {
                         "sent" -> StateSuccess
-                        "failed" -> Color.Red
+                        "failed" -> StateDanger
                         else -> TextTertiary
                     }
                     Row(
@@ -525,9 +549,18 @@ fun DeliveryLogSection(uiState: SettingsUiState) {
                         Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("${log.channel} · ${log.status}", modifier = Modifier.weight(1f), fontSize = 13.sp, color = TextPrimary)
-                        if (log.scheduled_for != null) {
-                            Text(log.scheduled_for.take(10), fontSize = 11.sp, color = TextTertiary, fontFamily = FontFamily.Monospace)
+                        val displayTime = formatDeliveryTime(log.sent_at ?: log.scheduled_for)
+                        if (displayTime.isNotBlank()) {
+                            Text(displayTime, fontSize = 11.sp, color = TextTertiary, fontFamily = FontFamily.Monospace)
                         }
+                    }
+                    if (!log.error_message.isNullOrBlank()) {
+                        Text(
+                            log.error_message,
+                            color = StateDanger.copy(alpha = 0.82f),
+                            fontSize = 11.sp,
+                            modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
+                        )
                     }
                 }
             }
@@ -536,47 +569,234 @@ fun DeliveryLogSection(uiState: SettingsUiState) {
 }
 
 @Composable
+fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
+    val context = LocalContext.current
+    val webcalUrl = uiState.calendarWebcalUrl
+    var showManualGuide by remember { mutableStateOf(false) }
+
+    SettingsSection("Calendar subscription") {
+        Text(
+            "Subscribe once and birthdays you add in RemindME will appear in Google Calendar or Outlook.",
+            color = TextSecondary,
+            fontSize = 13.sp
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        if (webcalUrl == null) {
+            Text(
+                if (uiState.isLoadingCalendar) "Preparing your private calendar link…" else "Calendar link unavailable. Check your connection and retry.",
+                color = TextTertiary,
+                fontSize = 13.sp
+            )
+            if (!uiState.isLoadingCalendar) {
+                Spacer(modifier = Modifier.height(12.dp))
+                AppButton(
+                    onClick = { viewModel.loadCalendarFeed() },
+                    modifier = Modifier.fillMaxWidth().height(48.dp)
+                ) {
+                    AppIcon(iconRes = AppIcons.Refresh, color = TextPrimary, size = 18.dp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Retry", color = TextPrimary)
+                }
+            }
+        } else {
+            AppCard(borderRadius = 16.dp) {
+                Text(
+                    webcalUrl,
+                    color = TextSecondary,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(14.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            AppButton(
+                onClick = {
+                    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    clipboard.setPrimaryClip(android.content.ClipData.newPlainText("RemindME calendar", webcalUrl))
+                    viewModel.showMessage("Calendar link copied")
+                },
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                tint = Accent500
+            ) {
+                AppIcon(iconRes = AppIcons.ContentCopy, color = Accent500, size = 18.dp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Copy webcal link", color = TextPrimary)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            AppButton(
+                onClick = {
+                    val webcalIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(webcalUrl))
+                    val calendarHandler = context.packageManager.queryIntentActivities(
+                        webcalIntent,
+                        android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
+                    ).firstOrNull { info ->
+                        val packageName = info.activityInfo.packageName.lowercase()
+                        packageName.contains("calendar") || packageName.contains("outlook")
+                    }
+                    if (calendarHandler == null) {
+                        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("RemindME calendar", webcalUrl))
+                        viewModel.showMessage("No calendar app accepted webcal; link copied")
+                        showManualGuide = true
+                    } else {
+                        webcalIntent.setPackage(calendarHandler.activityInfo.packageName)
+                        runCatching { context.startActivity(webcalIntent) }.onFailure {
+                            showManualGuide = true
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(48.dp)
+            ) {
+                AppIcon(iconRes = AppIcons.OpenInNew, color = TextPrimary, size = 18.dp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Open calendar app", color = TextPrimary)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(
+                onClick = { viewModel.rotateCalendarFeed() },
+                enabled = !uiState.isLoadingCalendar,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Regenerate private link", color = StateDanger)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider(color = BorderSubtle)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("Google Calendar", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(
+                "1. Open Google Calendar. 2. Open Other calendars and choose Add by URL. 3. Paste the webcal link and add the calendar.",
+                color = TextSecondary,
+                fontSize = 12.sp,
+                lineHeight = 18.sp
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text("Outlook Calendar", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(
+                "1. Open Outlook Calendar. 2. Choose Add calendar and Subscribe from web. 3. Paste the webcal link and subscribe.",
+                color = TextSecondary,
+                fontSize = 12.sp,
+                lineHeight = 18.sp
+            )
+        }
+    }
+
+    if (showManualGuide) {
+        AlertDialog(
+            onDismissRequest = { showManualGuide = false },
+            containerColor = appSurfaceColor(elevated = true),
+            titleContentColor = TextPrimary,
+            textContentColor = TextSecondary,
+            title = { Text("Connect your calendar", color = TextPrimary) },
+            text = {
+                Text(
+                    "The installed calendar app does not accept webcal links automatically. The private link is already copied.\n\nGoogle Calendar\n1. Open Google Calendar.\n2. Open Other calendars and choose Add by URL.\n3. Paste the link and add the calendar.\n\nOutlook Calendar\n1. Open Outlook Calendar.\n2. Choose Add calendar and Subscribe from web.\n3. Paste the link and subscribe."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { showManualGuide = false }) {
+                    Text("Got it", color = Accent500)
+                }
+            }
+        )
+    }
+}
+
+@Composable
 fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri -> uri?.let { viewModel.exportData(context, it) } }
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri -> uri?.let { viewModel.importData(context, it) } }
+    val contactsPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) viewModel.importAllContacts(context)
+        else Toast.makeText(context, "Allow Contacts access to import birthdays.", Toast.LENGTH_LONG).show()
+    }
     SettingsSection("Account") {
         Text("Export your data or sign out on all devices.", color = TextSecondary, fontSize = 13.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
-        LiquidButton(
+        AppButton(
             onClick = { viewModel.checkForUpdate(context) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            LiquidIcon(Icons.Rounded.Update, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(iconRes = AppIcons.Update, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Check for Updates", color = TextPrimary)
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        LiquidButton(
-            onClick = { viewModel.exportData(context) },
+        AppButton(
+            onClick = { exportLauncher.launch("remindme-export-${java.time.LocalDate.now()}.json") },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            LiquidIcon(Icons.Rounded.Download, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(iconRes = AppIcons.Download, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Export Data (JSON)", color = TextPrimary)
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        LiquidButton(
+        AppButton(
+            onClick = { importLauncher.launch(arrayOf("application/json")) },
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) {
+            AppIcon(iconRes = AppIcons.UploadFile, modifier = Modifier.size(18.dp), color = TextPrimary)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Import JSON", color = TextPrimary)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        AppButton(
+            onClick = {
+                if (!uiState.isImportingContacts) {
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+                        viewModel.importAllContacts(context)
+                    } else {
+                        contactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                    }
+                }
+            },
+            enabled = !uiState.isImportingContacts,
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) {
+            if (uiState.isImportingContacts) {
+                Spinner(size = 18.dp)
+            } else {
+                AppIcon(iconRes = AppIcons.People, modifier = Modifier.size(18.dp), color = TextPrimary)
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(if (uiState.isImportingContacts) "Importing contacts…" else "Import from Contacts", color = TextPrimary)
+        }
+        Text(
+            "Imports all device contacts that include birthday information. Contacts without birthdays are skipped; duplicates are skipped.",
+            color = TextTertiary,
+            fontSize = 11.sp,
+            lineHeight = 16.sp,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        AppButton(
             onClick = { viewModel.signOut(onNavigateHome) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            LiquidIcon(Icons.AutoMirrored.Rounded.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(iconRes = AppIcons.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sign Out (This Device)", color = TextPrimary)
         }
         Spacer(modifier = Modifier.height(12.dp))
 
-        LiquidButton(
+        AppButton(
             onClick = { viewModel.signOutAllDevices(onNavigateHome) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            LiquidIcon(Icons.Rounded.PhonelinkErase, modifier = Modifier.size(18.dp), color = TextPrimary)
+            AppIcon(iconRes = AppIcons.PhonelinkErase, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sign Out All Devices", color = TextPrimary)
         }
@@ -584,38 +804,129 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
 }
 
 @Composable
+fun AboutSupportSection() {
+    val context = LocalContext.current
+    val webBase = com.remindme.app.BuildConfig.WEB_API_URL.trimEnd('/')
+
+    fun openUrl(url: String) {
+        runCatching {
+            context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)))
+        }.onFailure {
+            Toast.makeText(context, "Unable to open link", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    SettingsSection("About & support") {
+        Text(
+            "RemindME keeps important dates close without making them noisy.",
+            color = TextSecondary,
+            fontSize = 13.sp,
+            lineHeight = 19.sp
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text("Version ${com.remindme.app.BuildConfig.VERSION_NAME}", color = TextTertiary, fontSize = 12.sp)
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+            AppButton(
+                onClick = {
+                    runCatching {
+                        context.startActivity(android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(android.content.Intent.EXTRA_TEXT, "RemindME — reminders that stay close. $webBase")
+                        }.let { android.content.Intent.createChooser(it, "Share RemindME") })
+                    }.onFailure {
+                        Toast.makeText(context, "Unable to share RemindME", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = Modifier.weight(1f).height(46.dp)
+            ) {
+                AppIcon(iconRes = AppIcons.Share, color = TextPrimary, size = 17.dp)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Share", color = TextPrimary)
+            }
+            AppButton(
+                onClick = {
+                    runCatching {
+                        context.startActivity(android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
+                            data = android.net.Uri.parse("mailto:kalabhaftu1@gmail.com?subject=RemindME%20feedback")
+                        })
+                    }.onFailure {
+                        Toast.makeText(context, "No email app available", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = Modifier.weight(1f).height(46.dp)
+            ) {
+                AppIcon(iconRes = AppIcons.MailOutline, color = TextPrimary, size = 17.dp)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Feedback", color = TextPrimary)
+            }
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+            TextButton(onClick = { openUrl("$webBase/terms") }, modifier = Modifier.weight(1f)) {
+                Text("Terms of Service", color = Accent500, fontSize = 12.sp)
+            }
+            TextButton(onClick = { openUrl("$webBase/privacy") }, modifier = Modifier.weight(1f)) {
+                Text("Privacy Policy", color = Accent500, fontSize = 12.sp)
+            }
+        }
+    }
+}
+
+@Composable
 fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(Color.Red.copy(alpha = 0.05f))
-            .border(1.dp, Color.Red.copy(alpha = 0.2f), RoundedCornerShape(24.dp))
+            .background(StateDanger.copy(alpha = 0.05f))
+            .border(1.dp, StateDanger.copy(alpha = 0.2f), RoundedCornerShape(24.dp))
             .padding(20.dp)
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Rounded.Security, contentDescription = null, tint = Color.Red, modifier = Modifier.size(20.dp))
+                AppIcon(iconRes = AppIcons.Security, contentDescription = null, tint = StateDanger, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Danger Zone", style = MaterialTheme.typography.titleMedium, color = Color.Red)
+                Text("Danger Zone", style = MaterialTheme.typography.titleMedium, color = StateDanger)
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "Permanently delete your account, all reminders, and revoke all external tokens. This action cannot be undone.",
-                color = Color.Red.copy(alpha = 0.8f),
+                color = StateDanger.copy(alpha = 0.8f),
                 fontSize = 13.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
-            LiquidButton(
-                onClick = { viewModel.deleteAccount(onNavigateHome) },
+            AppButton(
+                onClick = { showDeleteConfirmation = true },
                 modifier = Modifier.fillMaxWidth().height(48.dp),
-                surfaceColor = Color.Red.copy(alpha = 0.2f)
+                surfaceColor = StateDanger.copy(alpha = 0.2f)
             ) {
-                LiquidIcon(Icons.Rounded.Delete, modifier = Modifier.size(18.dp), color = Color.Red)
+                AppIcon(iconRes = AppIcons.Delete, modifier = Modifier.size(18.dp), color = StateDanger)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Delete Account", color = Color.Red)
+                Text("Delete Account", color = StateDanger)
             }
         }
+    }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            containerColor = appSurfaceColor(elevated = true),
+            titleContentColor = TextPrimary,
+            textContentColor = TextSecondary,
+            title = { Text("Delete account?", color = TextPrimary) },
+            text = { Text("This permanently deletes your reminders, settings, delivery channels, and account. This cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteConfirmation = false
+                    viewModel.deleteAccount(onNavigateHome)
+                }) { Text("Delete", color = StateDanger) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) { Text("Cancel", color = TextSecondary) }
+            }
+        )
     }
 }
 
@@ -624,26 +935,26 @@ fun ThemeSelectorScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    var currentStyle by remember { mutableStateOf(LiquidGlassPrefs.getStyle(context)) }
+    var currentStyle by remember { mutableStateOf(ThemePrefs.getStyle(context)) }
 
     val listener = remember {
         android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == "glass_style") {
-                currentStyle = LiquidGlassPrefs.getStyle(context)
+            if (key == "theme_style") {
+                currentStyle = ThemePrefs.getStyle(context)
             }
         }
     }
 
     androidx.compose.runtime.DisposableEffect(context) {
-        val prefs = context.getSharedPreferences("liquid_glass_prefs", android.content.Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("remindme_prefs", android.content.Context.MODE_PRIVATE)
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose {
             prefs.unregisterOnSharedPreferenceChangeListener(listener)
         }
     }
 
-    CompositionLocalProvider(LocalLiquidGlassStyle provides currentStyle) {
-        LiquidScaffold(
+    CompositionLocalProvider(LocalThemeStyle provides currentStyle) {
+        AppScaffold(
             appBar = {
                 Row(
                     modifier = Modifier
@@ -654,7 +965,7 @@ fun ThemeSelectorScreen(
                 ) {
                     CircledBackButton(onClick = onBack)
                     Spacer(modifier = Modifier.width(12.dp))
-                    LiquidAppBar(
+                    TopBar(
                         title = "Theme Selector",
                         statusBarsPadding = false,
                         modifier = Modifier.weight(1f)
@@ -671,7 +982,7 @@ fun ThemeSelectorScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Choose your Liquid Glass style. The entire app's backdrop and card elements will update instantly to reflect your choice.",
+                text = "Switch between Glass and Solid theme appearance.",
                 color = TextSecondary,
                 fontSize = 14.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -679,24 +990,24 @@ fun ThemeSelectorScreen(
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            LiquidGlassStyle.entries.forEach { style ->
+            ThemeStyle.entries.forEach { style ->
                 val isSelected = currentStyle == style
                 val title = when (style) {
-                    LiquidGlassStyle.Clear -> "Clear Glass (Reference Style)"
-                    LiquidGlassStyle.Frosted -> "Colored Glass (Frosted Style)"
+                    ThemeStyle.Glass -> "Default Glass"
+                    ThemeStyle.Solid -> "Flat Solid"
                 }
                 val desc = when (style) {
-                    LiquidGlassStyle.Clear -> "Perfect transparency. Blends directly into the background using a glassmorphic shader overlay."
-                    LiquidGlassStyle.Frosted -> "A beautiful frosted effect with solid color tints, enhancing text readability and UI depth."
+                    ThemeStyle.Glass -> "Semi-transparent panels and subtle glass depth. The default RemindME look."
+                    ThemeStyle.Solid -> "Solid opaque surfaces. Cleaner contrast with flat backgrounds."
                 }
 
-                FloatingGlassContainer(
+                AppCard(
                     borderRadius = 24.dp,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 20.dp)
                         .clickable {
-                            LiquidGlassPrefs.setStyle(context, style)
+                            ThemePrefs.setStyle(context, style)
                         }
                         .border(
                             width = 2.dp,
@@ -719,9 +1030,9 @@ fun ThemeSelectorScreen(
                                 fontSize = 16.sp
                             )
                             if (isSelected) {
-                                LiquidIcon(Icons.Rounded.CheckCircle, color = Accent500, size = 20.dp)
+                                AppIcon(iconRes = AppIcons.CheckCircle, color = Accent500, size = 20.dp)
                             } else {
-                                LiquidIcon(Icons.Rounded.Circle, color = TextTertiary, size = 20.dp)
+                                AppIcon(iconRes = AppIcons.Circle, color = TextTertiary, size = 20.dp)
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
@@ -733,8 +1044,8 @@ fun ThemeSelectorScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // Render the mockup using the specific theme style override
-                        CompositionLocalProvider(LocalLiquidGlassStyle provides style) {
-                            FloatingGlassContainer(
+                        CompositionLocalProvider(LocalThemeStyle provides style) {
+                            AppCard(
                                 borderRadius = 16.dp,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -749,7 +1060,7 @@ fun ThemeSelectorScreen(
                                             .background(Accent500.copy(alpha = 0.2f)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        LiquidIcon(Icons.Rounded.Notifications, color = Accent500, size = 20.dp)
+                                        AppIcon(iconRes = AppIcons.Notifications, color = Accent500, size = 20.dp)
                                     }
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Column {

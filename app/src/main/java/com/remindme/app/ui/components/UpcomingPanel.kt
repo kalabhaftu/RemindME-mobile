@@ -5,8 +5,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,9 +17,9 @@ import androidx.compose.ui.unit.sp
 import com.remindme.app.domain.models.CategoryType
 import com.remindme.app.domain.models.OccurrenceStatus
 import com.remindme.app.domain.models.ReminderOccurrence
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidFilterChip
-import com.remindme.app.ui.components.liquid.LiquidIcon
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.FilterChip
+import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.theme.AppColors
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -33,6 +31,7 @@ fun UpcomingPanel(
     occurrences: List<ReminderOccurrence>,
     onMarkDone: (String, LocalDate) -> Unit,
     onSnooze: (String, LocalDate) -> Unit,
+    onPreview: (com.remindme.app.domain.models.ReminderItem) -> Unit,
     onEdit: (com.remindme.app.domain.models.ReminderItem) -> Unit
 ) {
     var filter by remember { mutableStateOf(UpcomingFilter.SevenDays) }
@@ -52,7 +51,7 @@ fun UpcomingPanel(
         }.sortedBy { it.date }
     }
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 24.dp,
         padding = 16.dp,
         modifier = Modifier.fillMaxWidth()
@@ -71,17 +70,17 @@ fun UpcomingPanel(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                LiquidFilterChip("Next 3 Days", filter == UpcomingFilter.ThreeDays, onSelected = { filter = UpcomingFilter.ThreeDays })
-                LiquidFilterChip("Next 7 Days", filter == UpcomingFilter.SevenDays, onSelected = { filter = UpcomingFilter.SevenDays })
-                LiquidFilterChip("This Month", filter == UpcomingFilter.Month, onSelected = { filter = UpcomingFilter.Month })
-                LiquidFilterChip("All Upcoming", filter == UpcomingFilter.All, onSelected = { filter = UpcomingFilter.All })
+                FilterChip("Next 3 Days", filter == UpcomingFilter.ThreeDays, onSelected = { filter = UpcomingFilter.ThreeDays })
+                FilterChip("Next 7 Days", filter == UpcomingFilter.SevenDays, onSelected = { filter = UpcomingFilter.SevenDays })
+                FilterChip("This Month", filter == UpcomingFilter.Month, onSelected = { filter = UpcomingFilter.Month })
+                FilterChip("All Upcoming", filter == UpcomingFilter.All, onSelected = { filter = UpcomingFilter.All })
             }
             Spacer(modifier = Modifier.height(16.dp))
 
             if (filtered.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        LiquidIcon(Icons.Rounded.Notifications, size = 32.dp, color = AppColors.textTertiary)
+                        AppIcon(iconRes = AppIcons.Notifications, size = 32.dp, color = AppColors.textTertiary)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("All caught up", color = AppColors.textSecondary, fontSize = 14.sp)
                     }
@@ -93,6 +92,7 @@ fun UpcomingPanel(
                             occurrence = occ,
                             onMarkDone = { onMarkDone(occ.item.id, occ.date) },
                             onSnooze = { onSnooze(occ.item.id, occ.date) },
+                            onPreview = { onPreview(occ.item) },
                             onEdit = { onEdit(occ.item) }
                         )
                     }
@@ -107,19 +107,20 @@ fun UpcomingItem(
     occurrence: ReminderOccurrence,
     onMarkDone: () -> Unit,
     onSnooze: () -> Unit,
+    onPreview: () -> Unit,
     onEdit: () -> Unit
 ) {
     val item = occurrence.item
     val isDone = occurrence.status == OccurrenceStatus.COMPLETED_PAST
 
     val iconRes = when (item.category) {
-        CategoryType.TASK -> Icons.Rounded.Checklist
-        CategoryType.PERSON -> Icons.Rounded.Person
-        CategoryType.SUBSCRIPTION -> Icons.Rounded.CreditCard
-        CategoryType.CUSTOM_HOLIDAY -> Icons.Rounded.Cake
+        CategoryType.TASK -> AppIcons.Checklist
+        CategoryType.PERSON -> AppIcons.Person
+        CategoryType.SUBSCRIPTION -> AppIcons.CreditCard
+        CategoryType.CUSTOM_HOLIDAY -> AppIcons.Cake
     }
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         padding = 0.dp
     ) {
@@ -127,16 +128,16 @@ fun UpcomingItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .clickable { onEdit() }
+                .clickable { onPreview() }
                 .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 10.dp,
                 padding = 9.dp
             ) {
-                LiquidIcon(
-                    imageVector = iconRes,
+                AppIcon(
+                    iconRes = iconRes,
                     size = 18.dp,
                     tint = if (isDone) AppColors.textTertiary else AppColors.accent500
                 )
@@ -168,30 +169,30 @@ fun UpcomingItem(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (item.category == CategoryType.TASK && !isDone) {
-                    FloatingGlassContainer(
+                    AppCard(
                         borderRadius = 20.dp,
                         padding = 8.dp,
                         modifier = Modifier.clickable { onSnooze() }
                     ) {
-                        LiquidIcon(imageVector = Icons.Rounded.Snooze, size = 18.dp, color = AppColors.stateWarning)
+                        AppIcon(iconRes = AppIcons.Snooze, size = 18.dp, color = AppColors.stateWarning)
                     }
                     Spacer(modifier = Modifier.width(6.dp))
-                    FloatingGlassContainer(
+                    AppCard(
                         borderRadius = 20.dp,
                         padding = 8.dp,
                         modifier = Modifier.clickable { onMarkDone() }
                     ) {
-                        LiquidIcon(imageVector = Icons.Rounded.CheckCircle, size = 18.dp, color = AppColors.stateSuccess)
+                        AppIcon(iconRes = AppIcons.CheckCircle, size = 18.dp, color = AppColors.stateSuccess)
                     }
                     Spacer(modifier = Modifier.width(6.dp))
                 }
                 if (item.category != CategoryType.CUSTOM_HOLIDAY) {
-                    FloatingGlassContainer(
+                    AppCard(
                         borderRadius = 20.dp,
                         padding = 8.dp,
                         modifier = Modifier.clickable { onEdit() }
                     ) {
-                        LiquidIcon(imageVector = Icons.Rounded.Edit, size = 18.dp, color = AppColors.textTertiary)
+                        AppIcon(iconRes = AppIcons.Edit, size = 18.dp, color = AppColors.textTertiary)
                     }
                 }
             }

@@ -1,12 +1,17 @@
 package com.remindme.app.ui.screens.settings
 
 import android.content.Context
+import android.provider.ContactsContract
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.BuildConfig
 import com.remindme.app.data.remote.SupabaseManager
+import com.remindme.app.data.repository.OfflineReminderRepository
+import com.remindme.app.data.repository.ReminderRepository
+import com.remindme.app.domain.models.CategoryType
+import com.remindme.app.ui.components.NotificationPrefsStore
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
@@ -25,6 +30,10 @@ import org.json.JSONObject
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 data class SettingsUiState(
     val isLoading: Boolean = false,
@@ -35,7 +44,7 @@ data class SettingsUiState(
     val telegramEnabled: Boolean = false,
     val inAppEnabled: Boolean = true,
     val defaultLeadTime: String = "morning_of",
-    val defaultCustomTime: String = "09:00",
+    val defaultCustomTime: String = "",
     val nudgeDelayHours: Int = 4,
     val timezone: String = "UTC",
 
@@ -47,6 +56,11 @@ data class SettingsUiState(
 
     val deliveryLogs: List<DeliveryLog> = emptyList(),
 
+    val calendarWebcalUrl: String? = null,
+    val calendarHttpsUrl: String? = null,
+    val isLoadingCalendar: Boolean = false,
+    val isImportingContacts: Boolean = false,
+
     val error: String? = null,
     val message: String? = null
 )
@@ -57,24 +71,37 @@ data class DeliveryLog(
     val user_id: String? = null,
     val channel: String? = null,
     val status: String? = null,
-    val scheduled_for: String? = null
+    val scheduled_for: String? = null,
+    val sent_at: String? = null,
+    val error_message: String? = null
 )
 
-class SettingsViewModel : ViewModel() {
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+    private val settingsPrefs = application.getSharedPreferences("remindme_settings_cache", Context.MODE_PRIVATE)
+    private val telegramCacheTtlMs = 5 * 60 * 1000L
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     private val supabase = SupabaseManager.client
     private val webApiUrl = BuildConfig.WEB_API_URL
+    private val repository = OfflineReminderRepository(
+        ReminderRepository(SupabaseManager.client, application.applicationContext),
+        application.applicationContext
+    )
 
     init {
         loadPreferences()
         loadTelegramStatus()
         loadDeliveryLogs()
+        loadCalendarFeed()
     }
 
     fun clearMessage() {
         _uiState.update { it.copy(message = null, error = null) }
+    }
+
+    fun showMessage(message: String) {
+        _uiState.update { it.copy(message = message) }
     }
 
     private fun loadPreferences() = viewModelScope.launch(Dispatchers.IO) {
@@ -90,7 +117,7 @@ class SettingsViewModel : ViewModel() {
                     val tz = response["timezone"]?.let { it.toString().removeSurrounding("\"") } ?: "UTC"
                     val nudge = response["nudge_delay_hours"]?.toString()?.toIntOrNull() ?: 4
                     val leadTime = response["default_lead_time"]?.toString()?.removeSurrounding("\"") ?: "morning_of"
-                    val customTime = response["default_custom_time"]?.toString()?.removeSurrounding("\"") ?: "09:00"
+                    val customTime = response["default_custom_time"]?.toString()?.removeSurrounding("\"") ?: ""
 
                     var em = true
                     var pu = false
@@ -120,14 +147,20 @@ class SettingsViewModel : ViewModel() {
                 }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to load preferences") }
         } finally {
             _uiState.update { it.copy(isLoading = false) }
         }
     }
 
-    private fun loadTelegramStatus() = viewModelScope.launch(Dispatchers.IO) {
-        _uiState.update { it.copy(isLoadingTelegram = true) }
+    private fun loadTelegramStatus(force: Boolean = false) = viewModelScope.launch(Dispatchers.IO) {
+        val cachedAt = settingsPrefs.getLong("telegram_cached_at", 0L)
+        val cached = settingsPrefs.getString("telegram_status", null)
+        if (!force && cached != null) {
+            applyTelegramStatus(JSONObject(cached))
+            if (System.currentTimeMillis() - cachedAt < telegramCacheTtlMs) return@launch
+        }
+        _uiState.update { it.copy(isLoadingTelegram = cached == null) }
         try {
             val token = supabase.auth.currentSessionOrNull()?.accessToken ?: return@launch
             val url = URL("$webApiUrl/api/settings/telegram")
@@ -138,17 +171,8 @@ class SettingsViewModel : ViewModel() {
             if (conn.responseCode == 200) {
                 val responseBody = conn.inputStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(responseBody)
-                if (json.optBoolean("hasToken", false)) {
-                    _uiState.update {
-                        it.copy(
-                            hasTelegramToken = true,
-                            maskedTelegramToken = json.optString("maskedToken"),
-                            botUsername = json.optString("botUsername").takeIf { u -> u.isNotEmpty() },
-                            hasChatId = json.optBoolean("hasChatId", false),
-                            maskedChatId = json.optString("maskedChatId")
-                        )
-                    }
-                }
+                settingsPrefs.edit().putString("telegram_status", json.toString()).putLong("telegram_cached_at", System.currentTimeMillis()).apply()
+                applyTelegramStatus(json)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -156,6 +180,20 @@ class SettingsViewModel : ViewModel() {
             _uiState.update { it.copy(isLoadingTelegram = false) }
         }
     }
+
+    private fun applyTelegramStatus(json: JSONObject) {
+        _uiState.update {
+            it.copy(
+                hasTelegramToken = json.optBoolean("hasToken", false),
+                maskedTelegramToken = json.optString("maskedToken"),
+                botUsername = json.optString("botUsername").takeIf(String::isNotEmpty),
+                hasChatId = json.optBoolean("hasChatId", false),
+                maskedChatId = json.optString("maskedChatId")
+            )
+        }
+    }
+
+    fun refreshTelegramStatus() { loadTelegramStatus(force = true) }
 
     private fun loadDeliveryLogs() = viewModelScope.launch(Dispatchers.IO) {
         try {
@@ -171,6 +209,168 @@ class SettingsViewModel : ViewModel() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    fun loadCalendarFeed() = viewModelScope.launch(Dispatchers.IO) {
+        _uiState.update { it.copy(isLoadingCalendar = true) }
+        try {
+            val token = supabase.auth.currentSessionOrNull()?.accessToken ?: return@launch
+            val conn = (URL("$webApiUrl/api/calendar/feed-url").openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                setRequestProperty("Authorization", "Bearer $token")
+            }
+            val body = (if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream)
+                ?.bufferedReader()?.use { it.readText() }.orEmpty()
+            if (conn.responseCode !in 200..299) {
+                throw Exception(JSONObject(body).optString("error", "Calendar link unavailable"))
+            }
+            val json = JSONObject(body)
+            _uiState.update {
+                it.copy(
+                    calendarWebcalUrl = json.optString("webcalUrl").takeIf(String::isNotBlank),
+                    calendarHttpsUrl = json.optString("httpsUrl").takeIf(String::isNotBlank)
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = "Could not load calendar link") }
+        } finally {
+            _uiState.update { it.copy(isLoadingCalendar = false) }
+        }
+    }
+
+    fun rotateCalendarFeed() = viewModelScope.launch(Dispatchers.IO) {
+        _uiState.update { it.copy(isLoadingCalendar = true) }
+        try {
+            val token = supabase.auth.currentSessionOrNull()?.accessToken ?: return@launch
+            val conn = (URL("$webApiUrl/api/calendar/feed-url").openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                setRequestProperty("Authorization", "Bearer $token")
+            }
+            val body = (if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream)
+                ?.bufferedReader()?.use { it.readText() }.orEmpty()
+            if (conn.responseCode !in 200..299) {
+                throw Exception(JSONObject(body).optString("error", "Could not rotate calendar link"))
+            }
+            val json = JSONObject(body)
+            _uiState.update {
+                it.copy(
+                    calendarWebcalUrl = json.optString("webcalUrl").takeIf(String::isNotBlank),
+                    calendarHttpsUrl = json.optString("httpsUrl").takeIf(String::isNotBlank),
+                    message = "Calendar link regenerated"
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = "Could not regenerate calendar link") }
+        } finally {
+            _uiState.update { it.copy(isLoadingCalendar = false) }
+        }
+    }
+
+    fun importAllContacts(context: Context) = viewModelScope.launch(Dispatchers.IO) {
+        _uiState.update { it.copy(isImportingContacts = true, error = null) }
+        try {
+            val userId = supabase.auth.currentUserOrNull()?.id ?: throw Exception("Not logged in")
+            val resolver = context.contentResolver
+            val existing = runCatching { repository.getReminders() }.getOrElse { repository.cachedSnapshot() }
+                .filter { it.category == CategoryType.PERSON }
+                .mapTo(mutableSetOf()) { it.name.trim().lowercase() }
+            val defaults = NotificationPrefsStore.load(context)
+            var imported = 0
+            var skipped = 0
+            var withBirthday = 0
+            var withoutBirthday = 0
+            val seenContactIds = mutableSetOf<String>()
+
+            resolver.query(
+                ContactsContract.Data.CONTENT_URI,
+                arrayOf(
+                    ContactsContract.Data.CONTACT_ID,
+                    ContactsContract.Data.DISPLAY_NAME,
+                    ContactsContract.CommonDataKinds.Event.START_DATE
+                ),
+                "${ContactsContract.Data.MIMETYPE} = ? AND ${ContactsContract.CommonDataKinds.Event.TYPE} = ?",
+                arrayOf(
+                    ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE,
+                    ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY.toString()
+                ),
+                "${ContactsContract.Data.DISPLAY_NAME} COLLATE NOCASE ASC"
+            )?.use { cursor ->
+                val idIndex = cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID)
+                val nameIndex = cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)
+                val birthdayIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Event.START_DATE)
+                while (cursor.moveToNext()) {
+                    val contactId = cursor.getString(idIndex).orEmpty()
+                    if (!seenContactIds.add(contactId)) continue
+                    val name = cursor.getString(nameIndex)?.trim().orEmpty()
+                    if (name.isBlank()) continue
+                    val birthdate = parseContactBirthday(cursor.getString(birthdayIndex))
+                    if (birthdate == null) {
+                        withoutBirthday++
+                        continue
+                    }
+                    val key = name.lowercase()
+                    if (!existing.add(key)) {
+                        skipped++
+                        continue
+                    }
+                    val now = LocalDateTime.now()
+                    val item = com.remindme.app.domain.models.ReminderItem(
+                        id = UUID.randomUUID().toString(),
+                        userId = userId,
+                        category = CategoryType.PERSON,
+                        name = name,
+                        createdAt = now,
+                        updatedAt = now,
+                        personDetails = com.remindme.app.domain.models.PersonDetails(
+                            birthdate = birthdate,
+                            relationship = "friend",
+                            gender = "unspecified"
+                        ),
+                        recurrenceRules = com.remindme.app.domain.models.RecurrenceRules(
+                            frequency = "yearly",
+                            ends = "never",
+                            nextOccurrenceAt = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
+                                category = "person",
+                                birthdate = birthdate
+                            )
+                        ),
+                        notificationPreferences = defaults.map { (channel, pref) ->
+                            com.remindme.app.domain.models.NotificationPreference(
+                                channel = channel,
+                                enabled = pref.enabled,
+                                leadTime = pref.leadTime,
+                                customTime = pref.customTime,
+                                offsetDays = pref.offsetDays
+                            )
+                        }
+                    )
+                    repository.addReminder(item)
+                    imported++
+                    withBirthday++
+                }
+            } ?: throw Exception("Unable to read contacts")
+
+            _uiState.update {
+                it.copy(
+                    message = "Imported $imported contacts. Birthdays found: $withBirthday; missing: $withoutBirthday; duplicates skipped: $skipped",
+                    isImportingContacts = false
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = e.message ?: "Contact import failed", isImportingContacts = false) }
+        }
+    }
+
+    private fun parseContactBirthday(raw: String?): String? {
+        val value = raw?.trim().orEmpty()
+        if (value.isBlank() || value.startsWith("--")) return null
+        return runCatching {
+            when {
+                value.matches(Regex("\\d{8}")) -> LocalDate.parse(value, DateTimeFormatter.BASIC_ISO_DATE).toString()
+                value.length >= 10 -> LocalDate.parse(value.take(10), DateTimeFormatter.ISO_LOCAL_DATE).toString()
+                else -> null
+            }
+        }.getOrNull()
     }
 
     fun updatePreference(key: String, value: Any) {
@@ -213,7 +413,7 @@ class SettingsViewModel : ViewModel() {
             android.util.Log.d("SettingsViewModel", "Successfully synced preferences to Supabase: $payload")
         } catch (e: Exception) {
             android.util.Log.e("SettingsViewModel", "Failed to sync preferences to Supabase", e)
-            _uiState.update { it.copy(error = "Sync Failed: ${e.message}") }
+            _uiState.update { it.copy(error = "Failed to sync preferences. Please try again.") }
         }
     }
 
@@ -240,11 +440,12 @@ class SettingsViewModel : ViewModel() {
                         message = "Telegram token saved"
                     )
                 }
+                settingsPrefs.edit().remove("telegram_status").remove("telegram_cached_at").apply()
             } else {
                 _uiState.update { it.copy(error = "Failed to save token") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to save Telegram token") }
         }
     }
 
@@ -267,9 +468,10 @@ class SettingsViewModel : ViewModel() {
                         message = "Telegram token deleted"
                     )
                 }
+                settingsPrefs.edit().remove("telegram_status").remove("telegram_cached_at").apply()
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to delete Telegram token") }
         }
     }
 
@@ -298,10 +500,10 @@ class SettingsViewModel : ViewModel() {
                     )
                 }
             } else {
-                _uiState.update { it.copy(error = json.optString("error", "Detection failed")) }
+                _uiState.update { it.copy(error = "Failed to detect chat ID") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to detect chat ID") }
         }
     }
 
@@ -329,7 +531,7 @@ class SettingsViewModel : ViewModel() {
                 _uiState.update { it.copy(error = "Failed to save") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to save chat ID") }
         }
     }
 
@@ -346,10 +548,10 @@ class SettingsViewModel : ViewModel() {
             } else {
                 val errorStr = conn.errorStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(errorStr)
-                _uiState.update { it.copy(error = json.optString("error", "Failed to send test")) }
+                _uiState.update { it.copy(error = "Failed to send test notification") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to send test notification") }
         }
     }
 
@@ -360,6 +562,9 @@ class SettingsViewModel : ViewModel() {
             val conn = url.openConnection() as HttpURLConnection
             conn.setRequestProperty("Authorization", "Bearer $token")
             conn.requestMethod = "DELETE"
+            conn.doOutput = true
+            conn.setRequestProperty("Content-Type", "application/json")
+            conn.outputStream.use { it.write("{\"confirmation\":\"DELETE\"}".toByteArray()) }
             
             if (conn.responseCode == 200) {
                 supabase.auth.signOut()
@@ -368,7 +573,7 @@ class SettingsViewModel : ViewModel() {
                 _uiState.update { it.copy(error = "Failed to delete account") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to delete account") }
         }
     }
 
@@ -377,7 +582,7 @@ class SettingsViewModel : ViewModel() {
             supabase.auth.signOut()
             withContext(Dispatchers.Main) { onComplete() }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to sign out") }
         }
     }
 
@@ -386,11 +591,11 @@ class SettingsViewModel : ViewModel() {
             supabase.auth.signOut(io.github.jan.supabase.auth.SignOutScope.GLOBAL)
             withContext(Dispatchers.Main) { onComplete() }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to sign out all devices") }
         }
     }
 
-    fun exportData(context: android.content.Context) = viewModelScope.launch(Dispatchers.IO) {
+    fun exportData(context: android.content.Context, destination: android.net.Uri) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val token = supabase.auth.currentSessionOrNull()?.accessToken ?: throw Exception("Not logged in")
             val url = URL("$webApiUrl/api/account/export")
@@ -400,16 +605,55 @@ class SettingsViewModel : ViewModel() {
 
             if (conn.responseCode == 200) {
                 val json = conn.inputStream.bufferedReader().use { it.readText() }
-                val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                clipboard.setPrimaryClip(android.content.ClipData.newPlainText("RemindME Export", json))
+                if (JSONObject(json).optJSONArray("reminders")?.length() != null && JSONObject(json).optJSONArray("reminders")?.length() == 0) {
+                    withContext(Dispatchers.Main) { _uiState.update { it.copy(message = "There are no reminders to export yet") } }
+                    return@launch
+                }
+                val bytes = json.toByteArray(Charsets.UTF_8)
+                context.contentResolver.openOutputStream(destination, "wt")?.use { output ->
+                    output.write(bytes)
+                    output.flush()
+                }
+                    ?: throw Exception("Unable to open export destination")
                 withContext(Dispatchers.Main) {
-                    _uiState.update { it.copy(message = "Data exported and copied to clipboard!") }
+                    _uiState.update { it.copy(message = "Export saved (${bytes.size} bytes) as ${destination.lastPathSegment ?: "JSON file"}") }
                 }
             } else {
                 _uiState.update { it.copy(error = "Export failed: HTTP ${conn.responseCode}") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = e.message ?: "Failed to export data") }
+        }
+    }
+
+    fun importData(context: android.content.Context, source: android.net.Uri) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val token = supabase.auth.currentSessionOrNull()?.accessToken ?: throw Exception("Not logged in")
+            val json = context.contentResolver.openInputStream(source)?.bufferedReader()?.use { it.readText() }
+                ?: throw Exception("Unable to read import file")
+            if (json.length > 2_000_000 || !json.trimStart().startsWith("{")) throw Exception("Invalid JSON export")
+            val conn = (URL("$webApiUrl/api/account/import").openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                doOutput = true
+                setRequestProperty("Authorization", "Bearer $token")
+                setRequestProperty("Content-Type", "application/json")
+            }
+            conn.outputStream.use { it.write(json.toByteArray()) }
+            val body = (if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream)
+                .bufferedReader().use { it.readText() }
+            if (conn.responseCode !in 200..299) throw Exception(JSONObject(body).optString("error", "Import failed"))
+            val result = JSONObject(body)
+            val imported = result.optInt("imported")
+            val skipped = result.optInt("skipped")
+            _uiState.update {
+                it.copy(message = if (imported == 0 && skipped == 0) {
+                    "This JSON file contains no reminders"
+                } else {
+                    "Imported $imported reminders; skipped $skipped duplicates"
+                })
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = e.message ?: "Failed to import data") }
         }
     }
 
@@ -428,7 +672,7 @@ class SettingsViewModel : ViewModel() {
                 _uiState.update { it.copy(error = "Could not check for updates.") }
             }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message) }
+            _uiState.update { it.copy(error = "Failed to check for update") }
         }
     }
 }

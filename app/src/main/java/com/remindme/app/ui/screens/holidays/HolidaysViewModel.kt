@@ -1,4 +1,5 @@
 package com.remindme.app.ui.screens.holidays
+import com.remindme.app.domain.models.CategoryType
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
@@ -6,7 +7,7 @@ import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
-import com.remindme.app.domain.models.CategoryType
+import com.remindme.app.data.repository.OfflineReminderRepository
 import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.domain.models.HolidayDetails
 import com.remindme.app.domain.models.RecurrenceRules
@@ -53,7 +54,7 @@ data class HolidaysUiState(
 )
 
 class HolidaysViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
+    private val repository = OfflineReminderRepository(ReminderRepository(SupabaseManager.client, application.applicationContext), application.applicationContext)
     private val _uiState = MutableStateFlow(HolidaysUiState())
     val uiState: StateFlow<HolidaysUiState> = _uiState.asStateFlow()
 
@@ -71,10 +72,12 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
             val tables = listOf("reminder_items", "holiday_details")
             
             tables.forEach { table ->
-                realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
-                    this.table = table
-                }?.collect {
-                    fetchSubscribed()
+                launch {
+                    realtimeChannel?.postgresChangeFlow<PostgresAction>(schema = "public") {
+                        this.table = table
+                    }?.collect {
+                        fetchSubscribed()
+                    }
                 }
             }
             realtimeChannel?.subscribe()
@@ -105,7 +108,7 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
                 _uiState.update { it.copy(countries = list, isLoadingCountries = false) }
                 loadHolidays(_uiState.value.selectedCountry)
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoadingCountries = false, error = e.message) }
+                _uiState.update { it.copy(isLoadingCountries = false, error = "Failed to load countries") }
             }
         }
     }
@@ -113,6 +116,11 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
     fun selectCountry(code: String) {
         _uiState.update { it.copy(selectedCountry = code) }
         loadHolidays(code)
+    }
+
+    fun refresh() {
+        loadCountries()
+        fetchSubscribed()
     }
 
     private fun loadHolidays(code: String) {
@@ -136,7 +144,7 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
                 }
                 _uiState.update { it.copy(holidays = list.distinctBy { it.holidayKey }, isLoadingHolidays = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoadingHolidays = false, error = e.message) }
+                _uiState.update { it.copy(isLoadingHolidays = false, error = "Failed to load holidays") }
             }
         }
     }
@@ -193,21 +201,17 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
                             name = holiday.localName,
                             createdAt = java.time.LocalDateTime.now(),
                             updatedAt = java.time.LocalDateTime.now(),
-                            holidayDetails = listOf(
-                                HolidayDetails(
-                                    countryCode = holiday.countryCode,
-                                    holidayKey = key,
-                                    holidayDate = holiday.date,
-                                    isCustom = false
-                                )
+                            holidayDetails = HolidayDetails(
+                                countryCode = holiday.countryCode,
+                                holidayKey = key,
+                                holidayDate = holiday.date,
+                                isCustom = false
                             ),
-                            recurrenceRules = listOf(
-                                RecurrenceRules(
-                                    frequency = "yearly",
-                                    intervalCount = 1,
-                                    ends = "never",
-                                    nextOccurrenceAt = nextOccurrence
-                                )
+                            recurrenceRules = RecurrenceRules(
+                                frequency = "yearly",
+                                intervalCount = 1,
+                                ends = "never",
+                                nextOccurrenceAt = nextOccurrence
                             )
                         )
                         // Save through repository
@@ -219,7 +223,7 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
                     }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
+                _uiState.update { it.copy(error = "Failed to update subscription") }
             } finally {
                 _uiState.update { it.copy(togglingKey = null) }
                 fetchSubscribed()
@@ -240,7 +244,7 @@ class HolidaysViewModel(application: Application) : AndroidViewModel(application
                     }
                     fetchSubscribed()
                 } catch (e: Exception) {
-                    _uiState.update { it.copy(error = e.message) }
+                    _uiState.update { it.copy(error = "Failed to remove subscription") }
                 }
             }
         }

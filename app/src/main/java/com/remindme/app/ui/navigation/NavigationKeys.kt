@@ -12,10 +12,16 @@ import kotlinx.serialization.Serializable
 @Serializable data object Templates : NavKey
 @Serializable data object Notifications : NavKey
 @Serializable data object ThemeSelector : NavKey
+@Serializable data object NotificationHelp : NavKey
+@Serializable data object MagicLink : NavKey
 
 @Serializable data object AddPerson : NavKey
 @Serializable data class EditPerson(val personId: String) : NavKey
 @Serializable data object AddSubscription : NavKey
+@Serializable data class EditSubscription(val subscriptionId: String) : NavKey
 @Serializable data object AddTask : NavKey
+@Serializable data class EditTask(val taskId: String) : NavKey
+@Serializable data class EditReminder(val reminderId: String) : NavKey
+@Serializable data class ReminderPreview(val reminderId: String) : NavKey
 
 @Serializable data class PersonDetail(val personId: String) : NavKey

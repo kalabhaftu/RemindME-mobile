@@ -7,11 +7,12 @@ import android.app.Application
 import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
-import kotlinx.coroutines.Dispatchers
+import com.remindme.app.data.repository.OfflineReminderRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 data class PersonDetailUiState(
@@ -24,7 +25,7 @@ data class PersonDetailUiState(
 class PersonDetailViewModel(
     private val personId: String,
     application: Application,
-    private val repository: ReminderRepository = ReminderRepository(SupabaseManager.client, application.applicationContext)
+    private val repository: OfflineReminderRepository = OfflineReminderRepository(ReminderRepository(SupabaseManager.client, application.applicationContext), application.applicationContext)
 ) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(PersonDetailUiState())
@@ -41,7 +42,7 @@ class PersonDetailViewModel(
             val person = all.firstOrNull { it.id == personId }
             _uiState.update { it.copy(person = person, isLoading = false) }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message, isLoading = false) }
+            _uiState.update { it.copy(error = "Failed to load person details", isLoading = false) }
         }
     }
 
@@ -51,7 +52,7 @@ class PersonDetailViewModel(
             repository.deleteReminder(personId)
             _uiState.update { it.copy(isDeleted = true, isLoading = false) }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = e.message, isLoading = false) }
+            _uiState.update { it.copy(error = "Failed to delete person", isLoading = false) }
         }
     }
 }

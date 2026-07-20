@@ -6,9 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,9 +23,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
-import com.remindme.app.ui.components.liquid.LiquidSpinner
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.AppIcons
+import com.remindme.app.ui.components.Spinner
+import com.remindme.app.ui.components.SwipeDeleteBackground
+import com.remindme.app.ui.components.appScrimColor
+import com.remindme.app.ui.components.appSurfaceColor
+import com.remindme.app.ui.components.AppPullToRefresh
 import com.remindme.app.ui.theme.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -42,43 +44,16 @@ fun HolidaysScreen(
     val haptic = LocalHapticFeedback.current
     var showCountryPicker by remember { mutableStateOf(false) }
 
-    if (uiState.isLoadingCountries) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            LiquidSpinner()
-        }
-        return
-    }
-
+    AppPullToRefresh(
+        isRefreshing = uiState.isLoadingCountries || uiState.isLoadingHolidays,
+        onRefresh = { viewModel.refresh() }
+    ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
     ) {
-        item {
-            Text(
-                text = "Holiday Reminders",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Tap a holiday to add or remove it as a reminder.",
-                fontSize = 12.sp,
-                color = TextTertiary
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
 
         if (uiState.subscribedKeys.isNotEmpty()) {
-            item {
-                Text(
-                    text = "Your reminders — swipe to remove",
-                    fontSize = 12.sp,
-                    color = TextTertiary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
             items(uiState.subscribedKeys.toList(), key = { it }) { key ->
                 val parts = key.split("-")
                 val name = if (parts.size > 2) parts.subList(2, parts.size).joinToString("-") else key
@@ -94,25 +69,22 @@ fun HolidaysScreen(
                         }
                     }
                 )
+                val isSwiping = dismissState.currentValue != SwipeToDismissBoxValue.Settled ||
+                    dismissState.targetValue != SwipeToDismissBoxValue.Settled
 
                 SwipeToDismissBox(
                     state = dismissState,
                     enableDismissFromStartToEnd = false,
                     backgroundContent = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(StateDanger.copy(alpha = 0.15f))
-                                .padding(end = 16.dp),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = StateDanger)
-                        }
+                        SwipeDeleteBackground(
+                            dismissState = dismissState,
+                            cornerRadius = 8.dp,
+                            bottomPadding = 8.dp,
+                            endPadding = 16.dp
+                        )
                     },
                     content = {
-                        FloatingGlassContainer(
+                        AppCard(
                             borderRadius = 12.dp,
                             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                         ) {
@@ -120,7 +92,7 @@ fun HolidaysScreen(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                LiquidIcon(imageVector = Icons.Rounded.CardGiftcard, size = 16.dp, color = TextPrimary)
+                                AppIcon(iconRes = AppIcons.CardGiftcard, size = 16.dp, color = TextPrimary)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = name,
@@ -128,7 +100,7 @@ fun HolidaysScreen(
                                     fontSize = 13.sp,
                                     modifier = Modifier.weight(1f)
                                 )
-                                LiquidIcon(imageVector = Icons.Rounded.ArrowBack, size = 14.dp, color = TextPrimary)
+                                AppIcon(iconRes = AppIcons.ArrowBack, size = 14.dp, color = TextPrimary)
                             }
                         }
                     }
@@ -142,7 +114,7 @@ fun HolidaysScreen(
 
         item {
             val selectedName = uiState.countries.find { it.countryCode == uiState.selectedCountry }?.name ?: uiState.selectedCountry
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 16.dp,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -152,12 +124,12 @@ fun HolidaysScreen(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    FloatingGlassContainer(
+                    AppCard(
                         borderRadius = 10.dp,
                         modifier = Modifier.wrapContentSize()
                     ) {
                         Box(modifier = Modifier.padding(8.dp)) {
-                            LiquidIcon(imageVector = Icons.Rounded.Public, size = 18.dp, color = Accent500)
+                            AppIcon(iconRes = AppIcons.Public, size = 18.dp, color = Accent500)
                         }
                     }
                     Spacer(modifier = Modifier.width(12.dp))
@@ -166,7 +138,10 @@ fun HolidaysScreen(
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(text = selectedName, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
                     }
-                    LiquidIcon(imageVector = Icons.Rounded.KeyboardArrowDown, size = 20.dp, color = TextTertiary)
+                    if (uiState.isLoadingCountries) {
+                        Spinner(modifier = Modifier.size(18.dp))
+                    }
+                    AppIcon(iconRes = AppIcons.KeyboardArrowDown, size = 20.dp, color = TextTertiary)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -175,13 +150,13 @@ fun HolidaysScreen(
         if (uiState.isLoadingHolidays) {
             item {
                 Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                    LiquidSpinner()
+                    Spinner()
                 }
             }
         } else {
             items(uiState.holidays, key = { it.holidayKey }) { holiday ->
                 val active = uiState.subscribedKeys.contains(holiday.holidayKey)
-                FloatingGlassContainer(
+                AppCard(
                     borderRadius = 16.dp,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -192,13 +167,13 @@ fun HolidaysScreen(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        FloatingGlassContainer(
+                        AppCard(
                             borderRadius = 10.dp,
                             modifier = Modifier.wrapContentSize()
                         ) {
                             Box(modifier = Modifier.padding(8.dp)) {
-                                LiquidIcon(
-                                    imageVector = Icons.Rounded.CardGiftcard,
+                                AppIcon(
+                                    iconRes = AppIcons.CardGiftcard,
                                     size = 18.dp,
                                     color = if (active) Accent500 else TextTertiary
                                 )
@@ -222,10 +197,10 @@ fun HolidaysScreen(
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         if (uiState.togglingKey == holiday.holidayKey) {
-                            LiquidSpinner(modifier = Modifier.size(24.dp))
+                            Spinner(modifier = Modifier.size(24.dp))
                         } else {
-                            LiquidIcon(
-                                imageVector = if (active) Icons.Rounded.CheckCircle else Icons.Rounded.AddCircle,
+                            AppIcon(
+                                iconRes = if (active) AppIcons.CheckCircle else AppIcons.AddCircle,
                                 color = if (active) Accent500 else TextTertiary,
                                 size = 24.dp
                             )
@@ -235,11 +210,13 @@ fun HolidaysScreen(
             }
         }
     }
+    }
 
     if (showCountryPicker) {
         ModalBottomSheet(
             onDismissRequest = { showCountryPicker = false },
-            containerColor = Color.Transparent,
+            containerColor = appSurfaceColor(elevated = true),
+            scrimColor = appScrimColor(),
             dragHandle = {
                 Box(
                     modifier = Modifier
@@ -247,7 +224,7 @@ fun HolidaysScreen(
                         .width(36.dp)
                         .height(4.dp)
                         .clip(RoundedCornerShape(2.dp))
-                        .background(GlassBorder)
+                        .background(BorderSubtle)
                 )
             }
         ) {
@@ -255,8 +232,6 @@ fun HolidaysScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.9f)
-                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-                    .background(BgElevated)
             ) {
                 Text(
                     text = "Select Country",
@@ -270,7 +245,7 @@ fun HolidaysScreen(
                 ) {
                     items(uiState.countries, key = { it.countryCode }) { c ->
                         val isSelected = c.countryCode == uiState.selectedCountry
-                        FloatingGlassContainer(
+                        AppCard(
                             borderRadius = 14.dp,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -291,7 +266,7 @@ fun HolidaysScreen(
                                     modifier = Modifier.weight(1f)
                                 )
                                 if (isSelected) {
-                                    LiquidIcon(imageVector = Icons.Rounded.Check, size = 18.dp, color = Accent500)
+                                    AppIcon(iconRes = AppIcons.Check, size = 18.dp, color = Accent500)
                                 }
                             }
                         }

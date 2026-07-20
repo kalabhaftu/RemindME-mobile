@@ -6,9 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,8 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -27,9 +22,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.remindme.app.R
 import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.EmptyState
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
-import com.remindme.app.ui.components.liquid.LiquidSpinner
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.AppIcons
+import com.remindme.app.ui.components.Spinner
+import com.remindme.app.ui.components.SwipeDeleteBackground
+import com.remindme.app.ui.components.AppPullToRefresh
+import com.remindme.app.ui.components.ReminderListContentSkeleton
 import com.remindme.app.ui.theme.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -38,23 +37,29 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun TasksScreen(
     viewModel: TasksViewModel = viewModel(),
-    onNavigateToEdit: (String) -> Unit = {}
+    onNavigateToPreview: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val tasks by viewModel.sortedTasks.collectAsState()
     val haptic = LocalHapticFeedback.current
 
-    if (uiState.isLoading && tasks.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            LiquidSpinner()
+    Box(modifier = Modifier.fillMaxSize()) {
+        uiState.error?.let { error ->
+            Snackbar(
+                modifier = Modifier.padding(16.dp).align(Alignment.TopCenter),
+                action = { TextButton(onClick = { viewModel.fetchTasks() }) { Text("Retry") } }
+            ) { Text(error) }
         }
-        return
-    }
 
+    AppPullToRefresh(
+        isRefreshing = uiState.isLoading,
+        onRefresh = { viewModel.fetchTasks() }
+    ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
     ) {
+        if (uiState.isLoading && tasks.isEmpty()) item { ReminderListContentSkeleton() }
         if (tasks.isEmpty() && !uiState.isLoading) {
             item {
                 Box(modifier = Modifier.padding(top = 120.dp)) {
@@ -77,27 +82,24 @@ fun TasksScreen(
                         }
                     }
                 )
+                val isSwiping = dismissState.currentValue != SwipeToDismissBoxValue.Settled ||
+                    dismissState.targetValue != SwipeToDismissBoxValue.Settled
 
                 SwipeToDismissBox(
                     state = dismissState,
                     enableDismissFromStartToEnd = false,
                     backgroundContent = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(bottom = 10.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(StateDanger)
-                                .padding(end = 20.dp),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
-                        }
+                        SwipeDeleteBackground(
+                            dismissState = dismissState,
+                            cornerRadius = 16.dp,
+                            bottomPadding = 10.dp,
+                            endPadding = 20.dp
+                        )
                     },
                     content = {
                         TaskRow(
                             item = task,
-                            onClick = { onNavigateToEdit(task.id) },
+                            onClick = { onNavigateToPreview(task.id) },
                             onMarkDone = { viewModel.markTaskDone(task) }
                         )
                     }
@@ -105,25 +107,27 @@ fun TasksScreen(
             }
         }
     }
+    }
+    }
 }
 
 @Composable
 fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
     val dueStr = item.task?.dueAt
 
-    fun getIconForKey(key: String?): ImageVector {
+    fun getIconForKey(key: String?): Int {
         return when (key) {
-            "water" -> Icons.Rounded.WaterDrop
-            "trash" -> Icons.Rounded.Delete
-            "fitness" -> Icons.Rounded.FitnessCenter
-            "study" -> Icons.Rounded.MenuBook
-            "rent" -> Icons.Rounded.Home
-            "medication" -> Icons.Rounded.Medication
-            else -> Icons.Rounded.List
+            "water" -> AppIcons.WaterDrop
+            "trash" -> AppIcons.Delete
+            "fitness" -> AppIcons.FitnessCenter
+            "study" -> AppIcons.MenuBook
+            "rent" -> AppIcons.Home
+            "medication" -> AppIcons.Medication
+            else -> AppIcons.List
         }
     }
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         modifier = Modifier
             .fillMaxWidth()
@@ -143,8 +147,8 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
                     .background(BgSurface3)
             ) {
                 Box(modifier = Modifier.padding(10.dp)) {
-                    LiquidIcon(
-                        imageVector = getIconForKey(item.iconKey),
+                    AppIcon(
+                        iconRes = getIconForKey(item.iconKey),
                         color = Accent500,
                         size = 22.dp
                     )
@@ -163,8 +167,8 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
                 if (dueStr != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        LiquidIcon(
-                            imageVector = Icons.Rounded.AccessTime,
+                        AppIcon(
+                            iconRes = AppIcons.AccessTime,
                             color = TextTertiary,
                             size = 12.dp
                         )
@@ -194,8 +198,8 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
                     .clickable { onMarkDone() }
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
-                    LiquidIcon(
-                        imageVector = Icons.Rounded.CheckCircle,
+                    AppIcon(
+                        iconRes = AppIcons.CheckCircle,
                         color = StateSuccess,
                         size = 24.dp
                     )

@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
@@ -18,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.remindme.app.ui.components.liquid.*
+import com.remindme.app.ui.components.*
 import com.remindme.app.ui.theme.*
 import com.remindme.app.domain.models.OccurrenceStatus
 import com.remindme.app.domain.models.ReminderOccurrence
@@ -46,72 +44,76 @@ fun NotificationsScreen(
         "Missed (${missed.size})"
     )
 
-    LiquidScaffold(
+    AppScaffold(
         snackbarHost = {},
         appBar = {
-            Row(
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 8.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CircledBackButton(onClick = onBack)
-                Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
-                    title = "Notifications",
-                    statusBarsPadding = false,
-                    modifier = Modifier.weight(1f),
-                    actions = {
-                        if (selectedTab == 1 && inAppUnreadCount > 0) {
-                            TextButton(onClick = { viewModel.markAllRead() }) {
-                                Text("Mark all read", color = Accent500)
+            Column {
+                Row(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 4.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircledBackButton(onClick = onBack)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    TopBar(
+                        title = "Notifications",
+                        statusBarsPadding = false,
+                        modifier = Modifier.weight(1f),
+                        actions = {
+                            if (selectedTab == 1 && inAppUnreadCount > 0) {
+                                TextButton(onClick = { viewModel.markAllRead() }) {
+                                    Text("Mark all read", color = Accent500)
+                                }
                             }
                         }
+                    )
+                }
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = Color.Transparent,
+                    contentColor = TextPrimary,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    indicator = { tabPositions ->
+                        TabRowDefaults.SecondaryIndicator(
+                            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                            color = Accent500
+                        )
                     },
-                    bottom = {
-                    TabRow(
-                        selectedTabIndex = selectedTab,
-                        containerColor = Color.Transparent,
-                        contentColor = TextPrimary,
-                        indicator = { tabPositions ->
-                            TabRowDefaults.SecondaryIndicator(
-                                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                                color = Accent500
-                            )
-                        },
-                        divider = { HorizontalDivider(color = Color.Transparent) }
-                    ) {
-                        tabs.forEachIndexed { index, title ->
-                            Tab(
-                                selected = selectedTab == index,
-                                onClick = { selectedTab = index },
-                                text = { 
-                                    Text(
-                                        title,
-                                        color = if (selectedTab == index) TextPrimary else TextTertiary,
-                                        fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal
-                                    ) 
-                                }
-                            )
-                        }
+                    divider = { HorizontalDivider(color = Color.Transparent) }
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = {
+                                Text(
+                                    title,
+                                    color = if (selectedTab == index) TextPrimary else TextTertiary,
+                                    fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal,
+                                    maxLines = 1
+                                )
+                            }
+                        )
                     }
                 }
-            )
             }
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            if (uiState.isLoading && uiState.inAppNotifications.isEmpty() && uiState.allOccurrences.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    LiquidSpinner()
-                }
-            } else {
+            AppPullToRefresh(
+                isRefreshing = uiState.isLoading,
+                onRefresh = { viewModel.loadData() }
+            ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                if (uiState.isLoading) NotificationContentSkeleton()
                 when (selectedTab) {
                     0 -> UpcomingTab(upcoming, onOpenReminder)
-                    1 -> InAppTab(uiState.inAppNotifications, viewModel::markRead)
+                    1 -> InAppTab(uiState.inAppNotifications, viewModel::markRead, onOpenReminder)
                     2 -> MissedTab(missed, onOpenReminder)
                 }
+            }
             }
         }
     }
@@ -166,11 +168,15 @@ fun UpcomingTab(occurrences: List<ReminderOccurrence>, onOpenReminder: (String) 
 }
 
 @Composable
-fun InAppTab(notifications: List<InAppNotification>, onMarkRead: (String) -> Unit) {
+fun InAppTab(
+    notifications: List<InAppNotification>,
+    onMarkRead: (String) -> Unit,
+    onOpenReminder: (String) -> Unit
+) {
     if (notifications.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Rounded.Notifications, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
+                AppIcon(iconRes = AppIcons.Notifications, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("No in-app notifications yet.", color = TextSecondary, fontSize = 16.sp)
             }
@@ -185,10 +191,13 @@ fun InAppTab(notifications: List<InAppNotification>, onMarkRead: (String) -> Uni
                 val created = try { Instant.parse(n.created_at) } catch (e: Exception) { Instant.now() }
                 val formatter = DateTimeFormatter.ofPattern("MMM d, HH:mm").withZone(ZoneId.systemDefault())
 
-                FloatingGlassContainer(
+                AppCard(
                     borderRadius = 16.dp,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                        .clickable(enabled = isUnread) { onMarkRead(n.id) }
+                        .clickable {
+                            n.reminder_item_id?.let { onOpenReminder(it) }
+                            if (isUnread) onMarkRead(n.id)
+                        }
                 ) {
                     Row(
                         modifier = Modifier.padding(14.dp),
@@ -229,7 +238,7 @@ fun MissedTab(occurrences: List<ReminderOccurrence>, onOpenReminder: (String) ->
     if (occurrences.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Rounded.History, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
+                AppIcon(iconRes = AppIcons.History, contentDescription = null, modifier = Modifier.size(64.dp), tint = TextTertiary)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("No missed reminders.", color = TextSecondary, fontSize = 16.sp)
             }
@@ -248,7 +257,7 @@ fun MissedTab(occurrences: List<ReminderOccurrence>, onOpenReminder: (String) ->
 
 @Composable
 fun OccurrenceTile(occ: ReminderOccurrence, isMissed: Boolean = false, onOpenReminder: (String) -> Unit) {
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 16.dp,
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).clickable { onOpenReminder(occ.item.id) }
     ) {
@@ -256,13 +265,13 @@ fun OccurrenceTile(occ: ReminderOccurrence, isMissed: Boolean = false, onOpenRem
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FloatingGlassContainer(
+            AppCard(
                 borderRadius = 10.dp,
                 modifier = Modifier.wrapContentSize()
             ) {
                 Box(modifier = Modifier.padding(8.dp)) {
-                    LiquidIcon(
-                        imageVector = if (isMissed) Icons.Rounded.Warning else Icons.Rounded.Notifications,
+                    AppIcon(
+                        iconRes = if (isMissed) AppIcons.Warning else AppIcons.Notifications,
                         size = 18.dp,
                         color = if (isMissed) StateWarning else Accent500
                     )
@@ -276,7 +285,7 @@ fun OccurrenceTile(occ: ReminderOccurrence, isMissed: Boolean = false, onOpenRem
                 Text("${occ.item.category} · ${occ.date.format(formatter)}", fontSize = 12.sp, color = TextSecondary)
             }
             if (!isMissed && occ.status == OccurrenceStatus.TODAY) {
-                FloatingGlassContainer(
+                AppCard(
                     borderRadius = 20.dp,
                     modifier = Modifier.wrapContentSize()
                 ) {

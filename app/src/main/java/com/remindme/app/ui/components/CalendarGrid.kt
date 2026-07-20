@@ -13,10 +13,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.KeyboardArrowLeft
-import androidx.compose.material.icons.rounded.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -31,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.remindme.app.domain.models.OccurrenceStatus
 import com.remindme.app.domain.models.ReminderOccurrence
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
+import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.theme.AppColors
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -73,7 +69,7 @@ fun CalendarGrid(
         }
     }
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 24.dp,
         padding = 16.dp,
         modifier = Modifier.fillMaxWidth()
@@ -104,10 +100,10 @@ fun CalendarGrid(
                 }
 
                 IconButton(onClick = { navigate(-1) }, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Rounded.KeyboardArrowLeft, contentDescription = "Prev", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
+                    AppIcon(iconRes = AppIcons.KeyboardArrowLeft, contentDescription = "Prev", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
                 }
                 IconButton(onClick = { navigate(1) }, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Rounded.KeyboardArrowRight, contentDescription = "Next", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
+                    AppIcon(iconRes = AppIcons.KeyboardArrowRight, contentDescription = "Next", tint = AppColors.textSecondary, modifier = Modifier.size(20.dp))
                 }
             }
 
@@ -299,7 +295,7 @@ private fun DayCell(
 ) {
     val isToday = day == LocalDate.now()
 
-    FloatingGlassContainer(
+    AppCard(
         borderRadius = 12.dp,
         padding = 0.dp
     ) {
@@ -349,8 +345,8 @@ private fun DayCell(
                     ) {
                         occurrences.take(3).forEach { occ ->
                             if (occ.status == OccurrenceStatus.COMPLETED_PAST) {
-                                Icon(
-                                    Icons.Rounded.Check,
+                                AppIcon(
+                                    iconRes = AppIcons.Check,
                                     contentDescription = null,
                                     tint = AppColors.stateSuccess.copy(alpha = 0.5f),
                                     modifier = Modifier.size(8.dp)

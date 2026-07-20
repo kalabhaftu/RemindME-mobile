@@ -1,13 +1,12 @@
 package com.remindme.app.ui.screens.add
-
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
-import com.remindme.app.ui.components.liquid.ChannelPref
+import com.remindme.app.data.repository.OfflineReminderRepository
+import com.remindme.app.ui.components.ChannelPref
+import com.remindme.app.ui.components.NotificationPrefsStore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,23 +24,17 @@ data class AddTaskUiState(
     val notificationPrefs: Map<String, ChannelPref> = emptyMap(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isSuccess: Boolean = false
+    val isSuccess: Boolean = false,
+    val existingTaskId: String? = null
 )
 
 class AddTaskViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
+    private val repository = OfflineReminderRepository(ReminderRepository(SupabaseManager.client, application.applicationContext), application.applicationContext)
     private val _uiState = MutableStateFlow(AddTaskUiState())
     val uiState: StateFlow<AddTaskUiState> = _uiState.asStateFlow()
 
     init {
-        // Load default notification prefs
-        val defaultPrefs = mapOf(
-            "email" to ChannelPref(),
-            "push" to ChannelPref(),
-            "telegram" to ChannelPref(),
-            "in_app" to ChannelPref()
-        )
-        _uiState.update { it.copy(notificationPrefs = defaultPrefs) }
+        _uiState.update { it.copy(notificationPrefs = NotificationPrefsStore.load(application)) }
     }
 
     fun updateName(name: String) = _uiState.update { it.copy(name = name) }
@@ -49,9 +42,64 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
     fun updateDueAt(date: LocalDateTime?) = _uiState.update { it.copy(dueAt = date) }
     fun updateIconKey(key: String) = _uiState.update { it.copy(iconKey = key) }
     fun updateNotificationPrefs(prefs: Map<String, ChannelPref>) = _uiState.update { it.copy(notificationPrefs = prefs) }
+
+    fun resetForNewTask() {
+        _uiState.update {
+            it.copy(
+                name = "",
+                notes = "",
+                dueAt = null,
+                iconKey = "trash",
+                isLoading = false,
+                error = null,
+                isSuccess = false,
+                existingTaskId = null
+            )
+        }
+    }
     
     fun clearError() = _uiState.update { it.copy(error = null) }
     fun setError(error: String) = _uiState.update { it.copy(error = error) }
+
+    fun loadTask(taskId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null, isSuccess = false, existingTaskId = taskId) }
+            try {
+                val item = repository.getReminder(taskId)
+                if (item?.category != com.remindme.app.domain.models.CategoryType.TASK) {
+                    _uiState.update { it.copy(isLoading = false, error = "Task not found") }
+                    return@launch
+                }
+                _uiState.update {
+                    it.copy(
+                        name = item.name,
+                        notes = item.notes ?: "",
+                        dueAt = item.task?.dueAt?.let { value ->
+                            runCatching {
+                                java.time.OffsetDateTime.parse(value).toLocalDateTime()
+                            }.getOrElse {
+                                java.time.LocalDateTime.parse(value.removeSuffix("Z"))
+                            }
+                        },
+                        iconKey = item.iconKey ?: "trash",
+                        notificationPrefs = item.notificationPreferences
+                            ?.associate { pref ->
+                                pref.channel to ChannelPref(
+                                    enabled = pref.enabled,
+                                    leadTime = pref.leadTime,
+                                    customTime = pref.customTime,
+                                    offsetDays = pref.offsetDays
+                                )
+                            }
+                            ?: it.notificationPrefs,
+                        isLoading = false
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load task: ${e.message ?: "Unknown error"}") }
+            }
+        }
+    }
 
     fun saveTask() {
         val currentName = _uiState.value.name
@@ -69,9 +117,9 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
-                val id = java.util.UUID.randomUUID().toString()
+                val id = _uiState.value.existingTaskId ?: java.util.UUID.randomUUID().toString()
                 val now = LocalDateTime.now()
-                val dueAtStr = currentDueAt.toString()
+                val dueAtStr = com.remindme.app.utils.OccurrenceScheduler.toUtcIso(currentDueAt)
                 
                 val nextOccurrence = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
                     category = "task",
@@ -107,15 +155,20 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
                     iconKey = _uiState.value.iconKey,
                     createdAt = now,
                     updatedAt = now,
-                    taskDetails = listOf(taskDetails),
-                    recurrenceRules = listOf(recurrenceRules),
+                    taskDetails = taskDetails,
+                    recurrenceRules = recurrenceRules,
                     notificationPreferences = notificationPrefs
                 )
 
-                repository.addReminder(item)
+                if (_uiState.value.existingTaskId != null) {
+                    repository.updateReminder(item)
+                } else {
+                    repository.addReminder(item)
+                }
+                NotificationPrefsStore.save(getApplication(), _uiState.value.notificationPrefs)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to save task: ${e.message ?: "Unknown error"}") }
             }
         }
     }

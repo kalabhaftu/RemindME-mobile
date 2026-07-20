@@ -1,11 +1,18 @@
 package com.remindme.app.utils
 
 import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 object OccurrenceScheduler {
+
+    private fun parseDate(value: String): LocalDate = runCatching {
+        LocalDate.parse(value.take(10), DateTimeFormatter.ISO_LOCAL_DATE)
+    }.getOrElse {
+        LocalDateTime.parse(value, DateTimeFormatter.ISO_LOCAL_DATE_TIME).toLocalDate()
+    }
 
     private fun atNoon(date: LocalDateTime): LocalDateTime {
         return date.with(LocalTime.NOON)
@@ -24,14 +31,14 @@ object OccurrenceScheduler {
      * matches a future now() tick). Always convert through the device zone
      * to a real UTC instant before formatting.
      */
-    private fun toUtcIso(local: LocalDateTime): String {
+    fun toUtcIso(local: LocalDateTime): String {
         return local.atZone(ZoneId.systemDefault())
             .withZoneSameInstant(ZoneId.of("UTC"))
             .format(DateTimeFormatter.ISO_INSTANT)
     }
 
     fun nextBirthday(birthdateStr: String): LocalDateTime {
-        val birthdate = LocalDateTime.parse(birthdateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        val birthdate = parseDate(birthdateStr).atStartOfDay()
         val today = startOfDay(LocalDateTime.now())
         var candidate = LocalDateTime.of(today.year, birthdate.month, birthdate.dayOfMonth, 0, 0)
         
@@ -42,7 +49,7 @@ object OccurrenceScheduler {
     }
 
     fun nextRenewal(renewalDateStr: String, cycle: String): LocalDateTime {
-        val renewal = LocalDateTime.parse(renewalDateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        val renewal = parseDate(renewalDateStr).atStartOfDay()
         val today = startOfDay(LocalDateTime.now())
         var candidate = atNoon(renewal)
         
@@ -57,7 +64,7 @@ object OccurrenceScheduler {
     }
 
     fun nextHoliday(holidayDateStr: String): LocalDateTime {
-        val holiday = LocalDateTime.parse(holidayDateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        val holiday = parseDate(holidayDateStr).atStartOfDay()
         val today = startOfDay(LocalDateTime.now())
         var candidate = LocalDateTime.of(today.year, holiday.month, holiday.dayOfMonth, 0, 0)
         
@@ -75,10 +82,11 @@ object OccurrenceScheduler {
         dueAt: String? = null,
         holidayDate: String? = null
     ): String? {
+        if (category == "task") return dueAt
+
         val nextDate = when (category) {
             "person" -> birthdate?.let { nextBirthday(it) }
             "subscription" -> renewalDate?.let { nextRenewal(it, cycle ?: "monthly") }
-            "task" -> dueAt?.let { LocalDateTime.parse(it, DateTimeFormatter.ISO_LOCAL_DATE_TIME) }
             "custom_holiday" -> holidayDate?.let { nextHoliday(it) }
             else -> null
         }

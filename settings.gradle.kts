@@ -31,4 +31,3 @@ plugins {
 
 rootProject.name = "remindme_mobile"
 include(":app")
-include(":backdrop")

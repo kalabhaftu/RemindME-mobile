@@ -1,4 +1,5 @@
 package com.remindme.app.ui.screens.add
+import com.remindme.app.domain.models.CategoryType
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
@@ -6,7 +7,9 @@ import androidx.lifecycle.viewModelScope
 import android.app.Application
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
-import com.remindme.app.ui.components.liquid.ChannelPref
+import com.remindme.app.data.repository.OfflineReminderRepository
+import com.remindme.app.ui.components.ChannelPref
+import com.remindme.app.ui.components.NotificationPrefsStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,19 +37,12 @@ data class AddPersonUiState(
 )
 
 class AddPersonViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = ReminderRepository(SupabaseManager.client, application.applicationContext)
+    private val repository = OfflineReminderRepository(ReminderRepository(SupabaseManager.client, application.applicationContext), application.applicationContext)
     private val _uiState = MutableStateFlow(AddPersonUiState())
     val uiState: StateFlow<AddPersonUiState> = _uiState.asStateFlow()
 
     init {
-        // Load default notification prefs
-        val defaultPrefs = mapOf(
-            "email" to ChannelPref(),
-            "push" to ChannelPref(),
-            "telegram" to ChannelPref(),
-            "in_app" to ChannelPref()
-        )
-        _uiState.update { it.copy(notificationPrefs = defaultPrefs) }
+        _uiState.update { it.copy(notificationPrefs = NotificationPrefsStore.load(application)) }
     }
 
     fun updateName(name: String) = _uiState.update { it.copy(name = name) }
@@ -57,6 +53,24 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
     fun updateCustomRelationship(rel: String) = _uiState.update { it.copy(customRelationship = rel) }
     fun updateAvatarUrl(url: String?) = _uiState.update { it.copy(avatarUrl = url) }
     fun updateNotificationPrefs(prefs: Map<String, ChannelPref>) = _uiState.update { it.copy(notificationPrefs = prefs) }
+
+    fun resetForNewPerson() {
+        _uiState.update {
+            it.copy(
+                name = "",
+                notes = "",
+                birthdate = null,
+                gender = "unspecified",
+                relationship = "friend",
+                customRelationship = "",
+                avatarUrl = null,
+                isLoading = false,
+                error = null,
+                isSuccess = false,
+                existingPersonId = null
+            )
+        }
+    }
     
     fun setAvatarUploading(uploading: Boolean) = _uiState.update { it.copy(isUploadingAvatar = uploading) }
     fun clearError() = _uiState.update { it.copy(error = null) }
@@ -64,7 +78,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun loadPerson(personId: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, existingPersonId = personId) }
+            _uiState.update { it.copy(isLoading = true, error = null, isSuccess = false, existingPersonId = personId) }
             try {
                 val item = repository.getReminder(personId)
                 if (item != null) {
@@ -73,12 +87,12 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                         state.copy(
                             name = item.name,
                             notes = item.notes ?: "",
-                            birthdate = personDetails?.birthdate?.let { 
-                                try { LocalDateTime.parse(it) } catch (e: Exception) { null }
+                            birthdate = personDetails?.birthdate?.let {
+                                runCatching { java.time.LocalDate.parse(it.take(10)).atStartOfDay() }.getOrNull()
                             },
                             gender = personDetails?.gender ?: "unspecified",
                             relationship = personDetails?.relationship ?: "friend",
-                            avatarUrl = item.iconKey,
+                            avatarUrl = personDetails?.avatarUrl,
                             isLoading = false
                         )
                     }
@@ -86,7 +100,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                     _uiState.update { it.copy(isLoading = false, error = "Person not found") }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to load person: ${e.message ?: "Unknown error"}") }
             }
         }
     }
@@ -109,7 +123,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                 val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
                 val id = _uiState.value.existingPersonId ?: java.util.UUID.randomUUID().toString()
                 val now = LocalDateTime.now()
-                val birthdateStr = currentBirthdate.toString()
+                val birthdateStr = currentBirthdate.toLocalDate().toString()
                 
                 val nextOccurrence = com.remindme.app.utils.OccurrenceScheduler.computeInitialNextOccurrence(
                     category = "person",
@@ -120,7 +134,8 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                     birthdate = birthdateStr,
                     gender = _uiState.value.gender,
                     relationship = _uiState.value.relationship,
-                    customRelationship = _uiState.value.customRelationship
+                    customRelationship = _uiState.value.customRelationship,
+                    avatarUrl = _uiState.value.avatarUrl
                 )
                 
                 val recurrenceRules = com.remindme.app.domain.models.RecurrenceRules(
@@ -145,11 +160,11 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                     category = com.remindme.app.domain.models.CategoryType.PERSON,
                     name = currentName,
                     notes = _uiState.value.notes,
-                    iconKey = _uiState.value.avatarUrl,
+                    iconKey = null,
                     createdAt = now,
                     updatedAt = now,
-                    personDetails = listOf(personDetails),
-                    recurrenceRules = listOf(recurrenceRules),
+                    personDetails = personDetails,
+                    recurrenceRules = recurrenceRules,
                     notificationPreferences = notificationPrefs
                 )
 
@@ -158,9 +173,10 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                 } else {
                     repository.addReminder(item)
                 }
+                NotificationPrefsStore.save(getApplication(), _uiState.value.notificationPrefs)
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
+                _uiState.update { it.copy(isLoading = false, error = "Failed to save person: ${e.message ?: "Unknown error"}") }
             }
         }
     }
@@ -183,7 +199,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                 val publicUrl = bucket.publicUrl(path)
                 updateAvatarUrl(publicUrl)
             } catch (e: Exception) {
-                setError("Failed to upload avatar: ${e.message}")
+                setError("Failed to upload avatar")
             } finally {
                 setAvatarUploading(false)
             }

@@ -3,6 +3,7 @@ plugins {
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.kotlin.serialization)
   id("com.google.gms.google-services") version "4.4.1"
+
 }
 
 import java.io.FileInputStream
@@ -14,6 +15,9 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+fun signingProperty(name: String, envName: String = name): String? =
+    (keystoreProperties[name] as String?) ?: System.getenv(envName)
+
 android {
     namespace = "com.remindme.app"
     compileSdk = 36
@@ -21,26 +25,28 @@ android {
         applicationId = "com.remindme.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.0.2"
         
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
             localProperties.load(FileInputStream(localPropertiesFile))
         }
+        versionCode = localProperties.getProperty("VERSION_CODE", System.getenv("VERSION_CODE") ?: "3").toIntOrNull() ?: 3
+        versionName = localProperties.getProperty("VERSION_NAME", System.getenv("VERSION_NAME") ?: "1.0.2")
         buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL", "")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY", "")}\"")
-        buildConfigField("String", "WEB_API_URL", "\"${localProperties.getProperty("WEB_API_URL", "http://localhost:3000")}\"")
+        buildConfigField("String", "WEB_API_URL", "\"${localProperties.getProperty("WEB_API_URL", "https://remind-me-web-roan.vercel.app")}\"")
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProperties.getProperty("GOOGLE_WEB_CLIENT_ID", "")}\"")
     }
 
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String?
-            keyPassword = keystoreProperties["keyPassword"] as String?
-            storeFile = keystoreProperties["storeFile"]?.let { file(it as String) }
-            storePassword = keystoreProperties["storePassword"] as String?
+            keyAlias = signingProperty("keyAlias", "ANDROID_KEY_ALIAS")
+            keyPassword = signingProperty("keyPassword", "ANDROID_KEY_PASSWORD")
+            storeFile = signingProperty("storeFile", "ANDROID_STORE_FILE")?.let { file(it) }
+            storePassword = signingProperty("storePassword", "ANDROID_KEYSTORE_PASSWORD")
         }
     }
 
@@ -48,7 +54,9 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("release")
+            if (signingProperty("storeFile", "ANDROID_STORE_FILE") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
@@ -85,6 +93,7 @@ dependencies {
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
+  implementation("androidx.fragment:fragment-ktx:1.8.9")
 
   // Arch Components
   implementation(libs.androidx.lifecycle.runtime.compose)
@@ -95,6 +104,7 @@ dependencies {
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.compose.material3)
   implementation(libs.androidx.compose.material.icons.extended)
+  implementation("com.composables:icons-lucide-android:2.2.1")
   implementation(libs.coil.compose)
   // Tooling
   debugImplementation(libs.androidx.compose.ui.tooling)
@@ -119,8 +129,12 @@ dependencies {
   
   // Local modules
   coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-  implementation(project(":backdrop"))
-  implementation(libs.kyant.shapes)
+
+  // WorkManager (background sync)
+  implementation("androidx.work:work-runtime-ktx:2.9.1")
+  
+  // DataStore
+  implementation("androidx.datastore:datastore-preferences:1.0.0")
 
   // Firebase
   implementation(platform(libs.firebase.bom))

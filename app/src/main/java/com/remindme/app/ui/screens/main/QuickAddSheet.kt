@@ -10,14 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material.icons.filled.FormatListBulleted
-import com.remindme.app.ui.components.liquid.FloatingGlassContainer
-import com.remindme.app.ui.components.liquid.LiquidIcon
+import com.remindme.app.ui.components.AppCard
+import com.remindme.app.ui.components.AppIcon
+import com.remindme.app.ui.components.AppIcons
+import com.remindme.app.ui.components.appScrimColor
+import com.remindme.app.ui.components.appSurfaceColor
 import com.remindme.app.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,13 +31,14 @@ fun QuickAddSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+        containerColor = appSurfaceColor(elevated = true),
         contentColor = AppColors.textPrimary,
-        scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.4f),
+        scrimColor = appScrimColor(),
         dragHandle = null
     ) {
-        FloatingGlassContainer(
+        AppCard(
             borderRadius = 32.dp,
+            elevated = true,
             modifier = Modifier.fillMaxWidth()
         ) {
         Column(
@@ -71,7 +69,7 @@ fun QuickAddSheet(
                     color = AppColors.textPrimary
                 )
                 IconButton(onClick = onDismiss) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = AppColors.textSecondary)
+                    AppIcon(iconRes = AppIcons.Close, contentDescription = "Close", tint = AppColors.textSecondary)
                 }
             }
             
@@ -84,7 +82,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Person",
-                    icon = Icons.Default.Person,
+                    iconRes = AppIcons.Person,
                     onClick = {
                         onDismiss()
                         onNavigateToAddPerson()
@@ -93,7 +91,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Subscription",
-                    icon = Icons.Default.CreditCard,
+                    iconRes = AppIcons.CreditCard,
                     onClick = {
                         onDismiss()
                         onNavigateToAddSubscription()
@@ -108,7 +106,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Task",
-                    icon = Icons.Default.FormatListBulleted,
+                    iconRes = AppIcons.List,
                     onClick = {
                         onDismiss()
                         onNavigateToAddTask()
@@ -117,7 +115,7 @@ fun QuickAddSheet(
                 QuickAddOption(
                     modifier = Modifier.weight(1f),
                     label = "Holiday",
-                    icon = Icons.Default.Event,
+                    iconRes = AppIcons.CalendarToday,
                     onClick = {
                         onDismiss()
                         onNavigateToAddHoliday()
@@ -134,10 +132,10 @@ fun QuickAddSheet(
 fun QuickAddOption(
     modifier: Modifier = Modifier,
     label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconRes: Int,
     onClick: () -> Unit
 ) {
-    FloatingGlassContainer(
+    AppCard(
         modifier = modifier.clickable { onClick() },
         borderRadius = 16.dp
     ) {
@@ -147,7 +145,7 @@ fun QuickAddOption(
                 .padding(vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LiquidIcon(imageVector = icon, tint = AppColors.accent500, modifier = Modifier.size(28.dp))
+            AppIcon(iconRes = iconRes, tint = AppColors.accent500, modifier = Modifier.size(28.dp))
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = label,

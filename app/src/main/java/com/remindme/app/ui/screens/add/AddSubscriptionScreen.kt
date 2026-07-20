@@ -11,21 +11,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
-import com.remindme.app.ui.components.liquid.*
+import com.remindme.app.ui.components.BottomSheetPickerItem
+import com.remindme.app.ui.components.PickerField
+import com.remindme.app.ui.components.*
 import com.remindme.app.ui.theme.*
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddSubscriptionScreen(
-    viewModel: AddSubscriptionViewModel = viewModel(),
+    subscriptionId: String? = null,
+    viewModel: AddSubscriptionViewModel = viewModel(key = subscriptionId?.let { "edit-subscription-$it" } ?: "add-subscription"),
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     var showDatePicker by remember { mutableStateOf(false) }
+
+    LaunchedEffect(subscriptionId) {
+        if (subscriptionId == null) {
+            viewModel.resetForNewSubscription()
+        } else {
+            viewModel.loadSubscription(subscriptionId)
+        }
+    }
 
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
@@ -40,7 +50,7 @@ fun AddSubscriptionScreen(
         }
     }
 
-    LiquidScaffold(
+    AppScaffold(
         appBar = {
             Row(
                 modifier = Modifier
@@ -51,15 +61,15 @@ fun AddSubscriptionScreen(
             ) {
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
-                LiquidAppBar(
-                    title = "Add Subscription",
+                TopBar(
+                    title = if (subscriptionId == null) "Add Subscription" else "Edit Subscription",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f)
                 )
             }
         },
         snackbarHost = {
-            LiquidSnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) { paddingValues ->
         Column(
@@ -69,7 +79,7 @@ fun AddSubscriptionScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
-            LiquidTextField(
+            AppTextField(
                 value = uiState.name,
                 onValueChange = { viewModel.updateName(it) },
                 placeholder = "Service name *"
@@ -87,14 +97,15 @@ fun AddSubscriptionScreen(
                     modifier = Modifier.padding(top = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AsyncImage(
-                        model = uiState.logoUrl,
-                        contentDescription = "Logo",
-                        modifier = Modifier.size(40.dp)
+                    ResilientBrandImage(
+                        name = uiState.name,
+                        imageUrl = uiState.logoUrl,
+                        modifier = Modifier.size(40.dp),
+                        cornerRadius = 10.dp
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Logo auto-fetched",
+                        text = "Logo preview",
                         style = MaterialTheme.typography.bodySmall,
                         color = TextTertiary
                     )
@@ -103,10 +114,11 @@ fun AddSubscriptionScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            LiquidDateTile(
-                label = "Renewal Date & Time *",
+            DateTile(
+                label = "Renewal Date *",
                 value = uiState.renewalDate,
-                placeholder = "Select date and time",
+                placeholder = "Select renewal date",
+                formatter = { it.format(java.time.format.DateTimeFormatter.ofPattern("MMM d, yyyy")) },
                 onTap = { showDatePicker = true }
             )
             
@@ -114,7 +126,7 @@ fun AddSubscriptionScreen(
             
             Row {
                 Box(modifier = Modifier.weight(2f)) {
-                    LiquidTextField(
+                    AppTextField(
                         value = uiState.amount,
                         onValueChange = { viewModel.updateAmount(it) },
                         placeholder = "Amount",
@@ -123,35 +135,39 @@ fun AddSubscriptionScreen(
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    PickerField(
-                        label = "Currency",
-                        value = uiState.currency,
-                        displayValue = { it },
-                        title = "Select currency",
-                        items = listOf("USD", "EUR", "GBP").map { BottomSheetPickerItem(it, it) },
-                        onChanged = { viewModel.updateCurrency(it) }
-                    )
+                    AppCard(borderRadius = 16.dp) {
+                        PickerField(
+                            label = "Currency",
+                            value = uiState.currency,
+                            displayValue = { it },
+                            title = "Select currency",
+                            items = listOf("USD", "EUR", "GBP").map { BottomSheetPickerItem(it, it) },
+                            onChanged = { viewModel.updateCurrency(it) }
+                        )
+                    }
                 }
             }
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            PickerField(
-                label = "Cycle",
-                value = uiState.cycle,
-                displayValue = { it.replaceFirstChar { char -> char.uppercaseChar() } },
-                title = "Select billing cycle",
-                items = listOf(
-                    BottomSheetPickerItem("weekly", "Weekly"),
-                    BottomSheetPickerItem("monthly", "Monthly"),
-                    BottomSheetPickerItem("yearly", "Yearly")
-                ),
-                onChanged = { viewModel.updateCycle(it) }
-            )
+            AppCard(borderRadius = 16.dp) {
+                PickerField(
+                    label = "Cycle",
+                    value = uiState.cycle,
+                    displayValue = { it.replaceFirstChar { char -> char.uppercaseChar() } },
+                    title = "Select billing cycle",
+                    items = listOf(
+                        BottomSheetPickerItem("weekly", "Weekly"),
+                        BottomSheetPickerItem("monthly", "Monthly"),
+                        BottomSheetPickerItem("yearly", "Yearly")
+                    ),
+                    onChanged = { viewModel.updateCycle(it) }
+                )
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            LiquidTextField(
+            AppTextField(
                 value = uiState.notes,
                 onValueChange = { viewModel.updateNotes(it) },
                 placeholder = "Notes"
@@ -173,26 +189,27 @@ fun AddSubscriptionScreen(
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            LiquidButton(
+            AppButton(
                 onClick = { viewModel.saveSubscription() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (uiState.isLoading) {
-                    LiquidSpinner(size = 20.dp)
+                    Spinner(size = 20.dp)
                 } else {
-                    Text("Save", color = TextPrimary)
+                    Text(if (subscriptionId == null) "Save" else "Save Subscription", color = TextPrimary)
                 }
             }
         }
         
         if (showDatePicker) {
-            LiquidDateTimePickerDialog(
+            DateTimePickerDialog(
                 initialDate = uiState.renewalDate,
                 onDismissRequest = { showDatePicker = false },
                 onDateTimeSelected = {
                     viewModel.updateRenewalDate(it)
                     showDatePicker = false
-                }
+                },
+                dateOnly = true
             )
         }
     }
