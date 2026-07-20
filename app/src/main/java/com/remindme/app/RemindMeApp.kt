@@ -22,7 +22,7 @@ class RemindMeApp : Application() {
         OfflineSyncScheduler.schedule(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
+            val remindersChannel = NotificationChannel(
                 NotificationChannels.reminders,
                 "Reminders",
                 NotificationManager.IMPORTANCE_HIGH
@@ -32,7 +32,16 @@ class RemindMeApp : Application() {
                 vibrationPattern = longArrayOf(0, 260, 120, 420)
                 enableLights(true)
             }
-            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+            val updatesChannel = NotificationChannel(
+                NotificationChannels.updates,
+                "App updates",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = "New RemindME release notifications"
+            }
+            getSystemService(NotificationManager::class.java).createNotificationChannels(
+                listOf(remindersChannel, updatesChannel)
+            )
         }
     }
 }
