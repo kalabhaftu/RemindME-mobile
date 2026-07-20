@@ -16,6 +16,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       TAG_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
     steps:
@@ -58,7 +59,7 @@ jobs:
           GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID
           EOF
       - name: Build signed APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew --no-daemon --stacktrace assembleRelease
       - name: Verify APK signature
         run: |
           APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -1)
