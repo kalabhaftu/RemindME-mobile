@@ -48,11 +48,14 @@ fun ReminderPreviewScreen(
     onEdit: (ReminderItem) -> Unit = {}
 ) {
     val context = LocalContext.current
-    val vm: EditReminderViewModel = viewModel(factory = object : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            EditReminderViewModel(context.applicationContext as Application) as T
-    })
+    val vm: EditReminderViewModel = viewModel(
+        key = "preview-reminder-$reminderId",
+        factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                EditReminderViewModel(context.applicationContext as Application) as T
+        }
+    )
     val state by vm.uiState.collectAsState()
     LaunchedEffect(reminderId) { vm.loadReminder(reminderId) }
 
