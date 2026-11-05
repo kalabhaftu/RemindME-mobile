@@ -128,46 +128,56 @@ fun UpcomingItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .clickable { onPreview() }
                 .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AppCard(
-                borderRadius = 10.dp,
-                padding = 9.dp
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { onPreview() },
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                AppIcon(
-                    iconRes = iconRes,
-                    size = 18.dp,
-                    tint = if (isDone) AppColors.textTertiary else AppColors.accent500
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    item.name,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (isDone) AppColors.textTertiary else AppColors.textPrimary,
-                    textDecoration = if (isDone) TextDecoration.LineThrough else null
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    formatRelativeDate(occurrence.date).uppercase(),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AppColors.textTertiary,
-                    letterSpacing = 0.5.sp
-                )
-                Spacer(modifier = Modifier.height(1.dp))
-                Text(
-                    getSubtitle(occurrence),
-                    fontSize = 12.sp,
-                    color = AppColors.textSecondary
-                )
+                AppCard(
+                    borderRadius = 10.dp,
+                    padding = 9.dp
+                ) {
+                    AppIcon(
+                        iconRes = iconRes,
+                        size = 18.dp,
+                        tint = if (isDone) AppColors.textTertiary else AppColors.accent500
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        item.name,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (isDone) AppColors.textTertiary else AppColors.textPrimary,
+                        textDecoration = if (isDone) TextDecoration.LineThrough else null
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        formatRelativeDate(occurrence.date).uppercase(),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AppColors.textTertiary,
+                        letterSpacing = 0.5.sp
+                    )
+                    Spacer(modifier = Modifier.height(1.dp))
+                    Text(
+                        getSubtitle(occurrence),
+                        fontSize = 12.sp,
+                        color = AppColors.textSecondary
+                    )
+                }
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.padding(start = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 if (item.category == CategoryType.TASK && !isDone) {
                     AppCard(
                         borderRadius = 20.dp,

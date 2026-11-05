@@ -54,7 +54,7 @@ fun HolidaysScreen(
     ) {
 
         if (uiState.subscribedKeys.isNotEmpty()) {
-            items(uiState.subscribedKeys.toList(), key = { it }) { key ->
+            items(uiState.subscribedKeys.toList(), key = { "subscribed-$it" }) { key ->
                 val parts = key.split("-")
                 val name = if (parts.size > 2) parts.subList(2, parts.size).joinToString("-") else key
 
@@ -154,7 +154,7 @@ fun HolidaysScreen(
                 }
             }
         } else {
-            items(uiState.holidays, key = { it.holidayKey }) { holiday ->
+            items(uiState.holidays, key = { "all-${it.holidayKey}" }) { holiday ->
                 val active = uiState.subscribedKeys.contains(holiday.holidayKey)
                 AppCard(
                     borderRadius = 16.dp,

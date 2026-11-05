@@ -1,5 +1,7 @@
 package com.remindme.app.ui.navigation
 
+import com.remindme.app.domain.models.CategoryType
+import com.remindme.app.domain.models.ReminderItem
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
@@ -25,3 +27,10 @@ import kotlinx.serialization.Serializable
 @Serializable data class ReminderPreview(val reminderId: String) : NavKey
 
 @Serializable data class PersonDetail(val personId: String) : NavKey
+
+fun editDestinationFor(item: ReminderItem): NavKey = when (item.category) {
+    CategoryType.PERSON -> EditPerson(item.id)
+    CategoryType.SUBSCRIPTION -> EditSubscription(item.id)
+    CategoryType.TASK -> EditTask(item.id)
+    CategoryType.CUSTOM_HOLIDAY -> EditReminder(item.id)
+}

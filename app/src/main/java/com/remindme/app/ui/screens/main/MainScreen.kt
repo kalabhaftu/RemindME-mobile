@@ -26,11 +26,9 @@ import com.remindme.app.ui.components.AppScaffold
 import com.remindme.app.ui.navigation.AddPerson
 import com.remindme.app.ui.navigation.AddSubscription
 import com.remindme.app.ui.navigation.AddTask
-import com.remindme.app.ui.navigation.EditReminder
-import com.remindme.app.ui.navigation.EditSubscription
-import com.remindme.app.ui.navigation.EditTask
 import com.remindme.app.ui.navigation.PersonDetail
 import com.remindme.app.ui.navigation.ReminderPreview
+import com.remindme.app.ui.navigation.editDestinationFor
 import com.remindme.app.ui.screens.dashboard.DashboardScreen
 import com.remindme.app.ui.screens.holidays.HolidaysScreen
 import com.remindme.app.ui.screens.people.PeopleScreen
@@ -48,13 +46,6 @@ fun MainScreen(
     var showMenu by remember { mutableStateOf(false) }
 
     val tabTitles = listOf("RemindME", "People", "Subscriptions", "Tasks", "Holidays")
-
-    fun editDestination(item: com.remindme.app.domain.models.ReminderItem): NavKey = when (item.category) {
-        com.remindme.app.domain.models.CategoryType.PERSON -> com.remindme.app.ui.navigation.EditPerson(item.id)
-        com.remindme.app.domain.models.CategoryType.SUBSCRIPTION -> EditSubscription(item.id)
-        com.remindme.app.domain.models.CategoryType.TASK -> EditTask(item.id)
-        com.remindme.app.domain.models.CategoryType.CUSTOM_HOLIDAY -> EditReminder(item.id)
-    }
 
     AppScaffold(
         appBar = {
@@ -157,7 +148,7 @@ fun MainScreen(
                     onNavigateToAddTask = { onItemClick(AddTask) },
                     onNavigateToHolidays = { selectedTab = 4 },
                     onNavigateToPreview = { onItemClick(ReminderPreview(it)) },
-                    onNavigateToEdit = { onItemClick(editDestination(it)) }
+                    onNavigateToEdit = { onItemClick(editDestinationFor(it)) }
                 )
                 1 -> PeopleScreen(onNavigateToDetail = { onItemClick(PersonDetail(it)) })
                 2 -> SubscriptionsScreen(onNavigateToPreview = { onItemClick(ReminderPreview(it)) })

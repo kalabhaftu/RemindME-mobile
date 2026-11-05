@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import com.remindme.app.ui.navigation.MainNavigation
 import com.remindme.app.ui.theme.RemindmeMobileTheme
+import com.remindme.app.services.LaunchUpdateNotifier
 import io.github.jan.supabase.auth.handleDeeplinks
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -53,6 +54,7 @@ class MainActivity : ComponentActivity() {
         }
 
         askNotificationPermission()
+        LaunchUpdateNotifier.checkOnLaunch(this)
 
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
