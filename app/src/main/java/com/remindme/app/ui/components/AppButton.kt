@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,21 +38,23 @@ fun AppButton(
         else -> Accent500
     }
 
-    Row(
-        modifier
-            .defaultMinSize(minHeight = 52.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(bgColor)
-            .clickable(
-                interactionSource = null,
-                indication = LocalIndication.current,
-                enabled = enabled,
-                role = Role.Button,
-                onClick = onClick
-            )
-            .padding(contentPadding),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        content = content
-    )
+    CompositionLocalProvider(LocalContentColor provides Color.White) {
+        Row(
+            modifier
+                .defaultMinSize(minHeight = 52.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(bgColor)
+                .clickable(
+                    interactionSource = null,
+                    indication = LocalIndication.current,
+                    enabled = enabled,
+                    role = Role.Button,
+                    onClick = onClick
+                )
+                .padding(contentPadding),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            content = content
+        )
+    }
 }

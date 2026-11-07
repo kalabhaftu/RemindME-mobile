@@ -965,7 +965,7 @@ fun DangerZoneSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) 
             titleContentColor = TextPrimary,
             textContentColor = TextSecondary,
             title = { Text("Delete account?", color = TextPrimary) },
-            text = { Text("This permanently deletes your reminders, settings, delivery channels, and account. This cannot be undone.") },
+            text = { Text("This permanently deletes your reminders, settings, delivery channels, and account. This cannot be undone.", color = TextSecondary) },
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteConfirmation = false

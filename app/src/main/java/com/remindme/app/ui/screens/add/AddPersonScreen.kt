@@ -211,6 +211,7 @@ fun AddPersonScreen(
             Text(
                 text = "Notification preferences",
                 style = MaterialTheme.typography.labelSmall,
+                color = TextSecondary,
                 modifier = Modifier.align(Alignment.Start)
             )
             

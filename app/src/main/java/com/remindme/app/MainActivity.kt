@@ -68,14 +68,15 @@ class MainActivity : ComponentActivity() {
                             showCrash = false
                             prefs.edit().remove("last_crash").apply()
                         },
-                        title = { Text("App Crashed Previously") },
+                        containerColor = com.remindme.app.ui.theme.BgElevated,
+                        title = { Text("App Crashed Previously", color = com.remindme.app.ui.theme.TextPrimary) },
                         text = { 
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight(0.5f)
                                     .verticalScroll(rememberScrollState())
                             ) {
-                                Text(lastCrash ?: "") 
+                                Text(lastCrash ?: "", color = com.remindme.app.ui.theme.TextSecondary) 
                             }
                         },
                         confirmButton = {
@@ -84,13 +85,13 @@ class MainActivity : ComponentActivity() {
                                 val clip = android.content.ClipData.newPlainText("Crash Log", lastCrash)
                                 clipboard.setPrimaryClip(clip)
                                 android.widget.Toast.makeText(context, "Copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
-                            }) { Text("Copy") }
+                            }) { Text("Copy", color = com.remindme.app.ui.theme.Accent500) }
                         },
                         dismissButton = {
                             TextButton(onClick = {
                                 showCrash = false
                                 prefs.edit().remove("last_crash").apply()
-                            }) { Text("Dismiss") }
+                            }) { Text("Dismiss", color = com.remindme.app.ui.theme.TextSecondary) }
                         }
                     )
                 }

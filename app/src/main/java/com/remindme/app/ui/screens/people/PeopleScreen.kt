@@ -154,8 +154,8 @@ fun PeopleScreen(
     uiState.error?.let { error ->
         Snackbar(
             modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
-            action = { TextButton(onClick = { viewModel.fetchPeople() }) { Text("Retry") } }
-        ) { Text(error) }
+            action = { TextButton(onClick = { viewModel.fetchPeople() }) { Text("Retry", color = Accent500) } }
+        ) { Text(error, color = TextPrimary) }
     }
 }
 }

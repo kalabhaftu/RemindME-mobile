@@ -100,7 +100,7 @@ private fun InputStep(uiState: MagicLinkUiState, viewModel: MagicLinkViewModel) 
             modifier = Modifier.fillMaxWidth().height(48.dp),
             tint = Accent500
         ) {
-            Text("Send Magic Link", fontSize = 14.sp)
+            Text("Send Magic Link", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -186,7 +186,7 @@ private fun NotFoundStep(uiState: MagicLinkUiState, viewModel: MagicLinkViewMode
             onClick = { viewModel.retry() },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            Text("Try a different email", fontSize = 14.sp)
+            Text("Try a different email", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.SemiBold)
         }
         Spacer(modifier = Modifier.height(12.dp))
         AppButton(
@@ -194,7 +194,7 @@ private fun NotFoundStep(uiState: MagicLinkUiState, viewModel: MagicLinkViewMode
             modifier = Modifier.fillMaxWidth().height(48.dp),
             tint = Accent500
         ) {
-            Text("Sign up instead", fontSize = 14.sp)
+            Text("Sign up instead", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -229,7 +229,7 @@ private fun ErrorStep(uiState: MagicLinkUiState, viewModel: MagicLinkViewModel) 
             onClick = { viewModel.retry() },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
-            Text("Try again", fontSize = 14.sp)
+            Text("Try again", fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.SemiBold)
         }
     }
 }

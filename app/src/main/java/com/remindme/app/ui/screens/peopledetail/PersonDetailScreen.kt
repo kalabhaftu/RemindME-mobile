@@ -217,8 +217,9 @@ fun PersonDetailScreen(
         if (showDeleteConfirm) {
             AlertDialog(
                 onDismissRequest = { showDeleteConfirm = false },
-                title = { Text("Delete ${uiState.person?.name}?") },
-                text = { Text("Are you sure you want to delete this person?") },
+                containerColor = appSurfaceColor(elevated = true),
+                title = { Text("Delete ${uiState.person?.name}?", color = TextPrimary) },
+                text = { Text("Are you sure you want to delete this person?", color = TextSecondary) },
                 confirmButton = {
                     TextButton(onClick = {
                         showDeleteConfirm = false

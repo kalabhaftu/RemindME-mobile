@@ -170,7 +170,8 @@ fun AddTaskScreen(
             if (uiState.notificationPrefs.isNotEmpty()) {
                 Text(
                     text = "Notification Preferences",
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleSmall,
+                    color = TextPrimary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 NotificationPrefsForm(

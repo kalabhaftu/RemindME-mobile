@@ -3,9 +3,7 @@ package com.remindme.app.utils
 object AppConstants {
     val GENDER_LABELS = mapOf(
         "male" to "Male",
-        "female" to "Female",
-        "nonbinary" to "Non-binary",
-        "unspecified" to "—"
+        "female" to "Female"
     )
 
     val RELATIONSHIP_LABELS = mapOf(

@@ -50,8 +50,8 @@ fun SubscriptionsScreen(
         uiState.error?.let { error ->
             Snackbar(
                 modifier = Modifier.padding(16.dp).align(Alignment.TopCenter),
-                action = { TextButton(onClick = { viewModel.fetchSubscriptions() }) { Text("Retry") } }
-            ) { Text(error) }
+                action = { TextButton(onClick = { viewModel.fetchSubscriptions() }) { Text("Retry", color = Accent500) } }
+            ) { Text(error, color = TextPrimary) }
         }
 
     AppPullToRefresh(

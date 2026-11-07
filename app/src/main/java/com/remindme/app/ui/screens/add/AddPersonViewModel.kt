@@ -61,7 +61,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                 name = "",
                 notes = "",
                 birthdate = null,
-                gender = "unspecified",
+                gender = "male",
                 relationship = "friend",
                 customRelationship = "",
                 avatarUrl = null,
@@ -91,7 +91,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                             birthdate = personDetails?.birthdate?.let {
                                 runCatching { java.time.LocalDate.parse(it.take(10)).atStartOfDay() }.getOrNull()
                             },
-                            gender = personDetails?.gender ?: "unspecified",
+                            gender = personDetails?.gender ?: "male",
                             relationship = personDetails?.relationship ?: "friend",
                             customRelationship = personDetails?.customRelationship ?: "",
                             avatarUrl = personDetails?.avatarUrl,
