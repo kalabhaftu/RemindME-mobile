@@ -17,6 +17,10 @@ import java.util.Objects
 class NotificationSchedulingService(private val context: Context) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
 
+    fun scheduleReminders(reminders: List<ReminderItem>) {
+        reminders.forEach { scheduleReminder(it) }
+    }
+
     fun scheduleReminder(reminder: ReminderItem) {
         val nextOccurrence = reminder.recurrence?.nextOccurrenceAt ?: return
         val enabledPrefs = reminder.notificationPreferences.orEmpty().filter { it.enabled }

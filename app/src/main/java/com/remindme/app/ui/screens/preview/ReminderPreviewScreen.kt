@@ -37,6 +37,7 @@ import com.remindme.app.ui.components.CircledBackButton
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.TopBar
 import com.remindme.app.ui.screens.edit.EditReminderViewModel
+import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
 import androidx.compose.material3.AlertDialog

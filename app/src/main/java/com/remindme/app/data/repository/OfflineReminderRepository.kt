@@ -277,11 +277,12 @@ class OfflineReminderRepository(
                 when (op.type) {
                     "add" -> op.payload?.let { payload ->
                         val item = json.decodeFromString<ReminderItem>(payload)
-                        val itemToSave = if (item.category == com.remindme.app.domain.models.CategoryType.SUBSCRIPTION && item.subscription?.logoUrl == null) {
+                        val sub = item.subscriptionDetails
+                        val itemToSave = if (item.category == com.remindme.app.domain.models.CategoryType.SUBSCRIPTION && sub?.logoUrl == null) {
                             val resolved = runCatching { LogoResolver.resolve(item.name) }.getOrNull()
-                            if (resolved != null && item.subscription != null) {
+                            if (resolved != null && sub != null) {
                                 val updated = item.copy(
-                                    subscriptionDetails = item.subscription.copy(
+                                    subscriptionDetails = sub.copy(
                                         logoUrl = resolved.logoUrl,
                                         logoDomain = resolved.domain
                                     )

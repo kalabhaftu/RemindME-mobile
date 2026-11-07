@@ -233,7 +233,6 @@ fun PersonDetailScreen(
                         Text("Cancel", color = TextSecondary)
                     }
                 },
-                containerColor = BgElevated,
                 titleContentColor = TextPrimary,
                 textContentColor = TextSecondary
             )

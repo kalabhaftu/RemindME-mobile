@@ -146,7 +146,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                         )
                     }
                     NotificationPrefsStore.syncFromSettings(
-                        context = application,
+                        context = getApplication(),
                         email = em,
                         push = pu,
                         telegram = tg,
@@ -421,7 +421,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             
             supabase.postgrest["user_settings"].upsert(payload)
             NotificationPrefsStore.syncFromSettings(
-                context = application,
+                context = getApplication(),
                 email = state.emailEnabled,
                 push = state.pushEnabled,
                 telegram = state.telegramEnabled,

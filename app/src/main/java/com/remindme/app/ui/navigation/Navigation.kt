@@ -35,6 +35,7 @@ import com.remindme.app.ui.screens.notifications.NotificationHelpScreen
 import com.remindme.app.ui.screens.templates.TemplatesScreen
 import io.github.jan.supabase.auth.auth
 import com.remindme.app.domain.models.CategoryType
+import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.navigation.editDestinationFor
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.foundation.layout.Box
