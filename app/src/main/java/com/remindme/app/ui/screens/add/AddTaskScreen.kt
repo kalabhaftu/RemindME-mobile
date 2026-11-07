@@ -24,11 +24,11 @@ import java.time.LocalDateTime
 
 val TASK_ICONS = listOf(
     Triple("trash", AppIcons.Delete, "Take out trash"),
-    Triple("water", AppIcons.WaterDrop, "Drink water"),
-    Triple("fitness", AppIcons.Activity, "Exercise"),
-    Triple("study", AppIcons.Book, "Study"),
-    Triple("rent", AppIcons.Home, "Pay rent"),
-    Triple("medication", AppIcons.MedicalServices, "Medication")
+    Triple("drop", AppIcons.WaterDrop, "Drink water"),
+    Triple("barbell", AppIcons.FitnessCenter, "Exercise"),
+    Triple("book", AppIcons.MenuBook, "Study"),
+    Triple("money", AppIcons.Home, "Pay rent / bills"),
+    Triple("pill", AppIcons.Medication, "Medication")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -157,7 +157,7 @@ fun AddTaskScreen(
                 onTap = { showDatePicker = true }
             )
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             AppTextField(
                 value = uiState.notes,
@@ -189,7 +189,7 @@ fun AddTaskScreen(
                 if (uiState.isLoading) {
                     Spinner(size = 20.dp)
                 } else {
-                    Text(if (taskId == null) "Add Task" else "Save Task", color = TextPrimary)
+                    Text(if (taskId == null) "Add Task" else "Save Changes", color = Color.White, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

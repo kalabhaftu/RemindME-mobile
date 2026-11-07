@@ -2,6 +2,7 @@ package com.remindme.app.ui.screens.add
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import android.app.Application
+import com.remindme.app.data.AuthCache
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
 import com.remindme.app.data.repository.OfflineReminderRepository
@@ -163,7 +164,9 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
+                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id
+                    ?: AuthCache.getUserId(getApplication())
+                    ?: throw Exception("Not logged in")
                 val id = _uiState.value.existingSubscriptionId ?: java.util.UUID.randomUUID().toString()
                 val now = LocalDateTime.now()
                 val renewalDateStr = currentRenewalDate.toLocalDate().toString()

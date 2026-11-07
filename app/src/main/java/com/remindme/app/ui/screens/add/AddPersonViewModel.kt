@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import android.app.Application
+import com.remindme.app.data.AuthCache
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
 import com.remindme.app.data.repository.OfflineReminderRepository
@@ -92,7 +93,16 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
                             },
                             gender = personDetails?.gender ?: "unspecified",
                             relationship = personDetails?.relationship ?: "friend",
+                            customRelationship = personDetails?.customRelationship ?: "",
                             avatarUrl = personDetails?.avatarUrl,
+                            notificationPrefs = item.notificationPreferences?.associate { pref ->
+                                pref.channel to ChannelPref(
+                                    enabled = pref.enabled,
+                                    leadTime = pref.leadTime,
+                                    customTime = pref.customTime,
+                                    offsetDays = pref.offsetDays
+                                )
+                            } ?: state.notificationPrefs,
                             isLoading = false
                         )
                     }
@@ -120,7 +130,9 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
+                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id
+                    ?: AuthCache.getUserId(getApplication())
+                    ?: throw Exception("Not logged in")
                 val id = _uiState.value.existingPersonId ?: java.util.UUID.randomUUID().toString()
                 val now = LocalDateTime.now()
                 val birthdateStr = currentBirthdate.toLocalDate().toString()
@@ -186,7 +198,9 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
             setAvatarUploading(true)
             setError("")
             try {
-                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
+                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id
+                    ?: AuthCache.getUserId(getApplication())
+                    ?: throw Exception("Not logged in")
                 val filename = "${UUID.randomUUID()}.$extension"
                 val path = "$userId/$filename"
                 

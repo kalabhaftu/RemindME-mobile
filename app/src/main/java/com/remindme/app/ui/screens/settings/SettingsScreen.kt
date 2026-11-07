@@ -392,7 +392,20 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
         Spacer(modifier = Modifier.height(8.dp))
 
         var showTimingPicker by remember { mutableStateOf(false) }
-        val timings = listOf("at_time" to "At time of event", "morning_of" to "Morning of", "noon_of" to "Noon of", "evening_of" to "Evening of", "custom" to "Custom Time")
+        val timings = listOf(
+            "at_time" to "At time of event: Fires at 12:00 PM on the event date.",
+            "morning_of" to "Morning of: Fires at 09:00 AM in your timezone.",
+            "noon_of" to "Noon of: Fires at 12:00 PM in your timezone.",
+            "evening_of" to "Evening of: Fires at 18:00 (6:00 PM) in your timezone.",
+            "custom" to "Custom: Any exact time you choose (e.g., 15:00)."
+        )
+        val shortLabels = mapOf(
+            "at_time" to "At time of event (12:00 PM)",
+            "morning_of" to "Morning of (09:00 AM)",
+            "noon_of" to "Noon of (12:00 PM)",
+            "evening_of" to "Evening of (6:00 PM)",
+            "custom" to "Custom Time"
+        )
         
         AppCard(
             borderRadius = 16.dp,
@@ -400,10 +413,15 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Default Timing", color = TextPrimary)
-                Text(timings.find { it.first == uiState.defaultLeadTime }?.second ?: uiState.defaultLeadTime, color = Accent500, fontWeight = FontWeight.SemiBold)
+                Text(
+                    text = shortLabels[uiState.defaultLeadTime] ?: (timings.find { it.first == uiState.defaultLeadTime }?.second ?: uiState.defaultLeadTime),
+                    color = Accent500,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
 
@@ -418,23 +436,54 @@ fun NotificationDefaultsSection(uiState: SettingsUiState, viewModel: SettingsVie
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Escalation Nudge Delay (Hours)", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
-        Spacer(modifier = Modifier.height(8.dp))
-        var nudgeVal by remember(uiState.nudgeDelayHours) { mutableStateOf(uiState.nudgeDelayHours.toString()) }
-        AppTextField(
-            value = nudgeVal,
-            onValueChange = { 
-                nudgeVal = it
-                it.toIntOrNull()?.let { num ->
-                    if (num > 0) viewModel.updatePreference("nudge_delay_hours", num)
-                }
-            },
-            placeholder = "e.g. 4",
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Escalation Nudge Delay", style = MaterialTheme.typography.titleMedium, color = TextPrimary)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Accent500.copy(alpha = 0.15f))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                AppIcon(iconRes = AppIcons.Check, tint = Accent500, modifier = Modifier.size(12.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Saved (${uiState.nudgeDelayHours}h)", color = Accent500, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
         Text("Time to wait before sending a follow-up nudge if a task is not marked done.", color = TextTertiary, fontSize = 12.sp)
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        val nudgeOptions = listOf(1, 2, 4, 8, 12, 24)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            nudgeOptions.forEach { hours ->
+                val selected = uiState.nudgeDelayHours == hours
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (selected) Accent500 else appControlColor())
+                        .clickable { viewModel.updatePreference("nudge_delay_hours", hours) }
+                        .padding(vertical = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "${hours}h",
+                        color = if (selected) Color.White else TextPrimary,
+                        fontSize = 13.sp,
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                    )
+                }
+            }
+        }
     }
 }
 

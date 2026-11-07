@@ -2,6 +2,7 @@ package com.remindme.app.ui.screens.add
 import androidx.lifecycle.viewModelScope
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import com.remindme.app.data.AuthCache
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.ReminderRepository
 import com.remindme.app.data.repository.OfflineReminderRepository
@@ -116,7 +117,9 @@ class AddTaskViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id ?: throw Exception("Not logged in")
+                val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id
+                    ?: AuthCache.getUserId(getApplication())
+                    ?: throw Exception("Not logged in")
                 val id = _uiState.value.existingTaskId ?: java.util.UUID.randomUUID().toString()
                 val now = LocalDateTime.now()
                 val dueAtStr = com.remindme.app.utils.OccurrenceScheduler.toUtcIso(currentDueAt)

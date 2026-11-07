@@ -1,11 +1,15 @@
 package com.remindme.app.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,25 +29,34 @@ fun DateTile(
     onTap: () -> Unit
 ) {
     val hasValue = value != null
+    val shape = RoundedCornerShape(16.dp)
 
-    AppCard(
-        borderRadius = 16.dp,
-        modifier = Modifier.fillMaxWidth().clickable { onTap() }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 56.dp)
+            .clip(shape)
+            .background(appControlColor())
+            .clickable { onTap() }
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AppCard(
-                tintColor = Color.Transparent
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(if (hasValue) Accent500.copy(alpha = 0.15f) else Color.Transparent),
+                contentAlignment = Alignment.Center
             ) {
-                Box(modifier = Modifier.padding(8.dp)) {
-                    AppIcon(
-                        iconRes = AppIcons.CalendarToday,
-                        tint = if (hasValue) Accent500 else TextTertiary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                AppIcon(
+                    iconRes = AppIcons.CalendarToday,
+                    tint = if (hasValue) Accent500 else TextTertiary,
+                    modifier = Modifier.size(18.dp)
+                )
             }
             
             Spacer(modifier = Modifier.width(12.dp))

@@ -164,32 +164,32 @@ fun AddPersonScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            AppCard(borderRadius = 16.dp) {
-                PickerField(
-                    label = "Gender",
-                    value = uiState.gender,
-                    displayValue = { AppConstants.GENDER_LABELS[it] ?: it },
-                    title = "Select gender",
-                    items = AppConstants.GENDER_LABELS.map { BottomSheetPickerItem(it.key, it.value) },
-                    onChanged = { viewModel.updateGender(it) }
-                )
-            }
+            PickerField(
+                label = "Gender",
+                value = uiState.gender,
+                displayValue = { AppConstants.GENDER_LABELS[it] ?: it },
+                title = "Select gender",
+                items = AppConstants.GENDER_LABELS.map { BottomSheetPickerItem(it.key, it.value) },
+                onChanged = { viewModel.updateGender(it) }
+            )
             
-            AppCard(borderRadius = 16.dp) {
-                PickerField(
-                    label = "Relationship",
-                    value = uiState.relationship,
-                    displayValue = {
-                        val entry = AppConstants.RELATIONSHIP_LABELS[it]
-                        if (entry != null) "${entry.second} ${entry.first}" else it
-                    },
-                    title = "Select relationship",
-                    items = AppConstants.RELATIONSHIP_LABELS.map { 
-                        BottomSheetPickerItem(it.key, "${it.value.second} ${it.value.first}")
-                    },
-                    onChanged = { viewModel.updateRelationship(it) }
-                )
-            }
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            PickerField(
+                label = "Relationship",
+                value = uiState.relationship,
+                displayValue = {
+                    val entry = AppConstants.RELATIONSHIP_LABELS[it]
+                    entry?.first ?: it
+                },
+                title = "Select relationship",
+                items = AppConstants.RELATIONSHIP_LABELS.map { 
+                    BottomSheetPickerItem(it.key, it.value.first)
+                },
+                onChanged = { viewModel.updateRelationship(it) }
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
             
             if (uiState.relationship == "other") {
                 AppTextField(
@@ -204,7 +204,6 @@ fun AddPersonScreen(
                 value = uiState.notes,
                 onValueChange = { viewModel.updateNotes(it) },
                 placeholder = "Notes"
-                // maxLines = 3 // To be supported by AppTextField
             )
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -235,7 +234,7 @@ fun AddPersonScreen(
                 if (uiState.isLoading) {
                     Spinner(size = 20.dp)
                 } else {
-                    Text("Add Person", color = TextPrimary)
+                    Text(if (personId != null) "Save Changes" else "Add Person", color = Color.White, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

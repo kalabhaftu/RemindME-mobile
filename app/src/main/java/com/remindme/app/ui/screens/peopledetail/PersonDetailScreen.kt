@@ -184,8 +184,10 @@ fun PersonDetailScreen(
                             if (zodiac != null && glyph != null) {
                                 item { StatCard("ZODIAC", "$glyph $zodiac") }
                             }
-                            if (rel != null) {
-                                item { StatCard("RELATIONSHIP", "${rel.second} ${rel.first}") }
+                            val customRel = person.person?.customRelationship
+                            val displayRel = if (!customRel.isNullOrBlank()) customRel else rel?.first
+                            if (!displayRel.isNullOrBlank()) {
+                                item { StatCard("RELATIONSHIP", displayRel) }
                             }
                         }
 

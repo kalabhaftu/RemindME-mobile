@@ -39,7 +39,14 @@ import com.remindme.app.ui.components.TopBar
 import com.remindme.app.ui.screens.edit.EditReminderViewModel
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
-import com.remindme.app.domain.models.ReminderItem
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.remindme.app.ui.components.AppButton
+import com.remindme.app.ui.components.appSurfaceColor
+import com.remindme.app.ui.theme.StateDanger
 
 @Composable
 fun ReminderPreviewScreen(
@@ -57,7 +64,11 @@ fun ReminderPreviewScreen(
         }
     )
     val state by vm.uiState.collectAsState()
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
     LaunchedEffect(reminderId) { vm.loadReminder(reminderId) }
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) onBack()
+    }
 
     AppScaffold(appBar = {
         Row(
@@ -103,18 +114,79 @@ fun ReminderPreviewScreen(
                     PreviewBlock("Details") {
                         reminder.notes?.takeIf { it.isNotBlank() }?.let { PreviewValue("Notes", it) }
                         reminder.person?.birthdate?.let { PreviewValue("Birthday", it) }
-                        reminder.subscription?.renewalDate?.let { PreviewValue("Renews", it) }
-                        reminder.task?.dueAt?.let { PreviewValue("Due", it) }
+                        reminder.subscription?.let { sub ->
+                            sub.renewalDate?.let { PreviewValue("Next Renewal", it) }
+                            if (sub.billingAmount != null) {
+                                val amountStr = "${sub.billingCurrency ?: "USD"} ${sub.billingAmount}"
+                                PreviewValue("Billing Amount", amountStr)
+                            }
+                            sub.cycle?.let { PreviewValue("Billing Cycle", it.replaceFirstChar { c -> c.uppercase() }) }
+                        }
+                        reminder.task?.let { task ->
+                            task.dueAt?.let { PreviewValue("Due Date", it) }
+                            reminder.recurrence?.let { rec ->
+                                if (rec.frequency != "none") {
+                                    PreviewValue("Repeating", rec.frequency.replaceFirstChar { c -> c.uppercase() })
+                                }
+                            }
+                        }
                         reminder.holiday?.holidayDate?.let { PreviewValue("Date", it) }
                     }
                     PreviewBlock("Notifications") {
-                        reminder.notificationPreferences.orEmpty().filter { it.enabled }.forEach {
-                            PreviewValue(it.channel.replace('_', ' ').replaceFirstChar { c -> c.uppercase() }, it.leadTime.replace('_', ' '))
+                        val enabledPrefs = reminder.notificationPreferences.orEmpty().filter { it.enabled }
+                        if (enabledPrefs.isEmpty()) {
+                            Text("No active notifications", color = TextSecondary, fontSize = 14.sp)
+                        } else {
+                            enabledPrefs.forEach {
+                                val offsetStr = when (it.offsetDays) {
+                                    0 -> "Same day"
+                                    1 -> "1 day before"
+                                    7 -> "1 week before"
+                                    14 -> "2 weeks before"
+                                    else -> "${it.offsetDays} days before"
+                                }
+                                val leadStr = it.leadTime.replace('_', ' ')
+                                val timeStr = if (it.leadTime == "custom" && it.customTime.isNotBlank()) " (${it.customTime})" else ""
+                                PreviewValue(
+                                    label = it.channel.replace('_', ' ').replaceFirstChar { c -> c.uppercase() },
+                                    value = "$offsetStr · $leadStr$timeStr"
+                                )
+                            }
                         }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    AppButton(
+                        onClick = { showDeleteConfirmation = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        surfaceColor = appSurfaceColor()
+                    ) {
+                        AppIcon(iconRes = AppIcons.Delete, color = StateDanger)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Delete reminder", color = StateDanger)
                     }
                 } ?: Text("This reminder is no longer available.", color = TextSecondary)
             }
         }
+    }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            containerColor = appSurfaceColor(elevated = true),
+            title = { Text("Delete reminder?", color = TextPrimary) },
+            text = { Text("This will permanently remove this reminder and its notifications.", color = TextSecondary) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteConfirmation = false
+                    vm.deleteReminder(reminderId)
+                }) { Text("Delete", color = StateDanger) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) { Text("Cancel", color = TextSecondary) }
+            }
+        )
     }
 }
 

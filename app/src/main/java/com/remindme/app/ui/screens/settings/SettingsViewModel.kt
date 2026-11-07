@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import com.remindme.app.BuildConfig
+import com.remindme.app.data.AuthCache
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.OfflineReminderRepository
 import com.remindme.app.data.repository.ReminderRepository
@@ -585,6 +586,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             conn.outputStream.use { it.write("{\"confirmation\":\"DELETE\"}".toByteArray()) }
             
             if (conn.responseCode == 200) {
+                AuthCache.clear(getApplication())
                 supabase.auth.signOut()
                 withContext(Dispatchers.Main) { onComplete() }
             } else {
@@ -597,6 +599,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun signOut(onComplete: () -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         try {
+            AuthCache.clear(getApplication())
             supabase.auth.signOut()
             withContext(Dispatchers.Main) { onComplete() }
         } catch (e: Exception) {
@@ -606,6 +609,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun signOutAllDevices(onComplete: () -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         try {
+            AuthCache.clear(getApplication())
             supabase.auth.signOut(io.github.jan.supabase.auth.SignOutScope.GLOBAL)
             withContext(Dispatchers.Main) { onComplete() }
         } catch (e: Exception) {

@@ -42,6 +42,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.background
+import com.remindme.app.data.AuthCache
 import com.remindme.app.services.OfflineSyncScheduler
 import com.remindme.app.services.PushTokenRegistrar
 import kotlinx.coroutines.Dispatchers
@@ -107,6 +108,10 @@ fun MainNavigation(
                 // Stay on AuthCheck / splash
             }
             is io.github.jan.supabase.auth.status.SessionStatus.Authenticated -> {
+                val user = SupabaseManager.client.auth.currentUserOrNull()
+                if (user != null) {
+                    AuthCache.saveUser(context, user.id, user.email)
+                }
                 OfflineSyncScheduler.runNow(context)
                 kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launch {
                     runCatching { PushTokenRegistrar.registerCurrentToken() }
@@ -115,9 +120,36 @@ fun MainNavigation(
                     replaceRoot(Main)
                 }
             }
+            is io.github.jan.supabase.auth.status.SessionStatus.NotAuthenticated -> {
+                if (status.isSignOut) {
+                    AuthCache.clear(context)
+                    if (backStack.lastOrNull() != Login) {
+                        replaceRoot(Login)
+                    }
+                } else {
+                    // Offline or token refresh network delay: keep user in-app with cached offline data
+                    val cachedUserId = AuthCache.getUserId(context)
+                    if (cachedUserId != null) {
+                        if (backStack.lastOrNull() == AuthCheck) {
+                            replaceRoot(Main)
+                        }
+                    } else {
+                        if (backStack.lastOrNull() != Login) {
+                            replaceRoot(Login)
+                        }
+                    }
+                }
+            }
             else -> {
-                if (backStack.lastOrNull() != Login) {
-                    replaceRoot(Login)
+                val cachedUserId = AuthCache.getUserId(context)
+                if (cachedUserId != null) {
+                    if (backStack.lastOrNull() == AuthCheck) {
+                        replaceRoot(Main)
+                    }
+                } else {
+                    if (backStack.lastOrNull() != Login) {
+                        replaceRoot(Login)
+                    }
                 }
             }
         }

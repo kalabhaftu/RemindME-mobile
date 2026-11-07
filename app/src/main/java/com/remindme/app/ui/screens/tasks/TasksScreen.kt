@@ -117,12 +117,12 @@ fun TaskRow(item: ReminderItem, onClick: () -> Unit, onMarkDone: () -> Unit) {
 
     fun getIconForKey(key: String?): Int {
         return when (key) {
-            "water" -> AppIcons.WaterDrop
+            "water", "drop" -> AppIcons.WaterDrop
             "trash" -> AppIcons.Delete
-            "fitness" -> AppIcons.FitnessCenter
-            "study" -> AppIcons.MenuBook
-            "rent" -> AppIcons.Home
-            "medication" -> AppIcons.Medication
+            "fitness", "barbell" -> AppIcons.FitnessCenter
+            "study", "book" -> AppIcons.MenuBook
+            "rent", "money" -> AppIcons.Home
+            "medication", "pill" -> AppIcons.Medication
             else -> AppIcons.List
         }
     }

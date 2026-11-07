@@ -9,20 +9,11 @@ object AppConstants {
     )
 
     val RELATIONSHIP_LABELS = mapOf(
-        "family" to Pair("Family", "👨‍👩‍👧"),
-        "partner" to Pair("Partner", "💑"),
-        "friend" to Pair("Friends", "👫"),
-        "colleague" to Pair("Colleague", "💼"),
-        "other" to Pair("Other", "👤"),
-        // Additional relationships
-        "mother" to Pair("Mother", "👩‍👦"),
-        "father" to Pair("Father", "👨‍👦"),
-        "sister" to Pair("Sister", "👧"),
-        "brother" to Pair("Brother", "👦"),
-        "wife" to Pair("Wife", "💍"),
-        "husband" to Pair("Husband", "💍"),
-        "daughter" to Pair("Daughter", "👧"),
-        "son" to Pair("Son", "👦")
+        "family" to Pair("Family", "Family"),
+        "partner" to Pair("Partner", "Partner"),
+        "friend" to Pair("Friend", "Friend"),
+        "colleague" to Pair("Colleague", "Colleague"),
+        "other" to Pair("Other", "Other")
     )
 
     val ZODIAC_GLYPHS = mapOf(

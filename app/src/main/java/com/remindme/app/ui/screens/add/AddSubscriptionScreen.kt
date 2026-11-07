@@ -124,7 +124,10 @@ fun AddSubscriptionScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            Row {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(modifier = Modifier.weight(2f)) {
                     AppTextField(
                         value = uiState.amount,
@@ -133,37 +136,33 @@ fun AddSubscriptionScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
                 }
-                Spacer(modifier = Modifier.width(16.dp))
-                Box(modifier = Modifier.weight(1f)) {
-                    AppCard(borderRadius = 16.dp) {
-                        PickerField(
-                            label = "Currency",
-                            value = uiState.currency,
-                            displayValue = { it },
-                            title = "Select currency",
-                            items = listOf("USD", "EUR", "GBP").map { BottomSheetPickerItem(it, it) },
-                            onChanged = { viewModel.updateCurrency(it) }
-                        )
-                    }
+                Spacer(modifier = Modifier.width(12.dp))
+                Box(modifier = Modifier.weight(1.2f)) {
+                    PickerField(
+                        label = "Currency",
+                        value = uiState.currency,
+                        displayValue = { it },
+                        title = "Select currency",
+                        items = listOf("USD", "EUR", "GBP").map { BottomSheetPickerItem(it, it) },
+                        onChanged = { viewModel.updateCurrency(it) }
+                    )
                 }
             }
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            AppCard(borderRadius = 16.dp) {
-                PickerField(
-                    label = "Cycle",
-                    value = uiState.cycle,
-                    displayValue = { it.replaceFirstChar { char -> char.uppercaseChar() } },
-                    title = "Select billing cycle",
-                    items = listOf(
-                        BottomSheetPickerItem("weekly", "Weekly"),
-                        BottomSheetPickerItem("monthly", "Monthly"),
-                        BottomSheetPickerItem("yearly", "Yearly")
-                    ),
-                    onChanged = { viewModel.updateCycle(it) }
-                )
-            }
+            PickerField(
+                label = "Cycle",
+                value = uiState.cycle,
+                displayValue = { it.replaceFirstChar { char -> char.uppercaseChar() } },
+                title = "Select billing cycle",
+                items = listOf(
+                    BottomSheetPickerItem("weekly", "Weekly"),
+                    BottomSheetPickerItem("monthly", "Monthly"),
+                    BottomSheetPickerItem("yearly", "Yearly")
+                ),
+                onChanged = { viewModel.updateCycle(it) }
+            )
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -197,7 +196,7 @@ fun AddSubscriptionScreen(
                 if (uiState.isLoading) {
                     Spinner(size = 20.dp)
                 } else {
-                    Text(if (subscriptionId == null) "Save" else "Save Subscription", color = TextPrimary)
+                    Text(if (subscriptionId == null) "Add Subscription" else "Save Changes", color = Color.White, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

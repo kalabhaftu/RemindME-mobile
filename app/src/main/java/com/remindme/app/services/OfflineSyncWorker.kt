@@ -3,6 +3,7 @@ package com.remindme.app.services
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.remindme.app.data.AuthCache
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.data.repository.OfflineReminderRepository
 import com.remindme.app.data.repository.ReminderRepository
@@ -14,7 +15,9 @@ class OfflineSyncWorker(
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
         return try {
-            if (SupabaseManager.client.auth.currentSessionOrNull() == null) return Result.success()
+            val userId = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id
+                ?: AuthCache.getUserId(applicationContext)
+            if (userId == null) return Result.success()
             OfflineReminderRepository(
                 ReminderRepository(SupabaseManager.client, applicationContext),
                 applicationContext

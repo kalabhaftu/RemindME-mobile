@@ -7,8 +7,10 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
+import com.remindme.app.data.AuthCache
 import com.remindme.app.data.remote.SupabaseManager
 import com.remindme.app.domain.models.ReminderItem
+import com.remindme.app.services.LogoResolver
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -60,7 +62,14 @@ class OfflineReminderRepository(
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
-    private fun currentUserId(): String? = SupabaseManager.client.auth.currentSessionOrNull()?.user?.id
+    private fun currentUserId(): String? {
+        val remoteUser = SupabaseManager.client.auth.currentSessionOrNull()?.user
+        if (remoteUser != null) {
+            AuthCache.saveUser(context, remoteUser.id, remoteUser.email)
+            return remoteUser.id
+        }
+        return AuthCache.getUserId(context)
+    }
 
     private fun readCache(userId: String): List<ReminderItem> {
         val result = mutableListOf<ReminderItem>()
@@ -266,7 +275,23 @@ class OfflineReminderRepository(
         for (op in ops) {
             try {
                 when (op.type) {
-                    "add" -> op.payload?.let { remoteRepository.addReminder(json.decodeFromString<ReminderItem>(it)) }
+                    "add" -> op.payload?.let { payload ->
+                        val item = json.decodeFromString<ReminderItem>(payload)
+                        val itemToSave = if (item.category == com.remindme.app.domain.models.CategoryType.SUBSCRIPTION && item.subscription?.logoUrl == null) {
+                            val resolved = runCatching { LogoResolver.resolve(item.name) }.getOrNull()
+                            if (resolved != null && item.subscription != null) {
+                                val updated = item.copy(
+                                    subscriptionDetails = item.subscription.copy(
+                                        logoUrl = resolved.logoUrl,
+                                        logoDomain = resolved.domain
+                                    )
+                                )
+                                cacheReminder(updated)
+                                updated
+                            } else item
+                        } else item
+                        remoteRepository.addReminder(itemToSave)
+                    }
                     "update" -> op.payload?.let { remoteRepository.updateReminder(json.decodeFromString<ReminderItem>(it)) }
                     "delete" -> remoteRepository.deleteReminder(op.reminderId)
                 }

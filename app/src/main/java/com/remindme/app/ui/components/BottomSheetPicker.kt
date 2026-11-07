@@ -42,15 +42,20 @@ fun PickerField(
     displayValue: (String) -> String,
     title: String,
     items: List<BottomSheetPickerItem>,
-    onChanged: (String) -> Unit
+    onChanged: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var showPicker by remember { mutableStateOf(false) }
+    val shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .defaultMinSize(minHeight = 56.dp)
+            .androidx.compose.ui.draw.clip(shape)
+            .background(appControlColor())
             .clickable { showPicker = true }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
