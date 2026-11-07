@@ -175,7 +175,8 @@ fun AddTaskScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 NotificationPrefsForm(
                     matrix = uiState.notificationPrefs,
-                    onChanged = { viewModel.updateNotificationPrefs(it) }
+                    onChanged = { viewModel.updateNotificationPrefs(it) },
+                    targetDate = uiState.dueAt
                 )
             }
             

@@ -8,7 +8,7 @@ object NotificationPrefsStore {
     private val defaultPrefs = mapOf(
         "email" to ChannelPref(enabled = true, leadTime = "at_time"),
         "push" to ChannelPref(enabled = true, leadTime = "at_time"),
-        "telegram" to ChannelPref(enabled = false, leadTime = "at_time"),
+        "telegram" to ChannelPref(enabled = true, leadTime = "at_time"),
         "in_app" to ChannelPref(enabled = true, leadTime = "at_time")
     )
 
@@ -34,5 +34,22 @@ object NotificationPrefsStore {
             }
             apply()
         }
+    }
+
+    fun syncFromSettings(
+        context: Context,
+        email: Boolean,
+        push: Boolean,
+        telegram: Boolean,
+        inApp: Boolean,
+        leadTime: String,
+        customTime: String
+    ) {
+        val current = load(context).toMutableMap()
+        current["email"] = (current["email"] ?: ChannelPref()).copy(enabled = email, leadTime = leadTime, customTime = customTime)
+        current["push"] = (current["push"] ?: ChannelPref()).copy(enabled = push, leadTime = leadTime, customTime = customTime)
+        current["telegram"] = (current["telegram"] ?: ChannelPref()).copy(enabled = telegram, leadTime = leadTime, customTime = customTime)
+        current["in_app"] = (current["in_app"] ?: ChannelPref()).copy(enabled = inApp, leadTime = leadTime, customTime = customTime)
+        save(context, current)
     }
 }

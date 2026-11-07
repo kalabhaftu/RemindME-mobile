@@ -22,6 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalTime
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import com.remindme.app.ui.components.BottomSheetPickerItem
 import com.remindme.app.ui.components.PickerField
 import com.remindme.app.ui.theme.Accent500
@@ -79,11 +81,50 @@ val OFFSET_DAY_OPTIONS = mapOf(
     14 to "2 weeks before"
 )
 
+fun calculateLeadTimeLabel(
+    key: String,
+    targetDate: LocalDateTime?,
+    offsetDays: Int,
+    customTime: String
+): String {
+    val dateText = targetDate?.let { date ->
+        val remindDate = date.minusDays(offsetDays.toLong())
+        remindDate.format(DateTimeFormatter.ofPattern("MMM d"))
+    }
+
+    return when (key) {
+        "at_time" -> {
+            val eventDateStr = targetDate?.format(DateTimeFormatter.ofPattern("MMM d"))
+            if (eventDateStr != null) "At time of event: Fires at 12:00 PM on " + eventDateStr + "."
+            else "At time of event: Fires at 12:00 PM on the event date."
+        }
+        "morning_of" -> {
+            if (dateText != null) "Morning of: Fires at 09:00 AM on " + dateText + " in your timezone."
+            else "Morning of: Fires at 09:00 AM in your timezone."
+        }
+        "noon_of" -> {
+            if (dateText != null) "Noon of: Fires at 12:00 PM on " + dateText + " in your timezone."
+            else "Noon of: Fires at 12:00 PM in your timezone."
+        }
+        "evening_of" -> {
+            if (dateText != null) "Evening of: Fires at 18:00 (6:00 PM) on " + dateText + " in your timezone."
+            else "Evening of: Fires at 18:00 (6:00 PM) in your timezone."
+        }
+        "custom" -> {
+            val timeDisplay = if (customTime.isNotBlank()) formatTime12h(customTime) else "15:00"
+            if (dateText != null) "Custom: Any exact time you choose on " + dateText + " (e.g., " + timeDisplay + ")."
+            else "Custom: Any exact time you choose (e.g., 15:00)."
+        }
+        else -> LEAD_TIME_OPTIONS[key] ?: key
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationPrefsForm(
     matrix: Map<String, ChannelPref>,
-    onChanged: (Map<String, ChannelPref>) -> Unit
+    onChanged: (Map<String, ChannelPref>) -> Unit,
+    targetDate: LocalDateTime? = null
 ) {
     Column {
         CHANNELS.forEach { channel ->
@@ -149,9 +190,23 @@ fun NotificationPrefsForm(
                                 PickerField(
                                     label = "When",
                                     value = pref.leadTime,
-                                    displayValue = { LEAD_TIME_OPTIONS[it] ?: it },
+                                    displayValue = { key ->
+                                        when (key) {
+                                            "at_time" -> "At time of event (12:00 PM)"
+                                            "morning_of" -> "Morning of (09:00 AM)"
+                                            "noon_of" -> "Noon of (12:00 PM)"
+                                            "evening_of" -> "Evening of (6:00 PM)"
+                                            "custom" -> if (pref.customTime.isNotBlank()) "Custom (" + formatTime12h(pref.customTime) + ")" else "Custom time"
+                                            else -> LEAD_TIME_OPTIONS[key] ?: key
+                                        }
+                                    },
                                     title = "Select timing",
-                                    items = LEAD_TIME_OPTIONS.map { BottomSheetPickerItem(it.key, it.value) },
+                                    items = listOf("at_time", "morning_of", "noon_of", "evening_of", "custom").map { key ->
+                                        BottomSheetPickerItem(
+                                            key = key,
+                                            label = calculateLeadTimeLabel(key, targetDate, pref.offsetDays, pref.customTime)
+                                        )
+                                    },
                                     onChanged = {
                                         val next = matrix.toMutableMap()
                                         val offsetDays = if (it == "at_time") 0 else pref.offsetDays

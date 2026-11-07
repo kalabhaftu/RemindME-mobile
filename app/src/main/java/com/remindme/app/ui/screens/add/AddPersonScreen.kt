@@ -219,7 +219,8 @@ fun AddPersonScreen(
             
             NotificationPrefsForm(
                 matrix = uiState.notificationPrefs,
-                onChanged = { viewModel.updateNotificationPrefs(it) }
+                onChanged = { viewModel.updateNotificationPrefs(it) },
+                targetDate = uiState.birthdate
             )
             
             Spacer(modifier = Modifier.height(24.dp))

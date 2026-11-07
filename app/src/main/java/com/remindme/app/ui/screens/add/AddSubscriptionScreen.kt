@@ -184,7 +184,8 @@ fun AddSubscriptionScreen(
             
             NotificationPrefsForm(
                 matrix = uiState.notificationPrefs,
-                onChanged = { viewModel.updateNotificationPrefs(it) }
+                onChanged = { viewModel.updateNotificationPrefs(it) },
+                targetDate = uiState.renewalDate
             )
             
             Spacer(modifier = Modifier.height(32.dp))

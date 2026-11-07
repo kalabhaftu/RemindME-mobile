@@ -172,11 +172,13 @@ fun <T> BottomSheetPicker(
                                 ) {
                                     Text(
                                         text = itemLabel(item),
-                                        fontSize = 16.sp,
+                                        fontSize = 15.sp,
                                         color = if (isSelected) Accent500 else TextPrimary,
-                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                        modifier = Modifier.weight(1f)
                                     )
                                     if (isSelected) {
+                                        Spacer(modifier = Modifier.width(12.dp))
                                         AppIcon(
                                             iconRes = AppIcons.Check,
                                             color = Accent500,

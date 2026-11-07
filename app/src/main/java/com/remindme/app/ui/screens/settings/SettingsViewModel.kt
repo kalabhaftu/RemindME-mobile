@@ -120,8 +120,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     val customTime = response["default_custom_time"]?.toString()?.removeSurrounding("\"") ?: ""
 
                     var em = true
-                    var pu = false
-                    var tg = false
+                    var pu = true
+                    var tg = true
                     var ia = true
 
                     val channels = response["default_channels"] as? kotlinx.serialization.json.JsonObject
@@ -144,6 +144,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                             inAppEnabled = ia
                         )
                     }
+                    NotificationPrefsStore.syncFromSettings(
+                        context = application,
+                        email = em,
+                        push = pu,
+                        telegram = tg,
+                        inApp = ia,
+                        leadTime = leadTime,
+                        customTime = customTime
+                    )
                 }
             }
         } catch (e: Exception) {
@@ -410,6 +419,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             }
             
             supabase.postgrest["user_settings"].upsert(payload)
+            NotificationPrefsStore.syncFromSettings(
+                context = application,
+                email = state.emailEnabled,
+                push = state.pushEnabled,
+                telegram = state.telegramEnabled,
+                inApp = state.inAppEnabled,
+                leadTime = state.defaultLeadTime,
+                customTime = state.defaultCustomTime
+            )
             android.util.Log.d("SettingsViewModel", "Successfully synced preferences to Supabase: $payload")
         } catch (e: Exception) {
             android.util.Log.e("SettingsViewModel", "Failed to sync preferences to Supabase", e)
