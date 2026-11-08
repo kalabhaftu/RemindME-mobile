@@ -20,7 +20,7 @@ fun signingProperty(name: String, envName: String = name): String? =
 
 android {
     namespace = "com.remindme.app"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.remindme.app"
         minSdk = 24
