@@ -20,19 +20,19 @@ fun signingProperty(name: String, envName: String = name): String? =
 
 android {
     namespace = "com.remindme.app"
-    compileSdk = 36
+    compileSdk = 35
     defaultConfig {
         applicationId = "com.remindme.app"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 35
         
         val localProperties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
         if (localPropertiesFile.exists()) {
             localProperties.load(FileInputStream(localPropertiesFile))
         }
-        versionCode = localProperties.getProperty("VERSION_CODE", System.getenv("VERSION_CODE") ?: "11").toIntOrNull() ?: 11
-        versionName = localProperties.getProperty("VERSION_NAME", System.getenv("VERSION_NAME") ?: "1.0.7")
+        versionCode = localProperties.getProperty("VERSION_CODE", System.getenv("VERSION_CODE") ?: "12").toIntOrNull() ?: 12
+        versionName = localProperties.getProperty("VERSION_NAME", System.getenv("VERSION_NAME") ?: "1.0.8")
         buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL", "")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY", "")}\"")
         buildConfigField("String", "WEB_API_URL", "\"${localProperties.getProperty("WEB_API_URL", "https://remind-me-web-roan.vercel.app")}\"")
@@ -45,6 +45,10 @@ android {
             keyPassword = signingProperty("keyPassword", "ANDROID_KEY_PASSWORD")
             storeFile = signingProperty("storeFile", "ANDROID_STORE_FILE")?.let { file(it) }
             storePassword = signingProperty("storePassword", "ANDROID_KEYSTORE_PASSWORD")
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = false
         }
     }
 
@@ -74,6 +78,9 @@ android {
     packaging {
       resources {
         excludes += "/META-INF/{AL2.0,LGPL2.1}"
+      }
+      jniLibs {
+        useLegacyPackaging = true
       }
     }
 }
