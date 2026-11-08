@@ -41,6 +41,7 @@ fun PersonDetailScreen(
 ) {
     val context = LocalContext.current
     val viewModel: PersonDetailViewModel = viewModel(
+        key = "person-detail-$personId",
         factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -48,6 +49,23 @@ fun PersonDetailScreen(
             }
         }
     )
+
+    LaunchedEffect(personId) {
+        viewModel.loadPerson()
+    }
+
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, personId) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                viewModel.loadPerson()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
     
     val uiState by viewModel.uiState.collectAsState()
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -93,6 +111,10 @@ fun PersonDetailScreen(
             }
         }
     ) { paddingValues ->
+        AppPullToRefresh(
+            isRefreshing = uiState.isLoading,
+            onRefresh = { viewModel.loadPerson() }
+        ) {
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             val person = uiState.person
             if (uiState.isLoading) {
@@ -212,6 +234,7 @@ fun PersonDetailScreen(
                         }
                     }
                 }
+        }
         }
 
         if (showDeleteConfirm) {

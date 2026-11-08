@@ -84,6 +84,13 @@ class PeopleViewModel(application: Application) : AndroidViewModel(application) 
     init {
         fetchPeople()
         setupRealtime()
+        viewModelScope.launch {
+            repository.cachedReminders.collect { cached ->
+                if (cached.isNotEmpty()) {
+                    _allPeople.value = cached.filter { it.category == CategoryType.PERSON }
+                }
+            }
+        }
     }
 
     private fun setupRealtime() {

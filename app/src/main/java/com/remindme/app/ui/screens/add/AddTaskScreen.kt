@@ -192,7 +192,7 @@ fun AddTaskScreen(
                 if (uiState.isLoading) {
                     Spinner(size = 20.dp)
                 } else {
-                    Text(if (taskId == null) "Add Task" else "Save Changes", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Text(if (!taskId.isNullOrBlank() || !uiState.existingTaskId.isNullOrBlank()) "Save Changes" else "Add Task", color = Color.White, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

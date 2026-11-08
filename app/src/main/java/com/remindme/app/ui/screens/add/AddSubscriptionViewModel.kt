@@ -86,6 +86,7 @@ class AddSubscriptionViewModel(application: Application) : AndroidViewModel(appl
     }
     
     fun clearError() = _uiState.update { it.copy(error = null) }
+    fun clearSuccess() = _uiState.update { it.copy(isSuccess = false) }
     fun setError(error: String) = _uiState.update { it.copy(error = error) }
 
     fun loadSubscription(subscriptionId: String) {

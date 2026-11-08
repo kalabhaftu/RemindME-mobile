@@ -74,6 +74,7 @@ fun AddPersonScreen(
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
+            viewModel.clearSuccess()
             onBack()
         }
     }
@@ -90,7 +91,7 @@ fun AddPersonScreen(
                 CircledBackButton(onClick = onBack)
                 Spacer(modifier = Modifier.width(12.dp))
                 TopBar(
-                    title = if (personId != null) "Edit Person" else "Add Person",
+                    title = if (!personId.isNullOrBlank() || !uiState.existingPersonId.isNullOrBlank()) "Edit Person" else "Add Person",
                     statusBarsPadding = false,
                     modifier = Modifier.weight(1f)
     )
@@ -236,7 +237,7 @@ fun AddPersonScreen(
                 if (uiState.isLoading) {
                     Spinner(size = 20.dp)
                 } else {
-                    Text(if (personId != null) "Save Changes" else "Add Person", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Text(if (!personId.isNullOrBlank() || !uiState.existingPersonId.isNullOrBlank()) "Save Changes" else "Add Person", color = Color.White, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

@@ -75,6 +75,7 @@ class AddPersonViewModel(application: Application) : AndroidViewModel(applicatio
     
     fun setAvatarUploading(uploading: Boolean) = _uiState.update { it.copy(isUploadingAvatar = uploading) }
     fun clearError() = _uiState.update { it.copy(error = null) }
+    fun clearSuccess() = _uiState.update { it.copy(isSuccess = false) }
     fun setError(error: String) = _uiState.update { it.copy(error = error) }
 
     fun loadPerson(personId: String) {

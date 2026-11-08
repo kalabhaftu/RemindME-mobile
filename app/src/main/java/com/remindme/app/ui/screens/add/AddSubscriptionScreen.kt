@@ -48,6 +48,7 @@ fun AddSubscriptionScreen(
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
+            viewModel.clearSuccess()
             onBack()
         }
     }
@@ -199,7 +200,7 @@ fun AddSubscriptionScreen(
                 if (uiState.isLoading) {
                     Spinner(size = 20.dp)
                 } else {
-                    Text(if (subscriptionId == null) "Add Subscription" else "Save Changes", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Text(if (!subscriptionId.isNullOrBlank() || !uiState.existingSubscriptionId.isNullOrBlank()) "Save Changes" else "Add Subscription", color = Color.White, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

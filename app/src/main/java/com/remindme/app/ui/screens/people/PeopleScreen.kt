@@ -34,6 +34,7 @@ import com.remindme.app.R
 import com.remindme.app.domain.models.ReminderItem
 import com.remindme.app.ui.components.EmptyState
 import com.remindme.app.ui.components.*
+import com.remindme.app.ui.components.AppRetrySnackbar
 import com.remindme.app.ui.theme.*
 import com.remindme.app.ui.screens.people.PeopleSort
 import com.remindme.app.ui.screens.people.PeopleViewModel
@@ -151,13 +152,11 @@ fun PeopleScreen(
         }
     }
     }
-    uiState.error?.let { error ->
-        Snackbar(
-            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
-            action = { TextButton(onClick = { viewModel.fetchPeople() }) { Text("Retry", color = Accent500) } }
-        ) { Text(error, color = TextPrimary) }
+    AppRetrySnackbar(
+        error = uiState.error,
+        onRetry = { viewModel.fetchPeople() }
+    )
     }
-}
 }
 
 @Composable

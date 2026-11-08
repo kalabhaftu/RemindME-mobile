@@ -23,6 +23,7 @@ import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.AppIcons
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.AppPullToRefresh
+import com.remindme.app.ui.components.AppRetrySnackbar
 import com.remindme.app.ui.theme.Accent500
 import com.remindme.app.ui.theme.TextPrimary
 import com.remindme.app.ui.theme.TextSecondary
@@ -126,19 +127,11 @@ fun DashboardScreen(
         }
         }
     }
-    uiState.error?.let { error ->
-        androidx.compose.material3.Snackbar(
-            modifier = Modifier.padding(16.dp),
-            action = {
-                androidx.compose.material3.TextButton(onClick = { viewModel.fetchReminders() }) {
-                    androidx.compose.material3.Text("Retry", color = Accent500)
-                }
-            }
-        ) {
-            androidx.compose.material3.Text(error, color = TextPrimary)
-        }
+    AppRetrySnackbar(
+        error = uiState.error,
+        onRetry = { viewModel.fetchReminders() }
+    )
     }
-}
 }
 
 @Composable

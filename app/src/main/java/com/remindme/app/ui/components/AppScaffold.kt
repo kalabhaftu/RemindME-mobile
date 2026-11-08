@@ -84,7 +84,7 @@ fun AppScaffold(
                 }
             }
 
-            Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp).zIndex(12f)) {
+            Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 104.dp).zIndex(25f)) {
                 snackbarHost()
             }
         }

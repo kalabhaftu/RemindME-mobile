@@ -33,13 +33,19 @@ class PersonDetailViewModel(
 
     init {
         loadPerson()
+        viewModelScope.launch {
+            repository.cachedReminders.collect { cached ->
+                cached.find { it.id == personId }?.let { updated ->
+                    _uiState.update { it.copy(person = updated) }
+                }
+            }
+        }
     }
 
     fun loadPerson() = viewModelScope.launch(Dispatchers.IO) {
         _uiState.update { it.copy(isLoading = true, error = null) }
         try {
-            val all = repository.getReminders()
-            val person = all.firstOrNull { it.id == personId }
+            val person = repository.getReminder(personId)
             _uiState.update { it.copy(person = person, isLoading = false) }
         } catch (e: Exception) {
             _uiState.update { it.copy(error = "Failed to load person details", isLoading = false) }
