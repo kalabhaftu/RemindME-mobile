@@ -32,18 +32,20 @@ fun AppButton(
     contentPadding: PaddingValues = PaddingValues(horizontal = 24.dp, vertical = 14.dp),
     content: @Composable RowScope.() -> Unit
 ) {
-    val bgColor = when {
+    val baseBgColor = when {
         surfaceColor != Color.Unspecified -> surfaceColor
         tint != Color.Unspecified -> tint
         else -> Accent500
     }
+    val resolvedBgColor = if (enabled) baseBgColor else baseBgColor.copy(alpha = 0.45f)
+    val contentColor = if (enabled) Color.White else Color.White.copy(alpha = 0.5f)
 
-    CompositionLocalProvider(LocalContentColor provides Color.White) {
+    CompositionLocalProvider(LocalContentColor provides contentColor) {
         Row(
             modifier
                 .defaultMinSize(minHeight = 52.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(bgColor)
+                .background(resolvedBgColor)
                 .clickable(
                     interactionSource = null,
                     indication = LocalIndication.current,

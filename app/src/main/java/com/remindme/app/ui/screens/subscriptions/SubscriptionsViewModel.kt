@@ -40,12 +40,14 @@ class SubscriptionsViewModel(application: Application) : AndroidViewModel(applic
 
     val sortedSubscriptions: StateFlow<List<ReminderItem>> = combine(_allSubscriptions, _uiState) { subs, _ ->
         subs.sortedWith(Comparator { a, b ->
-            val ra = a.subscription?.renewalDate
-            val rb = b.subscription?.renewalDate
-            if (ra.isNullOrBlank() || rb.isNullOrBlank()) return@Comparator 0
+            val ra = a.subscription?.renewalDate?.takeIf { it.isNotBlank() }
+            val rb = b.subscription?.renewalDate?.takeIf { it.isNotBlank() }
+            if (ra == null && rb == null) return@Comparator 0
+            if (ra == null) return@Comparator 1
+            if (rb == null) return@Comparator -1
             try {
-                val da = LocalDate.parse(ra!!)
-                val db = LocalDate.parse(rb!!)
+                val da = LocalDate.parse(ra)
+                val db = LocalDate.parse(rb)
                 da.compareTo(db)
             } catch (e: DateTimeParseException) {
                 0

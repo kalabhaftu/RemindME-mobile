@@ -2,6 +2,7 @@ package com.remindme.app.ui.screens.login
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -10,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -21,6 +23,7 @@ import com.remindme.app.ui.components.GoogleLogo
 import com.remindme.app.ui.components.AppScaffold
 import com.remindme.app.ui.components.AppIcon
 import com.remindme.app.ui.components.AppButton
+import com.remindme.app.ui.components.AppCard
 import com.remindme.app.ui.components.Spinner
 import com.remindme.app.ui.components.AppTextField
 import com.remindme.app.ui.components.AppIcons
@@ -70,7 +73,7 @@ fun LoginScreen(
                 value = uiState.email,
                 onValueChange = viewModel::updateEmail,
                 label = "Email",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -81,6 +84,8 @@ fun LoginScreen(
                 label = "Password",
                 obscureText = !passwordVisible,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { if (!uiState.isLoading) viewModel.submit() }),
                 suffixIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         AppIcon(
@@ -92,6 +97,33 @@ fun LoginScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            if (uiState.message != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                AppCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    borderRadius = 12.dp,
+                    tintColor = if (uiState.messageIsError) MaterialTheme.colorScheme.error.copy(alpha = 0.15f) else Color(0xFF22C55E).copy(alpha = 0.15f)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = uiState.message!!,
+                            color = if (uiState.messageIsError) MaterialTheme.colorScheme.error else Color(0xFF22C55E),
+                            fontSize = 13.sp
+                        )
+                        if (uiState.unverifiedEmail != null) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            TextButton(
+                                onClick = viewModel::resendVerification,
+                                contentPadding = PaddingValues(0.dp)
+                            ) {
+                                Text("Resend verification email", color = Accent500, fontSize = 13.sp)
+                            }
+                        }
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
             AppButton(
@@ -157,27 +189,6 @@ fun LoginScreen(
                 enabled = !uiState.isLoading
             ) {
                 Text(text = "Send Magic Link", color = Color.White, fontSize = 16.sp)
-            }
-        }
-        
-        if (uiState.message != null) {
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
-            ) {
-                Column {
-                    Text(
-                        text = uiState.message!!,
-                        color = if (uiState.messageIsError) MaterialTheme.colorScheme.error else Color(0xFF22C55E),
-                        fontSize = 13.sp
-                    )
-                    if (uiState.unverifiedEmail != null) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        TextButton(onClick = viewModel::resendVerification) {
-                            Text("Resend verification email", color = Accent500, fontSize = 13.sp)
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
             }
         }
 

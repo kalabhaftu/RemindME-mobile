@@ -46,6 +46,11 @@ fun AppTextField(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val bgColor = appControlColor()
+    val resolvedTransformation = if (obscureText && visualTransformation == VisualTransformation.None) {
+        androidx.compose.ui.text.input.PasswordVisualTransformation()
+    } else {
+        visualTransformation
+    }
 
     Box(
         modifier = modifier
@@ -62,7 +67,7 @@ fun AppTextField(
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             textStyle = TextStyle(color = TextPrimary, fontSize = 16.sp),
             cursorBrush = SolidColor(TextPrimary),
-            visualTransformation = visualTransformation,
+            visualTransformation = resolvedTransformation,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             interactionSource = interactionSource,
@@ -71,7 +76,7 @@ fun AppTextField(
             decorationBox = @Composable { innerTextField ->
                 TextFieldDefaults.DecorationBox(
                     value = value,
-                    visualTransformation = visualTransformation,
+                    visualTransformation = resolvedTransformation,
                     innerTextField = innerTextField,
                     placeholder = placeholder?.let { { Text(text = it, color = TextTertiary) } },
                     label = label?.let { { Text(text = it, color = TextSecondary) } },

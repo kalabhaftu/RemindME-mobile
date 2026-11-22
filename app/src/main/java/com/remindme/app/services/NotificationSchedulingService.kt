@@ -17,6 +17,8 @@ import java.util.Objects
 class NotificationSchedulingService(private val context: Context) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
 
+    private val prefs = context.getSharedPreferences("remindme_scheduled_alarms", Context.MODE_PRIVATE)
+
     fun scheduleReminders(reminders: List<ReminderItem>) {
         reminders.forEach { scheduleReminder(it) }
     }
@@ -52,6 +54,11 @@ class NotificationSchedulingService(private val context: Context) {
                         intent,
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
+
+                    // Track request code
+                    val existing = prefs.getStringSet("codes_${reminder.id}", mutableSetOf())?.toMutableSet() ?: mutableSetOf()
+                    existing.add(requestCode.toString())
+                    prefs.edit().putStringSet("codes_${reminder.id}", existing).apply()
 
                     alarmManager?.let {
                         try {
@@ -91,14 +98,43 @@ class NotificationSchedulingService(private val context: Context) {
 
     fun cancelReminder(reminderId: String) {
         val intent = Intent(context, ReminderBroadcastReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            reminderId.hashCode(),
-            intent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        )
-        pendingIntent?.let {
-            alarmManager?.cancel(it)
+        val codes = prefs.getStringSet("codes_$reminderId", emptySet()).orEmpty()
+        codes.forEach { codeStr ->
+            codeStr.toIntOrNull()?.let { code ->
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    code,
+                    intent,
+                    PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+                )
+                pendingIntent?.let {
+                    alarmManager?.cancel(it)
+                    it.cancel()
+                }
+            }
         }
+        prefs.edit().remove("codes_$reminderId").apply()
+    }
+
+    fun cancelAll() {
+        val intent = Intent(context, ReminderBroadcastReceiver::class.java)
+        prefs.all.keys.forEach { key ->
+            val set = prefs.getStringSet(key, emptySet()).orEmpty()
+            set.forEach { codeStr ->
+                codeStr.toIntOrNull()?.let { code ->
+                    val pendingIntent = PendingIntent.getBroadcast(
+                        context,
+                        code,
+                        intent,
+                        PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    pendingIntent?.let {
+                        alarmManager?.cancel(it)
+                        it.cancel()
+                    }
+                }
+            }
+        }
+        prefs.edit().clear().apply()
     }
 }

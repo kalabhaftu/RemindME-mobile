@@ -31,8 +31,8 @@ android {
         if (localPropertiesFile.exists()) {
             localProperties.load(FileInputStream(localPropertiesFile))
         }
-        versionCode = localProperties.getProperty("VERSION_CODE", System.getenv("VERSION_CODE") ?: "12").toIntOrNull() ?: 12
-        versionName = localProperties.getProperty("VERSION_NAME", System.getenv("VERSION_NAME") ?: "1.0.8")
+        versionCode = localProperties.getProperty("VERSION_CODE", System.getenv("VERSION_CODE") ?: "13").toIntOrNull() ?: 13
+        versionName = localProperties.getProperty("VERSION_NAME", System.getenv("VERSION_NAME") ?: "1.0.9")
         buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL", "")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY", "")}\"")
         buildConfigField("String", "WEB_API_URL", "\"${localProperties.getProperty("WEB_API_URL", "https://remind-me-web-roan.vercel.app")}\"")

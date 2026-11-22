@@ -36,11 +36,6 @@ fun QuickAddSheet(
         scrimColor = appScrimColor(),
         dragHandle = null
     ) {
-        AppCard(
-            borderRadius = 32.dp,
-            elevated = true,
-            modifier = Modifier.fillMaxWidth()
-        ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -123,7 +118,6 @@ fun QuickAddSheet(
                 )
             }
             Spacer(modifier = Modifier.height(32.dp))
-        }
         }
     }
 }

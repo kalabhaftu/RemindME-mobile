@@ -12,6 +12,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,7 +25,7 @@ fun DateTimePickerDialog(
     var showTimePicker by remember { mutableStateOf(false) }
     
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = initialDate?.atZone(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+        initialSelectedDateMillis = initialDate?.toLocalDate()?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
             ?: System.currentTimeMillis()
     )
     val timePickerState = rememberTimePickerState(
@@ -42,7 +43,7 @@ fun DateTimePickerDialog(
                     if (dateOnly) {
                         val selectedMillis = datePickerState.selectedDateMillis
                         if (selectedMillis != null) {
-                            val date = Instant.ofEpochMilli(selectedMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+                            val date = Instant.ofEpochMilli(selectedMillis).atZone(ZoneOffset.UTC).toLocalDate()
                             val dateTime = date.atTime(12, 0)
                             onDateTimeSelected(dateTime)
                         }
@@ -87,7 +88,7 @@ fun DateTimePickerDialog(
                 TextButton(onClick = {
                     val selectedMillis = datePickerState.selectedDateMillis
                     if (selectedMillis != null) {
-                        val date = Instant.ofEpochMilli(selectedMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+                        val date = Instant.ofEpochMilli(selectedMillis).atZone(ZoneOffset.UTC).toLocalDate()
                         val dateTime = date.atTime(timePickerState.hour, timePickerState.minute)
                         onDateTimeSelected(dateTime)
                     }

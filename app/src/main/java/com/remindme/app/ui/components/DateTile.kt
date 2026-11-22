@@ -71,7 +71,7 @@ fun DateTile(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = if (hasValue) formatter(value!!) else placeholder,
+                    text = if (value != null) formatter(value) else placeholder,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = if (hasValue) TextPrimary else TextTertiary

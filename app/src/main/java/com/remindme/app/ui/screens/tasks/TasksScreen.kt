@@ -45,11 +45,6 @@ fun TasksScreen(
     val haptic = LocalHapticFeedback.current
 
     Box(modifier = Modifier.fillMaxSize()) {
-        AppRetrySnackbar(
-            error = uiState.error,
-            onRetry = { viewModel.fetchTasks() }
-        )
-
     AppPullToRefresh(
         isRefreshing = uiState.isLoading,
         onRefresh = { viewModel.fetchTasks() }
@@ -107,6 +102,10 @@ fun TasksScreen(
         }
     }
     }
+    AppRetrySnackbar(
+        error = uiState.error,
+        onRetry = { viewModel.fetchTasks() }
+    )
     }
 }
 

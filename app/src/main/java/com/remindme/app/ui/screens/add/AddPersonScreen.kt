@@ -232,6 +232,7 @@ fun AddPersonScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     viewModel.savePerson()
                 },
+                enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (uiState.isLoading) {

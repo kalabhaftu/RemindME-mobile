@@ -41,6 +41,7 @@ import java.time.format.DateTimeFormatter
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
     onNavigateHome: () -> Unit,
+    onNavigateToLogin: () -> Unit = onNavigateHome,
     onNavigateToThemeSelector: () -> Unit,
     onNavigateToNotificationHelp: () -> Unit = {}
 ) {
@@ -138,7 +139,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
-                        AccountSection(viewModel, onNavigateHome)
+                        AccountSection(viewModel, onNavigateHome, onNavigateToLogin)
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                     item {
@@ -277,19 +278,19 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
                 Row {
                     AppButton(
                         onClick = { viewModel.detectChatId() },
-                        modifier = Modifier.weight(1f).height(48.dp)
+                        modifier = Modifier.weight(1f)
                     ) {
-                        AppIcon(iconRes = AppIcons.WifiTethering, color = TextPrimary, size = 18.dp)
+                        AppIcon(iconRes = AppIcons.WifiTethering, color = Color.White, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Detect Chat ID", fontSize = 14.sp)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     AppButton(
                         onClick = { viewModel.saveChatId(chatId) },
-                        modifier = Modifier.weight(1f).height(48.dp),
+                        modifier = Modifier.weight(1f),
                         tint = Accent500
                     ) {
-                        AppIcon(iconRes = AppIcons.Save, color = Accent500, size = 18.dp)
+                        AppIcon(iconRes = AppIcons.Save, color = Color.White, size = 18.dp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Save", fontSize = 14.sp)
                     }
@@ -306,10 +307,10 @@ fun TelegramSection(uiState: SettingsUiState, viewModel: SettingsViewModel) {
             Spacer(modifier = Modifier.height(12.dp))
             AppButton(
                 onClick = { viewModel.saveTelegramToken(token) },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
+                modifier = Modifier.fillMaxWidth(),
                 tint = Accent500
             ) {
-                AppIcon(iconRes = AppIcons.Save, color = Accent500, size = 18.dp)
+                AppIcon(iconRes = AppIcons.Save, color = Color.White, size = 18.dp)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Save Token", fontSize = 14.sp)
             }
@@ -752,9 +753,10 @@ fun CalendarSubscriptionSection(uiState: SettingsUiState, viewModel: SettingsVie
 }
 
 @Composable
-fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
+fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit, onNavigateToLogin: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    var showClearCacheConfirm by remember { mutableStateOf(false) }
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri -> uri?.let { viewModel.exportData(context, it) } }
@@ -832,7 +834,24 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
         Spacer(modifier = Modifier.height(12.dp))
 
         AppButton(
-            onClick = { viewModel.signOut(onNavigateHome) },
+            onClick = { showClearCacheConfirm = true },
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) {
+            AppIcon(iconRes = AppIcons.Refresh, modifier = Modifier.size(18.dp), color = TextPrimary)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Clear Local Cache & Reset", color = TextPrimary)
+        }
+        Text(
+            "Clears locally cached reminders, offline queues, and local session caches without needing to clear app data in system settings.",
+            color = TextTertiary,
+            fontSize = 11.sp,
+            lineHeight = 16.sp,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        AppButton(
+            onClick = { viewModel.signOut(onNavigateToLogin) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
             AppIcon(iconRes = AppIcons.Logout, modifier = Modifier.size(18.dp), color = TextPrimary)
@@ -842,12 +861,39 @@ fun AccountSection(viewModel: SettingsViewModel, onNavigateHome: () -> Unit) {
         Spacer(modifier = Modifier.height(12.dp))
 
         AppButton(
-            onClick = { viewModel.signOutAllDevices(onNavigateHome) },
+            onClick = { viewModel.signOutAllDevices(onNavigateToLogin) },
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {
             AppIcon(iconRes = AppIcons.PhonelinkErase, modifier = Modifier.size(18.dp), color = TextPrimary)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Sign Out All Devices", color = TextPrimary)
+        }
+
+        if (showClearCacheConfirm) {
+            AlertDialog(
+                onDismissRequest = { showClearCacheConfirm = false },
+                containerColor = com.remindme.app.ui.theme.BgElevated,
+                title = { Text("Clear Local Cache?", color = TextPrimary) },
+                text = {
+                    Text(
+                        "This will wipe all locally stored reminders, pending offline actions, and cached session tokens. Any unsaved offline changes will be discarded.",
+                        color = TextSecondary
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showClearCacheConfirm = false
+                        viewModel.clearLocalCache { onNavigateToLogin() }
+                    }) {
+                        Text("Clear & Reset", color = com.remindme.app.ui.theme.StateDanger)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showClearCacheConfirm = false }) {
+                        Text("Cancel", color = TextSecondary)
+                    }
+                }
+            )
         }
     }
 }

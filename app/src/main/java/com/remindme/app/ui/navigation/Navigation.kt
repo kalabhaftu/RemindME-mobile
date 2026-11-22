@@ -111,6 +111,16 @@ fun MainNavigation(
             is io.github.jan.supabase.auth.status.SessionStatus.Authenticated -> {
                 val user = SupabaseManager.client.auth.currentUserOrNull()
                 if (user != null) {
+                    val prevUserId = AuthCache.getUserId(context)
+                    if (prevUserId != null && prevUserId != user.id) {
+                        kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launch {
+                            val repo = com.remindme.app.data.repository.OfflineReminderRepository(
+                                com.remindme.app.data.repository.ReminderRepository(SupabaseManager.client, context.applicationContext),
+                                context.applicationContext
+                            )
+                            repo.clearUserData(prevUserId)
+                        }
+                    }
                     AuthCache.saveUser(context, user.id, user.email)
                 }
                 OfflineSyncScheduler.runNow(context)
@@ -122,13 +132,21 @@ fun MainNavigation(
                 }
             }
             is io.github.jan.supabase.auth.status.SessionStatus.NotAuthenticated -> {
-                if (status.isSignOut) {
+                val cm = context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
+                val isOnline = cm?.let {
+                    val net = it.activeNetwork ?: return@let false
+                    val caps = it.getNetworkCapabilities(net) ?: return@let false
+                    caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                } ?: false
+
+                if (status.isSignOut || isOnline) {
+                    // Explicit sign-out or session rejected while online: wipe invalid cache and require login
                     AuthCache.clear(context)
                     if (backStack.lastOrNull() != Login) {
                         replaceRoot(Login)
                     }
                 } else {
-                    // Offline or token refresh network delay: keep user in-app with cached offline data
+                    // Truly offline: allow access using cached session data
                     val cachedUserId = AuthCache.getUserId(context)
                     if (cachedUserId != null) {
                         if (backStack.lastOrNull() == AuthCheck) {
@@ -142,14 +160,28 @@ fun MainNavigation(
                 }
             }
             else -> {
-                val cachedUserId = AuthCache.getUserId(context)
-                if (cachedUserId != null) {
-                    if (backStack.lastOrNull() == AuthCheck) {
-                        replaceRoot(Main)
-                    }
-                } else {
+                val cm = context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
+                val isOnline = cm?.let {
+                    val net = it.activeNetwork ?: return@let false
+                    val caps = it.getNetworkCapabilities(net) ?: return@let false
+                    caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                } ?: false
+
+                if (isOnline) {
+                    AuthCache.clear(context)
                     if (backStack.lastOrNull() != Login) {
                         replaceRoot(Login)
+                    }
+                } else {
+                    val cachedUserId = AuthCache.getUserId(context)
+                    if (cachedUserId != null) {
+                        if (backStack.lastOrNull() == AuthCheck) {
+                            replaceRoot(Main)
+                        }
+                    } else {
+                        if (backStack.lastOrNull() != Login) {
+                            replaceRoot(Login)
+                        }
                     }
                 }
             }
@@ -157,7 +189,9 @@ fun MainNavigation(
     }
 
     LaunchedEffect(openReminderId, sessionStatus) {
-        if (openReminderId != null && sessionStatus is io.github.jan.supabase.auth.status.SessionStatus.Authenticated) {
+        val isAuthenticated = sessionStatus is io.github.jan.supabase.auth.status.SessionStatus.Authenticated
+        val hasCachedUser = AuthCache.getUserId(context) != null
+        if (openReminderId != null && (isAuthenticated || hasCachedUser)) {
             val destination: NavKey = if (openReminderCategory?.lowercase() == "person") {
                 PersonDetail(openReminderId)
             } else {
@@ -214,7 +248,7 @@ fun MainNavigation(
                     )
                 }
             entry<Main> {
-                MainScreen(onItemClick = { navKey -> backStack.add(navKey) }, modifier = Modifier.safeDrawingPadding().padding(16.dp))
+                MainScreen(onItemClick = { navKey -> backStack.add(navKey) })
             }
             entry<AddPerson> {
                 AddPersonScreen(onBack = { popBack() })
@@ -279,9 +313,12 @@ fun MainNavigation(
                 )
             }
             entry<Settings> {
-                    SettingsScreen(
+                SettingsScreen(
                     onNavigateHome = { 
                         replaceRoot(Main)
+                    },
+                    onNavigateToLogin = {
+                        replaceRoot(Login)
                     },
                     onNavigateToThemeSelector = {
                         backStack.add(ThemeSelector)
@@ -311,7 +348,13 @@ fun MainNavigation(
             }
             entry<Templates> {
                 TemplatesScreen(
-                    onApplyTemplate = { /* handle */ },
+                    onApplyTemplate = { category ->
+                        when (category.lowercase()) {
+                            "person" -> backStack.add(AddPerson)
+                            "subscription" -> backStack.add(AddSubscription)
+                            else -> backStack.add(AddTask)
+                        }
+                    },
                     onBack = { popBack() }
                 )
             }

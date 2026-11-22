@@ -99,27 +99,19 @@ fun TemplatesScreen(
     }
 
         if (showCreate) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        appScrimColor()
-                    )
-                    .clickable { showCreate = false }
+            ModalBottomSheet(
+                onDismissRequest = { showCreate = false },
+                containerColor = appSurfaceColor(elevated = true),
+                scrimColor = appScrimColor(),
+                dragHandle = null
             ) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .clickable(enabled = false) {}
-                ) {
-                    CreateTemplateSheet(
-                        onClose = { showCreate = false },
-                        onCreate = { name, cat, notes ->
-                            viewModel.createTemplate(name, cat, notes)
-                            showCreate = false
-                        }
-                    )
-                }
+                CreateTemplateSheet(
+                    onClose = { showCreate = false },
+                    onCreate = { name, cat, notes ->
+                        viewModel.createTemplate(name, cat, notes)
+                        showCreate = false
+                    }
+                )
             }
         }
     }
@@ -234,9 +226,9 @@ fun CreateTemplateSheet(onClose: () -> Unit, onCreate: (String, String, String?)
                     modifier = Modifier.weight(1f).height(48.dp),
                     tint = Accent500
                 ) {
-                    AppIcon(iconRes = AppIcons.Add, color = Accent500, size = 18.dp)
+                    AppIcon(iconRes = AppIcons.Add, color = Color.White, size = 18.dp)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Create", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text("Create", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

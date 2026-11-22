@@ -31,6 +31,7 @@ import com.remindme.app.ui.components.SwipeDeleteBackground
 import com.remindme.app.ui.components.appScrimColor
 import com.remindme.app.ui.components.appSurfaceColor
 import com.remindme.app.ui.components.AppPullToRefresh
+import com.remindme.app.ui.components.AppRetrySnackbar
 import com.remindme.app.ui.theme.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -44,10 +45,11 @@ fun HolidaysScreen(
     val haptic = LocalHapticFeedback.current
     var showCountryPicker by remember { mutableStateOf(false) }
 
-    AppPullToRefresh(
-        isRefreshing = uiState.isLoadingCountries || uiState.isLoadingHolidays,
-        onRefresh = { viewModel.refresh() }
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AppPullToRefresh(
+            isRefreshing = uiState.isLoadingCountries || uiState.isLoadingHolidays,
+            onRefresh = { viewModel.refresh() }
+        ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 140.dp, bottom = 120.dp, start = 16.dp, end = 16.dp)
@@ -210,6 +212,11 @@ fun HolidaysScreen(
             }
         }
     }
+    }
+    AppRetrySnackbar(
+        error = uiState.error,
+        onRetry = { viewModel.refresh() }
+    )
     }
 
     if (showCountryPicker) {

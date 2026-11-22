@@ -75,7 +75,21 @@ class NotificationsViewModel(application: Application) : AndroidViewModel(applic
     fun loadData() = viewModelScope.launch(Dispatchers.IO) {
         _uiState.update { it.copy(isLoading = true, error = null) }
         try {
-            val user = supabase.auth.currentUserOrNull() ?: return@launch
+            val user = supabase.auth.currentUserOrNull()
+            if (user == null) {
+                val reminders = repository.getReminders()
+                val today = LocalDate.now()
+                val end = today.plusDays(30)
+                val occurrences = OccurrenceCalculator.generateOccurrences(reminders, today, end, today)
+                _uiState.update { 
+                    it.copy(
+                        inAppNotifications = emptyList(),
+                        allOccurrences = occurrences,
+                        isLoading = false
+                    ) 
+                }
+                return@launch
+            }
             
             val inAppList = supabase.postgrest["in_app_notifications"]
                 .select {

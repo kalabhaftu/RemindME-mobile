@@ -187,6 +187,7 @@ fun AddTaskScreen(
             
             AppButton(
                 onClick = { viewModel.saveTask() },
+                enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (uiState.isLoading) {

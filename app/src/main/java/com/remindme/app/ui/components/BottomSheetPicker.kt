@@ -85,7 +85,7 @@ fun PickerField(
         BottomSheetPicker(
             title = title,
             items = items,
-            initialSelection = items.find { it.key == value.toString() } ?: items.first(),
+            initialSelection = items.find { it.key == value } ?: items.first(),
             onDismiss = { showPicker = false },
             onSelect = { selected ->
                 onChanged(selected.key)

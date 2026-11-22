@@ -597,23 +597,56 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun clearLocalCache(onComplete: () -> Unit = {}) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            repository.clearAllUserData()
+            AuthCache.clear(getApplication())
+            settingsPrefs.edit().clear().apply()
+            runCatching {
+                com.remindme.app.services.NotificationSchedulingService(getApplication()).cancelAll()
+            }
+            withContext(Dispatchers.Main) {
+                _uiState.update { it.copy(message = "Local cache and saved session cleared successfully.") }
+                onComplete()
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                _uiState.update { it.copy(error = "Failed to clear cache: ${e.message}") }
+            }
+        }
+    }
+
     fun signOut(onComplete: () -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         try {
+            repository.clearAllUserData()
             AuthCache.clear(getApplication())
-            supabase.auth.signOut()
+            settingsPrefs.edit().clear().apply()
+            runCatching {
+                com.remindme.app.services.NotificationSchedulingService(getApplication()).cancelAll()
+            }
+            runCatching { supabase.auth.signOut() }
             withContext(Dispatchers.Main) { onComplete() }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = "Failed to sign out") }
+            repository.clearAllUserData()
+            AuthCache.clear(getApplication())
+            withContext(Dispatchers.Main) { onComplete() }
         }
     }
 
     fun signOutAllDevices(onComplete: () -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         try {
+            repository.clearAllUserData()
             AuthCache.clear(getApplication())
-            supabase.auth.signOut(io.github.jan.supabase.auth.SignOutScope.GLOBAL)
+            settingsPrefs.edit().clear().apply()
+            runCatching {
+                com.remindme.app.services.NotificationSchedulingService(getApplication()).cancelAll()
+            }
+            runCatching { supabase.auth.signOut(io.github.jan.supabase.auth.SignOutScope.GLOBAL) }
             withContext(Dispatchers.Main) { onComplete() }
         } catch (e: Exception) {
-            _uiState.update { it.copy(error = "Failed to sign out all devices") }
+            repository.clearAllUserData()
+            AuthCache.clear(getApplication())
+            withContext(Dispatchers.Main) { onComplete() }
         }
     }
 

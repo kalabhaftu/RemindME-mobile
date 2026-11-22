@@ -195,6 +195,7 @@ fun AddSubscriptionScreen(
             
             AppButton(
                 onClick = { viewModel.saveSubscription() },
+                enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (uiState.isLoading) {

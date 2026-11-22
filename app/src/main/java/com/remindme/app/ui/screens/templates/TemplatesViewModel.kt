@@ -51,7 +51,11 @@ class TemplatesViewModel : ViewModel() {
     fun loadTemplates() = viewModelScope.launch(Dispatchers.IO) {
         _uiState.update { it.copy(isLoading = true, error = null) }
         try {
-            val user = supabase.auth.currentUserOrNull() ?: return@launch
+            val user = supabase.auth.currentUserOrNull()
+            if (user == null) {
+                _uiState.update { it.copy(isLoading = false) }
+                return@launch
+            }
             val list = supabase.postgrest["reminder_templates"]
                 .select {
                     filter { eq("user_id", user.id) }

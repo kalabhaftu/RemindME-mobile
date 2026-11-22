@@ -50,10 +50,51 @@ class OfflineReminderRepository(
     private val _cachedReminders = MutableStateFlow<List<ReminderItem>>(emptyList())
     val cachedReminders: Flow<List<ReminderItem>> = _cachedReminders.asStateFlow()
 
-    fun cachedSnapshot(): List<ReminderItem> = _cachedReminders.value
+    fun cachedSnapshot(): List<ReminderItem> {
+        val uid = currentUserId()
+        if (uid == null) {
+            _cachedReminders.value = emptyList()
+            return emptyList()
+        }
+        val currentList = _cachedReminders.value
+        if (currentList.isNotEmpty() && currentList.any { it.userId != uid }) {
+            val fresh = readCache(uid)
+            _cachedReminders.value = fresh
+            return fresh
+        }
+        if (currentList.isEmpty()) {
+            val fresh = readCache(uid)
+            if (fresh.isNotEmpty()) {
+                _cachedReminders.value = fresh
+                return fresh
+            }
+        }
+        return currentList
+    }
 
     init {
         currentUserId()?.let { _cachedReminders.value = readCache(it) }
+    }
+
+    suspend fun clearAllUserData() = withContext(Dispatchers.IO) {
+        _cachedReminders.value = emptyList()
+        database.writableDatabase.delete("reminders", null, null)
+        database.writableDatabase.delete("pending_ops", null, null)
+    }
+
+    suspend fun clearUserData(userId: String) = withContext(Dispatchers.IO) {
+        _cachedReminders.value = emptyList()
+        database.writableDatabase.delete("reminders", "user_id = ?", arrayOf(userId))
+        database.writableDatabase.delete("pending_ops", "user_id = ?", arrayOf(userId))
+    }
+
+    fun refreshCacheForCurrentUser() {
+        val uid = currentUserId()
+        if (uid != null) {
+            _cachedReminders.value = readCache(uid)
+        } else {
+            _cachedReminders.value = emptyList()
+        }
     }
 
     private fun isOnline(): Boolean {
@@ -155,6 +196,11 @@ class OfflineReminderRepository(
             }
         } catch (e: Exception) {
             Log.e("OfflineRepo", "getReminders remote failed", e)
+            val msg = e.message?.lowercase() ?: ""
+            if (msg.contains("401") || msg.contains("unauthorized") || msg.contains("jwt") || msg.contains("invalid_grant")) {
+                AuthCache.clear(context)
+                throw e
+            }
             remoteError = e
         }
         val cached = readCache(userId)
