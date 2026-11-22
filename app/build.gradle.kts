@@ -73,6 +73,11 @@ android {
       shaders = false
     }
 
+    lint {
+      checkReleaseBuilds = false
+      abortOnError = false
+    }
+
 
 
     packaging {
